@@ -2,7 +2,7 @@ from fastapi import FastAPI, BackgroundTasks
 from pydantic import BaseModel
 import concurrent.futures
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import psycopg2
 import os
 import dotenv
@@ -438,9 +438,10 @@ async def heatmap():
     SQLModel.metadata.create_all(engine)
     session = Session(engine)
     # fetch all entries in the search table with a date in the last 367 days
-    
-    rows = session.query(Search).filter(Search.timestamp >= (datetime.now() - timedelta(days=367))).all()
-    
+    # todays date with timezone
+    now = datetime.now().replace(tzinfo=timezone.utc)
+
+    rows = session.query(Search).filter(Search.timestamp >= (now - timedelta(days=367))).all()
     # group rows by date and aggregate the number of entries for each date
     # returning a list of
     # [
