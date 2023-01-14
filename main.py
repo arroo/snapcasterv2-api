@@ -442,7 +442,7 @@ async def heatmap():
 
     results = []
     for row in rows:
-        date = row.timestamp.strftime("%Y-%m-%d")
+        date = row.timestamp[0:10]
         count = 1
         for result in results:
             if result["date"] == date:
