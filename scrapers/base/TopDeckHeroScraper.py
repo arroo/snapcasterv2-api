@@ -33,7 +33,6 @@ class TopDeckHeroScraper(Scraper):
             "'", '%27').replace(' ', '+').replace('/', '%2F')
         searchPrepend = '/advanced_search?utf8=%E2%9C%93&search%5Bfuzzy_search%5D='
         searchAppend = '&search%5Btags_name_eq%5D=&search%5Bsell_price_gte%5D=&search%5Bsell_price_lte%5D=&search%5Bbuy_price_gte%5D=&search%5Bbuy_price_lte%5D=&search%5Bin_stock%5D=0&search%5Bin_stock%5D=1&buylist_mode=0&search%5Bcategory_ids_with_descendants%5D%5B%5D=&search%5Bcategory_ids_with_descendants%5D%5B%5D=&search%5Bsort%5D=name&search%5Bdirection%5D=ascend&commit=Search&search%5Bcatalog_group_id_eq%5D='
-        print("----- URL: self.baseUrl + searchPrepend + urlCardName + searchAppend")
         return self.baseUrl + searchPrepend + urlCardName + searchAppend
 
     def scrape(self):

@@ -30,7 +30,7 @@ from scrapers.base.ManaforceScraper import ManaforceScraper
 from scrapers.base.FirstPlayerScraper import FirstPlayerScraper
 from scrapers.base.OrchardCityScraper import OrchardCityScraper
 from scrapers.base.BorderCityScraper import BorderCityScraper
-
+from scrapers.base.AetherVaultScraper import AetherVaultScraper
 from scrapers.sealed.GauntletSealedScraper import GauntletSealedScraper
 from scrapers.sealed.Four01SealedScraper import Four01SealedScraper
 from scrapers.sealed.FusionSealedScraper import FusionSealedScraper
@@ -164,6 +164,7 @@ async def search_single(request: SingleCardSearch):
     firstPlayerScraper = FirstPlayerScraper(request.cardName)
     orchardCityScraper = OrchardCityScraper(request.cardName)
     borderCityScraper = BorderCityScraper(request.cardName)
+    aetherVaultScraper = AetherVaultScraper(request.cardName)
 
     # Map scrapers to an identifier keyword
     scraperMap = {
@@ -189,6 +190,7 @@ async def search_single(request: SingleCardSearch):
         'manaforce': manaforceScraper,
         'orchardcity': orchardCityScraper,
         'bordercity': borderCityScraper,
+        'aethervault': aetherVaultScraper
     }
 
 
