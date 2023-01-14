@@ -441,26 +441,40 @@ async def heatmap():
     # retrieve all entries from the "search" table
     # only get entries where timestamp is within the last 367 days
     # return a list of {date: count} objects where count is the number of searches on that date
-    SQLModel.metadata.create_all(engine)
-    session = Session(engine)
-    results = session.query(Search).filter(Search.timestamp >= (datetime.now() - timedelta(days=367))).all()
-    session.close()
-    for result in results:
-        print(result.timestamp)
+    # using psycopg2
 
-    # create a dictionary of {date: count} objects
-    # where count is the number of searches on that date
-    dateCounts = {}
-    for result in results:
-        date = result.timestamp.strftime("%Y-%m-%d")
-        if date in dateCounts:
-            dateCounts[date] += 1
-        else:
-            dateCounts[date] = 1
+    # connect to database
+    conn = psycopg2.connect(
+        dbname=os.environ['PG_DB'],
+        user=os.environ['PG_USER'],
+        password=os.environ['PG_PASSWORD'],
+        host=os.environ['PG_HOST'],
+        port=os.environ['PG_PORT']
+    )
+    cur = conn.cursor()
     
-    # convert dictionary to list of {date: count} objects
-    dateCountsList = []
-    for date in dateCounts:
-        dateCountsList.append({"date": date, "count": dateCounts[date]})
+    # get all entries from the "search" table where the timestamp is within the last 367 days, aggregate the number of results for each unique day and return a list of {date: count} objects
+    cur.execute("""
+        SELECT date_trunc('day', timestamp) as date, count(*) as count
+        FROM search
+        WHERE timestamp > now() - interval '367 days'
+        GROUP BY date
+        ORDER BY date;
+    """)
 
-    return dateCountsList
+    
+    # create a dictionary of {date: count} objects
+    results = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    # create a list of objects like this and return it:
+    # [
+    #  {date: "2020-01-01", count: 10},
+    # {date: "2020-01-02", count: 5},
+    # ]
+    return [{"date": result[0].strftime("%Y-%m-%d"), "count": result[1]} for result in results]
+
+    # where count is the number of searches on that date
+
+    # convert dictionary to list of {date: count} objects
