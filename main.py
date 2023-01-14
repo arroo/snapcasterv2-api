@@ -2,7 +2,7 @@ from fastapi import FastAPI, BackgroundTasks
 from pydantic import BaseModel
 import concurrent.futures
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
+from datetime import datetime, timedelta
 import psycopg2
 import os
 import dotenv
@@ -435,3 +435,32 @@ async def log(request: Search):
     session.commit()
     session.close()
     return {"message": "Logged"}
+
+@app.get("/heatmap/")
+async def heatmap():
+    # retrieve all entries from the "search" table
+    # only get entries where timestamp is within the last 367 days
+    # return a list of {date: count} objects where count is the number of searches on that date
+    SQLModel.metadata.create_all(engine)
+    session = Session(engine)
+    results = session.query(Search).filter(Search.timestamp >= (datetime.now() - timedelta(days=367))).all()
+    session.close()
+    for result in results:
+        print(result.timestamp)
+
+    # create a dictionary of {date: count} objects
+    # where count is the number of searches on that date
+    dateCounts = {}
+    for result in results:
+        date = result.timestamp.strftime("%Y-%m-%d")
+        if date in dateCounts:
+            dateCounts[date] += 1
+        else:
+            dateCounts[date] = 1
+    
+    # convert dictionary to list of {date: count} objects
+    dateCountsList = []
+    for date in dateCounts:
+        dateCountsList.append({"date": date, "count": dateCounts[date]})
+
+    return dateCountsList
