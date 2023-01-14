@@ -283,6 +283,7 @@ async def search_bulk(request: BulkCardSearch):
         firstPlayerScraper = FirstPlayerScraper(cardName)
         orchardCityScraper = OrchardCityScraper(cardName)
         borderCityScraper = BorderCityScraper(cardName)
+        aetherVaultScraper = AetherVaultScraper(cardName)
 
         # Map scrapers to an identifier keyword
         scraperMap = {
@@ -308,6 +309,7 @@ async def search_bulk(request: BulkCardSearch):
             'firstplayer': firstPlayerScraper,
             'orchardcity': orchardCityScraper,
             'bordercity': borderCityScraper,
+            'aethervault': aetherVaultScraper
         }
 
         # Filter out scrapers that are not requested in request.websites
