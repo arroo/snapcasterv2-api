@@ -437,22 +437,10 @@ async def log(request: Search):
 async def heatmap():
     SQLModel.metadata.create_all(engine)
     session = Session(engine)
-    # fetch all entries in the search table with a date in the last 367 days
-    # todays date with timezone
-    now = datetime.now().replace(tzinfo=timezone.utc)
 
     rows = session.query(Search).all()
-    # group rows by date and aggregate the number of entries for each date
-    # returning a list of
-    # [
-    #   {
-    #      "date": "2021-01-01",
-    #     "count": 10
-    #   },
-    # ]
 
     results = []
-    print(len(rows))
     for row in rows:
         date = row.timestamp.strftime("%Y-%m-%d")
         count = 1
