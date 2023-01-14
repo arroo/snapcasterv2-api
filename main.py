@@ -38,14 +38,10 @@ from scrapers.sealed.HouseOfCardsSealedScraper import HouseOfCardsSealedScraper
 from scrapers.sealed.MagicStrongholdSealedScraper import MagicStrongholdSealedScraper
 from scrapers.sealed.ConnectionGamesSealedScraper import ConnectionGamesSealedScraper
 from scrapers.sealed.Jeux3DragonsSealedScraper import Jeux3DragonsSealedScraper
-
 from db.database import engine, SQLModel, Session
 from db.models import Search
 
-
 # Pydantic Models
-
-
 class SingleCardSearch(BaseModel):
     cardName: str
     websites: list
@@ -436,45 +432,40 @@ async def log(request: Search):
     session.close()
     return {"message": "Logged"}
 
-def fetch_heatmap():
-        # connect to database
-    conn = psycopg2.connect(
-        dbname=os.environ['PG_DB'],
-        user=os.environ['PG_USER'],
-        password=os.environ['PG_PASSWORD'],
-        host=os.environ['PG_HOST'],
-        port=os.environ['PG_PORT']
-    )
-    cur = conn.cursor()
-    
-    # get all entries from the "search" table where the timestamp is within the last 367 days, aggregate the number of results for each unique day and return a list of {date: count} objects
-    cur.execute("""
-        SELECT date_trunc('day', timestamp) as date, count(*) as count
-        FROM search
-        WHERE timestamp > now() - interval '367 days'
-        GROUP BY date
-        ORDER BY date;
-    """)
-
-    
-    # create a dictionary of {date: count} objects
-    results = cur.fetchall()
-    cur.close()
-    conn.close()
-
-    # create a list of objects like this and return it:
-    # [
-    #  {date: "2020-01-01", count: 10},
-    # {date: "2020-01-02", count: 5},
-    # ]
-    return [{"date": result[0].strftime("%Y-%m-%d"), "count": result[1]} for result in results]
-
 
 @app.get("/heatmap/")
 async def heatmap():
-    # fetch the heatmap data from the database
-    results = fetch_heatmap()
-
-    # return the results
+    SQLModel.metadata.create_all(engine)
+    session = Session(engine)
+    # fetch all entries in the search table with a date in the last 367 days
+    
+    rows = session.query(Search).filter(Search.timestamp >= (datetime.now() - timedelta(days=367))).all()
+    
+    # group rows by date and aggregate the number of entries for each date
+    # returning a list of
+    # [
+    #   {
+    #      "date": "2021-01-01",
+    #     "count": 10
+    #   },
+    # ]
+    results = []
+    print(len(rows))
+    for row in rows:
+        date = row.timestamp.strftime("%Y-%m-%d")
+        count = 1
+        for result in results:
+            if result["date"] == date:
+                result["count"] += 1
+                count = 0
+                break
+        if count == 1:
+            results.append({
+                "date": date,
+                "count": 1
+            })
+        
+    
+    session.close()
     return results
     
