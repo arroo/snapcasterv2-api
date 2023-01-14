@@ -43,7 +43,6 @@ class AetherVaultScraper(Scraper):
         return self.baseUrl + searchPrepend + urlCardName + searchAppend
 
     def scrape(self):
-        print("scraping aethervault")
         page = requests.get(self.url)
 
         soup = BeautifulSoup(page.content, 'html.parser')
@@ -53,87 +52,92 @@ class AetherVaultScraper(Scraper):
             return None
 
         for result in results:
-            name = result.select_one('div.meta h4.name').getText()
-            # foil status is in the name as - Foil, same with Borderless
-            foil = False
-            borderless = False
-            if ' - Foil' in name:
-                foil = True
-                name = name.replace(' - Foil', '')
-                if " Etched" in name:
-                    name = name.replace(" Etched", "")
-            if ' - Borderless' in name:
-                borderless = True
-                name = name.replace(' - Borderless', '')
+            try:
+                name = result.select_one('div.meta h4.name').getText()
+                # foil status is in the name as - Foil, same with Borderless
+                foil = False
+                borderless = False
+                if ' - Foil' in name:
+                    foil = True
+                    name = name.replace(' - Foil', '')
+                    if " Etched" in name:
+                        name = name.replace(" Etched", "")
+                if ' - Borderless' in name:
+                    borderless = True
+                    name = name.replace(' - Borderless', '')
 
-            if ' - ' in name:
-                # split card
-                name = name.split(' - ')[0]
+                if ' - ' in name:
+                    # split card
+                    name = name.split(' - ')[0]
 
-            if self.cardName.lower() not in name.lower():
+                if self.cardName.lower() not in name.lower():
+                    continue
+
+                # get the href from the a tag with an itemprop="url" attribute
+                link = self.baseUrl + \
+                    result.select_one('a[itemprop="url"]')['href']
+                if 'magic' and 'single' not in link:
+                    # not a magic card
+                    continue
+
+                if 'art_series' in link:
+                    continue
+
+                # get the set from div.meta span.category
+                setName = result.select_one('div.meta span.category').getText()
+
+                # sometimes there are weird tags like setName (MISC4) or setName (MISC3)
+                # we want to remove any tags like that if they contain MISC
+                if 'MISC' in setName:
+                    setName = setName.split(' (')[0]
+                if 'COM' in setName:
+                    setName = setName.split(' (')[0]
+
+                # weird thing where they have tournament legality in setName
+                if ' (Not Tournament Legal)' in setName:
+                    setName = setName.replace(' (Not Tournament Legal)', '')
+
+                # remove any other tags we dont want
+                if ' - ' in setName:
+                    setName = setName.split(' - ')[0]
+
+                # get the image src from inside from the div with image class
+                image = result.select_one('div.image img')['src']
+
+                # TODO
+                # need to do this for each variant
+                for variant in result.select('div.variants div.variant-row'):
+                    condition = variant.select_one(
+                        'span.variant-short-info').getText()
+                    if 'Mint' in condition:
+                        condition = 'NM'
+                    elif 'Light' in condition:
+                        condition = 'LP'
+                    elif 'Moderat' in condition:
+                        condition = 'MP'
+                    elif 'Heav' in condition:
+                        condition = 'HP'
+                    elif "Damag" in condition:
+                        condition = 'DMG'
+                    elif "Hero" in condition:
+                        condition = 'LP'
+
+                    # price comes from the span with class = "regular price"
+                    price = variant.select_one(
+                        'span.regular.price').getText().replace('CAD$ ', '')
+
+                    card = {
+                        'name': name,
+                        'set': setName,
+                        'condition': condition,
+                        'price': price,
+                        'link': link,
+                        'image': image,
+                        'foil': foil,
+                        'website': self.website
+                    }
+                    self.results.append(card)
+            except Exception as e:
+                # print(e)
+                # print("error scraping aethervault")
                 continue
-
-            # get the href from the a tag with an itemprop="url" attribute
-            link = self.baseUrl + \
-                result.select_one('a[itemprop="url"]')['href']
-            if 'magic' and 'single' not in link:
-                # not a magic card
-                continue
-
-            if 'art_series' in link:
-                continue
-
-            # get the set from div.meta span.category
-            setName = result.select_one('div.meta span.category').getText()
-
-            # sometimes there are weird tags like setName (MISC4) or setName (MISC3)
-            # we want to remove any tags like that if they contain MISC
-            if 'MISC' in setName:
-                setName = setName.split(' (')[0]
-            if 'COM' in setName:
-                setName = setName.split(' (')[0]
-
-            # weird thing where they have tournament legality in setName
-            if ' (Not Tournament Legal)' in setName:
-                setName = setName.replace(' (Not Tournament Legal)', '')
-
-            # remove any other tags we dont want
-            if ' - ' in setName:
-                setName = setName.split(' - ')[0]
-
-            # get the image src from inside from the div with image class
-            image = result.select_one('div.image img')['src']
-
-            # TODO
-            # need to do this for each variant
-            for variant in result.select('div.variants div.variant-row'):
-                condition = variant.select_one(
-                    'span.variant-short-info').getText()
-                if 'Mint' in condition:
-                    condition = 'NM'
-                elif 'Light' in condition:
-                    condition = 'LP'
-                elif 'Moderat' in condition:
-                    condition = 'MP'
-                elif 'Heav' in condition:
-                    condition = 'HP'
-                elif "Damag" in condition:
-                    condition = 'DMG'
-                elif "Hero" in condition:
-                    condition = 'LP'
-
-                # price comes from the span with class = "regular price"
-                price = variant.select_one(
-                    'span.regular.price').getText().replace('CAD$ ', '')
-
-                card = {
-                    'name': name,
-                    'set': setName,
-                    'condition': condition,
-                    'price': price,
-                    'link': link,
-                    'image': image,
-                    'foil': foil,
-                    'website': self.website
-                }
-                self.results.append(card)
