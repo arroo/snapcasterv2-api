@@ -441,7 +441,7 @@ async def heatmap():
     # todays date with timezone
     now = datetime.now().replace(tzinfo=timezone.utc)
 
-    rows = session.query(Search).filter(Search.timestamp >= (now - timedelta(days=367))).all()
+    rows = session.query(Search).filter(Search.timestamp >= now - timedelta(days=367)).all()
     # group rows by date and aggregate the number of entries for each date
     # returning a list of
     # [
