@@ -436,14 +436,8 @@ async def log(request: Search):
     session.close()
     return {"message": "Logged"}
 
-@app.get("/heatmap/")
-async def heatmap():
-    # retrieve all entries from the "search" table
-    # only get entries where timestamp is within the last 367 days
-    # return a list of {date: count} objects where count is the number of searches on that date
-    # using psycopg2
-
-    # connect to database
+def fetch_heatmap():
+        # connect to database
     conn = psycopg2.connect(
         dbname=os.environ['PG_DB'],
         user=os.environ['PG_USER'],
@@ -475,6 +469,12 @@ async def heatmap():
     # ]
     return [{"date": result[0].strftime("%Y-%m-%d"), "count": result[1]} for result in results]
 
-    # where count is the number of searches on that date
 
-    # convert dictionary to list of {date: count} objects
+@app.get("/heatmap/")
+async def heatmap():
+    # fetch the heatmap data from the database
+    results = fetch_heatmap()
+
+    # return the results
+    return results
+    
