@@ -2,7 +2,7 @@ from fastapi import FastAPI, BackgroundTasks
 from pydantic import BaseModel
 import concurrent.futures
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 import psycopg2
 import os
 import dotenv
@@ -113,6 +113,59 @@ def post_search(query, websites, query_type, results, num_results):
     conn.commit()
     cur.close()
     conn.close()
+
+def fetchScrapers(cardName):
+       # Arrange scrapers
+    houseOfCardsScraper = HouseOfCardsScraper(cardName)
+    gauntletScraper = GauntletScraper(cardName)
+    kanatacgScraper = KanatacgScraper(cardName)
+    fusionScraper = FusionScraper(cardName)
+    four01Scraper = Four01Scraper(cardName)
+    everythingGamesScraper = EverythingGamesScraper(cardName)
+    magicStrongholdScraper = MagicStrongholdScraper(cardName)
+    faceToFaceScraper = FaceToFaceScraper(cardName)
+    connectionGamesScraper = ConnectionGamesScraper(cardName)
+    topDeckHeroScraper = TopDeckHeroScraper(cardName)
+    jeux3DragonsScraper = Jeux3DragonsScraper(cardName)
+    sequenceScraper = SequenceScraper(cardName)
+    atlasScraper = AtlasScraper(cardName)
+    hairyTScraper = HairyTScraper(cardName)
+    gamezillaScraper = GamezillaScraper(cardName)
+    exorGamesScraper = ExorGamesScraper(cardName)
+    gameKnightScraper = GameKnightScraper(cardName)
+    enterTheBattlefieldScraper = EnterTheBattlefieldScraper(cardName)
+    manaforceScraper = ManaforceScraper(cardName)
+    firstPlayerScraper = FirstPlayerScraper(cardName)
+    orchardCityScraper = OrchardCityScraper(cardName)
+    borderCityScraper = BorderCityScraper(cardName)
+    aetherVaultScraper = AetherVaultScraper(cardName)
+
+    # Map scrapers to an identifier keyword
+    return {
+        "houseofcards": houseOfCardsScraper,
+        "gauntlet": gauntletScraper,
+        "kanatacg": kanatacgScraper,
+        "fusion": fusionScraper,
+        "four01": four01Scraper,
+        "everythinggames": everythingGamesScraper,
+        "magicstronghold": magicStrongholdScraper,
+        "facetoface": faceToFaceScraper,
+        "connectiongames": connectionGamesScraper,
+        "topdeckhero": topDeckHeroScraper,
+        "jeux3dragons": jeux3DragonsScraper,
+        'sequencegaming': sequenceScraper,
+        'atlas': atlasScraper,
+        'hairyt': hairyTScraper,
+        'gamezilla': gamezillaScraper,
+        'exorgames': exorGamesScraper,
+        'gameknight': gameKnightScraper,
+        'enterthebattlefield': enterTheBattlefieldScraper,
+        'firstplayer': firstPlayerScraper,
+        'manaforce': manaforceScraper,
+        'orchardcity': orchardCityScraper,
+        'bordercity': borderCityScraper,
+        'aethervault': aetherVaultScraper
+    } 
     
 
 # Routes
@@ -137,79 +190,24 @@ async def search_single(request: SingleCardSearch):
             results.append(result)
         return
 
-    # Arrange scrapers
-    houseOfCardsScraper = HouseOfCardsScraper(request.cardName)
-    gauntletScraper = GauntletScraper(request.cardName)
-    kanatacgScraper = KanatacgScraper(request.cardName)
-    fusionScraper = FusionScraper(request.cardName)
-    four01Scraper = Four01Scraper(request.cardName)
-    everythingGamesScraper = EverythingGamesScraper(request.cardName)
-    magicStrongholdScraper = MagicStrongholdScraper(request.cardName)
-    faceToFaceScraper = FaceToFaceScraper(request.cardName)
-    connectionGamesScraper = ConnectionGamesScraper(request.cardName)
-    topDeckHeroScraper = TopDeckHeroScraper(request.cardName)
-    jeux3DragonsScraper = Jeux3DragonsScraper(request.cardName)
-    sequenceScraper = SequenceScraper(request.cardName)
-    atlasScraper = AtlasScraper(request.cardName)
-    hairyTScraper = HairyTScraper(request.cardName)
-    gamezillaScraper = GamezillaScraper(request.cardName)
-    exorGamesScraper = ExorGamesScraper(request.cardName)
-    gameKnightScraper = GameKnightScraper(request.cardName)
-    enterTheBattlefieldScraper = EnterTheBattlefieldScraper(request.cardName)
-    manaforceScraper = ManaforceScraper(request.cardName)
-    firstPlayerScraper = FirstPlayerScraper(request.cardName)
-    orchardCityScraper = OrchardCityScraper(request.cardName)
-    borderCityScraper = BorderCityScraper(request.cardName)
-    aetherVaultScraper = AetherVaultScraper(request.cardName)
 
-    # Map scrapers to an identifier keyword
-    scraperMap = {
-        "houseofcards": houseOfCardsScraper,
-        "gauntlet": gauntletScraper,
-        "kanatacg": kanatacgScraper,
-        "fusion": fusionScraper,
-        "four01": four01Scraper,
-        "everythinggames": everythingGamesScraper,
-        "magicstronghold": magicStrongholdScraper,
-        "facetoface": faceToFaceScraper,
-        "connectiongames": connectionGamesScraper,
-        "topdeckhero": topDeckHeroScraper,
-        "jeux3dragons": jeux3DragonsScraper,
-        'sequencegaming': sequenceScraper,
-        'atlas': atlasScraper,
-        'hairyt': hairyTScraper,
-        'gamezilla': gamezillaScraper,
-        'exorgames': exorGamesScraper,
-        'gameknight': gameKnightScraper,
-        'enterthebattlefield': enterTheBattlefieldScraper,
-        'firstplayer': firstPlayerScraper,
-        'manaforce': manaforceScraper,
-        'orchardcity': orchardCityScraper,
-        'bordercity': borderCityScraper,
-        'aethervault': aetherVaultScraper
-    }
-
+    # Get scrapers
+    scraperMap = fetchScrapers(request.cardName)
 
     # Filter out scrapers that are not requested in request.websites
     try:
-        # if "all" in request.websites: then we want all scrapers
         if "all" in request.websites:
             scrapers = scraperMap.values()
         else:
             scrapers = [scraperMap[website] for website in request.websites]
     except KeyError:
         return {"error": "Invalid website provided"}
-    
-    # scrapers = [
-    #     connectionGamesScraper      
-    # ]
 
     # Run scrapers in parallel
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         threadResults = executor.map(transform, scrapers)
 
-    # Create a new search object
-    # post a log to the database
+    # Create a new search object and post it to the database
     numResults = len(results)
     log = Search(query=request.cardName, websites=','.join(request.websites), query_type="single", results="", num_results=numResults, timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     SQLModel.metadata.create_all(engine)
@@ -255,58 +253,8 @@ async def search_bulk(request: BulkCardSearch):
         return
 
     def executeScrapers(cardName):
-        # For each card 
-        # Arrange scrapers
-        houseOfCardsScraper = HouseOfCardsScraper(cardName)
-        gauntletScraper = GauntletScraper(cardName)
-        kanatacgScraper = KanatacgScraper(cardName)
-        fusionScraper = FusionScraper(cardName)
-        four01Scraper = Four01Scraper(cardName)
-        everythingGamesScraper = EverythingGamesScraper(cardName)
-        magicStrongholdScraper = MagicStrongholdScraper(cardName)
-        faceToFaceScraper = FaceToFaceScraper(cardName)
-        connectionGamesScraper = ConnectionGamesScraper(cardName)
-        topDeckHeroScraper = TopDeckHeroScraper(cardName)
-        jeux3DragonsScraper = Jeux3DragonsScraper(cardName)
-        sequenceScraper = SequenceScraper(cardName)
-        atlasScraper = AtlasScraper(cardName)
-        hairyTScraper = HairyTScraper(cardName)
-        gamezillaScraper = GamezillaScraper(cardName)
-        exorGamesScraper = ExorGamesScraper(cardName)
-        gameKnightScraper = GameKnightScraper(cardName)
-        enterTheBattlefieldScraper = EnterTheBattlefieldScraper(cardName)
-        manaforceScraper = ManaforceScraper(cardName)
-        firstPlayerScraper = FirstPlayerScraper(cardName)
-        orchardCityScraper = OrchardCityScraper(cardName)
-        borderCityScraper = BorderCityScraper(cardName)
-        aetherVaultScraper = AetherVaultScraper(cardName)
-
-        # Map scrapers to an identifier keyword
-        scraperMap = {
-            "houseofcards": houseOfCardsScraper,
-            "gauntlet": gauntletScraper,
-            "kanatacg": kanatacgScraper,
-            "fusion": fusionScraper,
-            "four01": four01Scraper,
-            "everythinggames": everythingGamesScraper,
-            "magicstronghold": magicStrongholdScraper,
-            "facetoface": faceToFaceScraper,
-            "connectiongames": connectionGamesScraper,
-            'topdeckhero': topDeckHeroScraper,
-            'jeux3dragons': jeux3DragonsScraper,
-            'sequencegaming': sequenceScraper,
-            'atlas': atlasScraper,
-            'hairyt': hairyTScraper,
-            'gamezilla': gamezillaScraper,
-            'exorgames': exorGamesScraper,
-            'gameknight': gameKnightScraper,
-            'enterthebattlefield': enterTheBattlefieldScraper,
-            'manaforce': manaforceScraper,
-            'firstplayer': firstPlayerScraper,
-            'orchardcity': orchardCityScraper,
-            'bordercity': borderCityScraper,
-            'aethervault': aetherVaultScraper
-        }
+        # Get scrapers
+        scraperMap = fetchScrapers(cardName)
 
         # Filter out scrapers that are not requested in request.websites
         try:
