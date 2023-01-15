@@ -37,7 +37,7 @@ class User(BaseModel):
 dotenv.load_dotenv(dotenv_path="dev.env")
 app = FastAPI()
 app.include_router(search_router, prefix="/search", tags=["search"])
-app.include_router(users_router, prefix="/users", tags=["users"])
+app.include_router(users_router, tags=["users"])
 
 origins = [
     "http://127.0.0.1:5173",
