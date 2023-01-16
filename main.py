@@ -44,6 +44,8 @@ origins = [
     "https://snapcaster.bryceeppler.com",
     "https://www.snapcaster.ca",
     "https://snapcaster.ca",
+    "http://localhost:3000",
+    "https://snapcaster-nextjs.vercel.app",
 ]
 
 app.add_middleware(
