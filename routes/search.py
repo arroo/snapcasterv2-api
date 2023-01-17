@@ -22,6 +22,7 @@ from scrapers.base.FirstPlayerScraper import FirstPlayerScraper
 from scrapers.base.OrchardCityScraper import OrchardCityScraper
 from scrapers.base.BorderCityScraper import BorderCityScraper
 from scrapers.base.AetherVaultScraper import AetherVaultScraper
+from scrapers.base.FantasyForgedScraper import FantasyForgedScraper
 from scrapers.sealed.GauntletSealedScraper import GauntletSealedScraper
 from scrapers.sealed.Four01SealedScraper import Four01SealedScraper
 from scrapers.sealed.FusionSealedScraper import FusionSealedScraper
@@ -29,6 +30,7 @@ from scrapers.sealed.HouseOfCardsSealedScraper import HouseOfCardsSealedScraper
 from scrapers.sealed.MagicStrongholdSealedScraper import MagicStrongholdSealedScraper
 from scrapers.sealed.ConnectionGamesSealedScraper import ConnectionGamesSealedScraper
 from scrapers.sealed.Jeux3DragonsSealedScraper import Jeux3DragonsSealedScraper
+
 
 import concurrent.futures
 from pydantic import BaseModel
@@ -78,6 +80,7 @@ def fetchScrapers(cardName):
     orchardCityScraper = OrchardCityScraper(cardName)
     borderCityScraper = BorderCityScraper(cardName)
     aetherVaultScraper = AetherVaultScraper(cardName)
+    fantasyForgedScraper = FantasyForgedScraper(cardName)
 
     # Map scrapers to an identifier keyword
     return {
@@ -103,7 +106,8 @@ def fetchScrapers(cardName):
         'manaforce': manaforceScraper,
         'orchardcity': orchardCityScraper,
         'bordercity': borderCityScraper,
-        'aethervault': aetherVaultScraper
+        'aethervault': aetherVaultScraper,
+        'fantasyforged': fantasyForgedScraper
     }
 
 # Background tasks
