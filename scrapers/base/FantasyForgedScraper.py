@@ -41,13 +41,12 @@ class FantasyForgedScraper(Scraper):
                 if "Art Card".lower() in cardName.lower():
                     continue
                 foil = False
-                if "(Foil)" in cardName.lower():
+                if "(Foil)" in cardName:
                     foil = True
 
                 # remove any brackets and their contents from the card name
                 cardName = cardName.split(' (')[0].strip()
-                cardSet = "Unknown"
-                print("Card Name: " + cardName)
+                cardSet = ""
 
 
 
