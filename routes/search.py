@@ -228,7 +228,10 @@ async def search_bulk(request: BulkCardSearch):
         scraperMap = fetchScrapers(cardName)
         # Filter out scrapers that are not requested in request.websites
         try:
-            scrapers = [scraperMap[website] for website in websites]
+            if "all" in websites:
+                scrapers = scraperMap.values()
+            else:
+                scrapers = [scraperMap[website] for website in websites]
         except KeyError:
             return {"error": "Invalid website provided"}
 
