@@ -66,8 +66,8 @@ class PriceEntry(BaseModel):
     oracleId: str
     priceList: str
     date: str
-# redis://default:erggr7iz8KpyXegVZ7zZ@containers-us-west-164.railway.app:8012
-rd = redis.Redis(host='containers-us-west-164.railway.app', port=8012, password='erggr7iz8KpyXegVZ7zZ', db=0)
+
+rd = redis.Redis(host=os.environ['RD_HOST'], port=os.environ['RD_PORT'], password=os.environ['RD_PASSWORD'], db=0)
 
 def fetchScrapers(cardName):
     # Arrange scrapers
