@@ -128,7 +128,6 @@ async def fetch_prices():
     # convert the results to a list
     cards = cur.fetchall()
     cards = [card[0] for card in cards]
-    print(cards)
     # Iterate through the cards
     for card in cards:
         # Execute the bulk scrape for the current card name
@@ -174,6 +173,8 @@ async def fetch_prices():
         # wait 2 seconds before executing the next command
         time.sleep(2)
 
-        
+
     cur.close()
     conn.close()
+
+    return {"message": "Success"}
