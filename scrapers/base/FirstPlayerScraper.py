@@ -104,5 +104,7 @@ class FirstPlayerScraper(Scraper):
                     
                     self.results.append(card)
             except Exception as e:
-                print(e)
+                print(f'Error searching for {self.cardName} on {self.website}')
+                # print only the last 5 lines of the error
+                print(e.args[-5:])
                 continue

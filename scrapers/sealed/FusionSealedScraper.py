@@ -48,7 +48,7 @@ class FusionSealedScraper(SealedScraper):
                 })
 
         except Exception as e:
-            print(e)
-            print('Error scraping Fusion')
+            print(f'Error searching for {self.cardName} on {self.website}')
+            print(e.args[-5:])
 
   

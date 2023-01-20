@@ -76,6 +76,7 @@ class FantasyForgedScraper(Scraper):
                     self.results.append(cardToAdd)
 
             except Exception as e:
-                print(e)
+                print(f'Error searching for {self.cardName} on {self.website}')
+                print(e.args[-5:])
                 continue
         

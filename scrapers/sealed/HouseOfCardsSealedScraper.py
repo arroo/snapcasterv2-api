@@ -114,10 +114,8 @@ class HouseOfCardsSealedScraper(SealedScraper):
                                 }) 
 
                             except Exception as e:
-                                print(e)
-                                # print error details
-                                print("Error on line {}".format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
-                                print("Error parsing product")
+                                print(f'Error searching for {self.cardName} on {self.website}')
+                                print(e.args[-5:])
 
                         # Check the ol.pagination and see if there is an li element with a class of disabled that contains the text 'Next'
                         pagination = soup.find('ol', class_='pagination')

@@ -84,7 +84,8 @@ class AetherVaultScraper(Scraper):
                     continue
 
                 # get the set from div.meta span.category
-                setName = result.select_one('div.meta span.category').getText()
+                setName = result.select_one('div.meta span.category').text
+                print("setName: ", setName)
 
                 # sometimes there are weird tags like setName (MISC4) or setName (MISC3)
                 # we want to remove any tags like that if they contain MISC
@@ -108,7 +109,7 @@ class AetherVaultScraper(Scraper):
                 # need to do this for each variant
                 for variant in result.select('div.variants div.variant-row'):
                     condition = variant.select_one(
-                        'span.variant-short-info').getText()
+                        'span.variant-short-info').text
                     if 'Mint' in condition:
                         condition = 'NM'
                     elif 'Light' in condition:
@@ -124,7 +125,7 @@ class AetherVaultScraper(Scraper):
 
                     # price comes from the span with class = "regular price"
                     price = variant.select_one(
-                        'span.regular.price').getText().replace('CAD$ ', '')
+                        'span.regular.price').text.replace('CAD$ ', '')
 
                     card = {
                         'name': name,
@@ -138,6 +139,6 @@ class AetherVaultScraper(Scraper):
                     }
                     self.results.append(card)
             except Exception as e:
-                # print(e)
-                # print("error scraping aethervault")
+                print(f'Error searching for {self.cardName} on {self.website}')
+                print(e.args[-5:])
                 continue

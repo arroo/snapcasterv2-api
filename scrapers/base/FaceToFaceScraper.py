@@ -100,7 +100,6 @@ class FaceToFaceScraper(Scraper):
                         'website': self.website
                     })
             except Exception as e:
-
-                print(e)
-                print("Error parsing card in FaceToFaceScraper")
+                print(f'Error searching for {self.cardName} on {self.website}')
+                print(e.args[-5:])
                 continue

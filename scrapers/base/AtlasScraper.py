@@ -40,73 +40,78 @@ class AtlasScraper(Scraper):
             return None
         
         for result in results:
-            name = result.select_one('div.meta h4.name').getText()
-            if "Art Card" in name:
+            try:
+                name = result.select_one('div.meta h4.name').getText()
+                if "Art Card" in name:
+                    continue
+                # foil status is in the name as - Foil, same with Borderless
+                foil = False
+                borderless = False
+                if ' - Foil' in name:
+                    foil = True
+                    name = name.replace(' - Foil', '')
+                if ' - Borderless' in name:
+                    borderless = True
+                    name = name.replace(' - Borderless', '')
+
+                if ' - ' in name:
+                    # split card
+                    name = name.split(' - ')[0]
+
+                if self.cardName.lower() not in name.lower():
+                    continue
+
+
+                # get the href from the a tag with an itemprop="url" attribute
+                link = self.baseUrl + result.select_one('a[itemprop="url"]')['href']
+                if 'magic_singles' not in link:
+                    # not a magic card
+                    continue
+
+                # get the set from div.meta span.category
+                setName = result.select_one('div.meta span.category').getText()
+
+                # remove any other tags we dont want
+                if ' - ' in setName:
+                    setName = setName.split(' - ')[0]
+
+
+
+                # get the image src from inside from the div with image class
+                image = result.select_one('div.image img')['src']
+
+
+                # TODO
+                # need to do this for each variant
+                for variant in result.select('div.variants div.variant-row'):
+                    condition = variant.select_one('span.variant-short-info').getText()
+                    if 'NM' in condition:
+                        condition = 'NM'
+                    elif 'LP' in condition:
+                        condition = 'LP'
+                    elif 'MP' in condition:
+                        condition = 'MP'
+                    elif 'HP' in condition:
+                        condition = 'HP'
+                    elif "DMG" in condition:
+                        condition = 'DMG'
+
+                    # price comes from the span with class = "regular price"
+                    price = variant.select_one('span.regular.price').getText().replace('CAD$ ', '')
+
+                    card = {
+                        'name': name,
+                        'set': setName,
+                        'condition': condition,
+                        'price': price,
+                        'link': link,
+                        'image': image,
+                        'foil': foil,
+                        'website': self.website
+                    }
+
+                    self.results.append(card)
+            except Exception as e:
+                print(f'Error scraping {self.cardName} from {self.website}')
+                print(e.args[-5:])
                 continue
-            # foil status is in the name as - Foil, same with Borderless
-            foil = False
-            borderless = False
-            if ' - Foil' in name:
-                foil = True
-                name = name.replace(' - Foil', '')
-            if ' - Borderless' in name:
-                borderless = True
-                name = name.replace(' - Borderless', '')
-
-            if ' - ' in name:
-                # split card
-                name = name.split(' - ')[0]
-
-            if self.cardName.lower() not in name.lower():
-                continue
-
-
-            # get the href from the a tag with an itemprop="url" attribute
-            link = self.baseUrl + result.select_one('a[itemprop="url"]')['href']
-            if 'magic_singles' not in link:
-                # not a magic card
-                continue
-
-            # get the set from div.meta span.category
-            setName = result.select_one('div.meta span.category').getText()
-
-            # remove any other tags we dont want
-            if ' - ' in setName:
-                setName = setName.split(' - ')[0]
-
-
-
-            # get the image src from inside from the div with image class
-            image = result.select_one('div.image img')['src']
-
-
-            # TODO
-            # need to do this for each variant
-            for variant in result.select('div.variants div.variant-row'):
-                condition = variant.select_one('span.variant-short-info').getText()
-                if 'NM' in condition:
-                    condition = 'NM'
-                elif 'LP' in condition:
-                    condition = 'LP'
-                elif 'MP' in condition:
-                    condition = 'MP'
-                elif 'HP' in condition:
-                    condition = 'HP'
-                elif "DMG" in condition:
-                    condition = 'DMG'
-
-                # price comes from the span with class = "regular price"
-                price = variant.select_one('span.regular.price').getText().replace('CAD$ ', '')
-
-                card = {
-                    'name': name,
-                    'set': setName,
-                    'condition': condition,
-                    'price': price,
-                    'link': link,
-                    'image': image,
-                    'foil': foil,
-                    'website': self.website
-                }
-
-                self.results.append(card)
