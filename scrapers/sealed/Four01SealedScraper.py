@@ -69,8 +69,6 @@ class Four01SealedScraper(SealedScraper):
                         'language': language,
                         'tags': tags 
                     })
-                except:
-                    print("Error: " + name)
-                    print(item)
-                    print("")
-
+                except Exception as e:
+                    print("Error in Four01SealedScraper.py: " + e)
+                    continue

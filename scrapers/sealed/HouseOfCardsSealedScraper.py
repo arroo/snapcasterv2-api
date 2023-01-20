@@ -56,13 +56,11 @@ class HouseOfCardsSealedScraper(SealedScraper):
                 cur.execute("SELECT * FROM sealed_prices WHERE website = 'houseOfCards' AND updated_at > NOW() - INTERVAL '8 hours'")
                 rows = cur.fetchall()
             except:
-                print("Error selecting from database")
                 conn.rollback()
                 rows = []
 
             # if there is data, return it
             if len(rows) > 0:
-                print("no queries needed, returning data from database")
                 # close db connection, we don't need it anymore
                 cur.close()
                 conn.close()

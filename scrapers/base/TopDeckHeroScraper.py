@@ -129,5 +129,5 @@ class TopDeckHeroScraper(Scraper):
 
                     self.results.append(card)
             except Exception as e:
-                print("----- Error scraping card #{}: {}".format(i, e))
+                print("error scraping card in topdeckhero: ", e)
             

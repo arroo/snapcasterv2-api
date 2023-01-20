@@ -50,6 +50,5 @@ class FusionSealedScraper(SealedScraper):
         except Exception as e:
             print(e)
             print('Error scraping Fusion')
-            print(self.url)
 
   

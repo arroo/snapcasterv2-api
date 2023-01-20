@@ -55,7 +55,6 @@ class FantasyForgedScraper(Scraper):
 
                 # Verify card name is correct
                 if not self.compareCardNames(self.cardName.lower(), cardName.lower()):
-                    print(f'skipping {cardName} because it doesnt match {self.cardName}')
                     continue
 
                 price = card.select_one('span.price-item--regular').getText().replace('$', '').replace("CAD", "").strip()

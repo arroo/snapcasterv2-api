@@ -191,7 +191,6 @@ def post_price_entry(results):
 
         # We want to add this search to the search table
         # If the table doesn't exist, create it. id is the primary key, and (oracle_id, date) is a unique constraint
-        print("good 1")
         cur.execute(
             """
         CREATE TABLE IF NOT EXISTS price_entry (
@@ -204,7 +203,6 @@ def post_price_entry(results):
         """
         )
 
-        print("good 2")
         # on conflict do nothing
         cur.execute(
             """
@@ -219,7 +217,6 @@ def post_price_entry(results):
                 "date": date
             }
         )
-        print("good done")
         conn.commit()
         cur.close()
         conn.close()
@@ -249,10 +246,8 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
     # request.cardName lowercased
     cache = rd.get(request.cardName.lower())
     if cache:
-        print("cache hit")
         return json.loads(cache)
     else :
-        print("cache miss")
         scraperMap = fetchScrapers(request.cardName)
         # Filter out scrapers that are not requested in request.websites
         try:

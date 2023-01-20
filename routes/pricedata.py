@@ -15,7 +15,6 @@ router = APIRouter()
 # get request where query params are the card name
 @router.get("/card/{card_name}")
 async def get_card(card_name: str):
-    print("card_name: ", card_name)
     conn = psycopg2.connect(
         dbname=os.environ['PG_DB'],
         user=os.environ['PG_USER'],

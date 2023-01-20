@@ -73,7 +73,6 @@ class FaceToFaceScraper(Scraper):
                 for variant in cardDocument['hawk_child_attributes']:
                     if int(variant['child_inventory_level'][0]) <= 0:
                         continue
-                    print(float(variant['child_price_retail'][0]))
                     price = float(variant['child_price_retail'][0])
                     if price == 0:
                         # try getting the price from the parent's price_retail
@@ -103,6 +102,5 @@ class FaceToFaceScraper(Scraper):
             except Exception as e:
 
                 print(e)
-                print("Error parsing card")
-                print(json.dumps(card))
+                print("Error parsing card in FaceToFaceScraper")
                 continue
