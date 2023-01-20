@@ -33,7 +33,7 @@ class User(BaseModel):
     user_type: str
 
 # load the differently named dev.env file with dotenv
-dotenv.load_dotenv(dotenv_path="dev.env")
+dotenv.load_dotenv()
 app = FastAPI()
 app.include_router(search_router, prefix="/search", tags=["search"])
 

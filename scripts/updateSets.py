@@ -1,5 +1,5 @@
 """
-PopulateDB.py
+updateSets.py
 
 This is a script to update the set table in the database.
 Every time a new set is released, this script should be run to update the database.

@@ -42,18 +42,33 @@ import os
 from fastapi import BackgroundTasks, APIRouter
 
 # Pydantic Models
+
+
 class SingleCardSearch(BaseModel):
     cardName: str
     websites: list
+
 
 class BulkCardSearch(BaseModel):
     cardNames: list
     websites: list
     worstCondition: str
 
+
 class SealedSearch(BaseModel):
     setName: str
     websites: list
+
+
+class Card(BaseModel):
+    cardName: str
+
+
+class PriceEntry(BaseModel):
+    oracleId: str
+    priceList: str
+    date: str
+
 
 def fetchScrapers(cardName):
     # Arrange scrapers
@@ -111,6 +126,8 @@ def fetchScrapers(cardName):
     }
 
 # Background tasks
+
+
 def post_search(query, websites, query_type, results, num_results):
     # Connect to the database
     conn = psycopg2.connect(
@@ -148,10 +165,75 @@ def post_search(query, websites, query_type, results, num_results):
     conn.close()
 
 
+def post_price_entry(results):
+    if len(results) == 0:
+        return
+    try:
+        card_name = results[0]['name']
+        price_list = [str(result['price']) for result in results]
+        # convert to a comma separated string
+        price_list = ','.join(price_list)
+
+        # Connect to the database
+        conn = psycopg2.connect(
+            dbname=os.environ['PG_DB'],
+            user=os.environ['PG_USER'],
+            password=os.environ['PG_PASSWORD'],
+            host=os.environ['PG_HOST'],
+            port=os.environ['PG_PORT']
+        )
+        cur = conn.cursor()
+
+        # Get the oracle id for the card
+        cur.execute("SELECT oracle_id FROM cards WHERE name = %(card_name)s", {
+                    "card_name": card_name})
+        date = datetime.now().strftime("%Y-%m-%d")
+        oracle_id = cur.fetchone()
+
+        # We want to add this search to the search table
+        # If the table doesn't exist, create it. id is the primary key, and (oracle_id, date) is a unique constraint
+        print("good 1")
+        cur.execute(
+            """
+        CREATE TABLE IF NOT EXISTS price_entry (
+            id SERIAL PRIMARY KEY,
+            oracle_id VARCHAR(255),
+            price_list TEXT,
+            date DATE,
+            UNIQUE (oracle_id, date)
+        );
+        """
+        )
+
+        print("good 2")
+        # on conflict do nothing
+        cur.execute(
+            """
+        INSERT INTO
+            price_entry (oracle_id, price_list, date)
+        VALUES (%(oracle_id)s, %(price_list)s, %(date)s)
+        ON CONFLICT (oracle_id, date) DO NOTHING;
+        """,
+            {
+                "oracle_id": oracle_id,
+                "price_list": price_list,
+                "date": date
+            }
+        )
+        print("good done")
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(e)
+        
+
+
 router = APIRouter()
 
+
 @router.post("/single/")
-async def search_single(request: SingleCardSearch):
+async def search_single(request: SingleCardSearch, background_tasks: BackgroundTasks):
     """
     Search for a single card and return all prices across the provided websites
     """
@@ -189,6 +271,7 @@ async def search_single(request: SingleCardSearch):
     session.add(log)
     session.commit()
     session.close()
+    background_tasks.add_task(post_price_entry, results)
 
     return results
 
