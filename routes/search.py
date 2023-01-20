@@ -41,6 +41,7 @@ import psycopg2
 import os
 from fastapi import BackgroundTasks, APIRouter
 import redis
+import re 
 # Pydantic Models
 class SingleCardSearch(BaseModel):
     cardName: str
@@ -353,15 +354,37 @@ async def search_bulk(request: BulkCardSearch):
     totalResults = []
     results = {}
 
+    # Clean card names
+    # Remove any numbers at the start of the card name
+    # Remove any text in brackets, and the brackets themselves
+    cardNames = [re.sub(r"^\d+\s*", "", cardName).strip() for cardName in cardNames]
+    cardNames = [re.sub(r"\s*\([^)]*\)", "", cardName).strip() for cardName in cardNames]
+    # remove any numbers from the end of the card name
+    cardNames = [re.sub(r"\s*\d+$", "", cardName).strip() for cardName in cardNames]
+    # convert to lowercase
+    cardNames = [cardName.lower() for cardName in cardNames]
+    # remove duplicates
+    cardNames = list(set(cardNames))
+    
+
+
     # Scraper function
     def transform(scraper):
         scraper.scrape()
         scraperResults = scraper.getResults()
         for result in scraperResults:
-            if result['name'].lower() in results:
-                results[result['name'].lower()].append(result)
+            # print(result)
+            # remove any punctuation from the result['name'] and lowercase it,
+            tempResultName = re.sub(r"[^\w\s]", "", result['name']).lower()
+            # then if it is in the results dict, append the result to the list
+            # if result['name'].lower() in results:
+            #     results[result['name'].lower()].append(result)
+            # else:
+            #     results[result['name'].lower()] = [result]
+            if tempResultName in results:
+                results[tempResultName].append(result)
             else:
-                results[result['name'].lower()] = [result]
+                results[tempResultName] = [result]
         return
 
     def executeScrapers(cardName):
@@ -382,7 +405,7 @@ async def search_bulk(request: BulkCardSearch):
         # Create a CardObject for the card
         cardObject = {
             "cardName": cardName.lower(),
-            "variants": results[cardName.lower()]
+            "variants": results[re.sub(r"[^\w\s]", "", cardName).lower()]
         }
         totalResults.append(cardObject)
         return
