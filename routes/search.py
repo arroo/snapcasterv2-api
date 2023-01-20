@@ -246,7 +246,8 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
 
     # List to store results from all threads
     results = []
-    cache = rd.get(request.cardName)
+    # request.cardName lowercased
+    cache = rd.get(request.cardName.lower())
     if cache:
         print("cache hit")
         return json.loads(cache)
@@ -276,8 +277,8 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
         session.commit()
         session.close()
         background_tasks.add_task(post_price_entry, results)
-        rd.set(request.cardName, json.dumps(results))
-        rd.expire(request.cardName, 120)
+        rd.set(request.cardName.lower(), json.dumps(results))
+        rd.expire(request.cardName.lower(), 120)
         return results
 
 
