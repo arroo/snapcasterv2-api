@@ -64,7 +64,7 @@ class FirstPlayerScraper(Scraper):
                     continue
 
                 # get the set from div.meta span.category
-                setName = result.select_one('div.meta span.category').getText()
+                setName = result.select_one('div.meta span.category').text
 
                 # remove any other tags we dont want
                 if ' - ' in setName:
@@ -78,7 +78,7 @@ class FirstPlayerScraper(Scraper):
                 # get the image src from inside from the div with image class
                 image = result.select_one('div.image img')['src']
                 for variant in result.select('div.variants div.variant-row'):
-                    condition = variant.select_one('span.variant-short-info').getText()
+                    condition = variant.select_one('span.variant-short-info').text
                     if 'Near Mint' in condition:
                         condition = 'NM'
                     elif 'Light' in condition:
@@ -90,7 +90,7 @@ class FirstPlayerScraper(Scraper):
                     elif "dmg" or "dam" in condition.lower():
                         condition = 'DMG'
                     # price comes from the span with class = "regular price"
-                    price = variant.select_one('span.regular.price').getText().replace('CAD$ ', '')
+                    price = variant.select_one('span.regular.price').text.replace('CAD$ ', '')
                     card = {
                         'name': name,
                         'set': setName,
