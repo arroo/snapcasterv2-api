@@ -53,7 +53,7 @@ class AetherVaultScraper(Scraper):
 
         for result in results:
             try:
-                name = result.select_one('div.meta h4.name').getText()
+                name = result.select_one('div.meta h4.name').text
                 # foil status is in the name as - Foil, same with Borderless
                 foil = False
                 borderless = False
@@ -85,7 +85,6 @@ class AetherVaultScraper(Scraper):
 
                 # get the set from div.meta span.category
                 setName = result.select_one('div.meta span.category').text
-                print("setName: ", setName)
 
                 # sometimes there are weird tags like setName (MISC4) or setName (MISC3)
                 # we want to remove any tags like that if they contain MISC
@@ -141,4 +140,6 @@ class AetherVaultScraper(Scraper):
             except Exception as e:
                 print(f'Error searching for {self.cardName} on {self.website}')
                 print(e.args[-5:])
+                print(f'Error on line {e.__traceback__.tb_lineno} ')
+
                 continue
