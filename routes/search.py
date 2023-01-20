@@ -230,7 +230,7 @@ def post_price_entry(results):
 
 router = APIRouter()
 
-
+ 
 @router.post("/single/")
 async def search_single(request: SingleCardSearch, background_tasks: BackgroundTasks):
     """
