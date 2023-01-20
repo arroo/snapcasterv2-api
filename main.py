@@ -5,6 +5,7 @@ import dotenv
 
 # routes
 from routes.search import router as search_router
+from routes.pricedata import router as pricedata_router
 from db.database import engine, SQLModel, Session
 from db.models import Search
 
@@ -36,6 +37,7 @@ class User(BaseModel):
 dotenv.load_dotenv()
 app = FastAPI()
 app.include_router(search_router, prefix="/search", tags=["search"])
+app.include_router(pricedata_router, prefix="/pricedata", tags=["pricedata"])
 
 origins = [
     "http://127.0.0.1:5173",

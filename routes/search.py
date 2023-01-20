@@ -31,7 +31,7 @@ from scrapers.sealed.MagicStrongholdSealedScraper import MagicStrongholdSealedSc
 from scrapers.sealed.ConnectionGamesSealedScraper import ConnectionGamesSealedScraper
 from scrapers.sealed.Jeux3DragonsSealedScraper import Jeux3DragonsSealedScraper
 
-
+import json
 import concurrent.futures
 from pydantic import BaseModel
 from db.models import Search
@@ -40,10 +40,8 @@ from datetime import datetime
 import psycopg2
 import os
 from fastapi import BackgroundTasks, APIRouter
-
+import redis
 # Pydantic Models
-
-
 class SingleCardSearch(BaseModel):
     cardName: str
     websites: list
@@ -68,7 +66,8 @@ class PriceEntry(BaseModel):
     oracleId: str
     priceList: str
     date: str
-
+# redis://default:erggr7iz8KpyXegVZ7zZ@containers-us-west-164.railway.app:8012
+rd = redis.Redis(host='containers-us-west-164.railway.app', port=8012, password='erggr7iz8KpyXegVZ7zZ', db=0)
 
 def fetchScrapers(cardName):
     # Arrange scrapers
@@ -237,9 +236,6 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
     """
     Search for a single card and return all prices across the provided websites
     """
-    # List to store results from all threads
-    results = []
-
     # Scraper function
     def transform(scraper):
         scraper.scrape()
@@ -248,32 +244,41 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
             results.append(result)
         return
 
-    scraperMap = fetchScrapers(request.cardName)
-    # Filter out scrapers that are not requested in request.websites
-    try:
-        if "all" in request.websites:
-            scrapers = scraperMap.values()
-        else:
-            scrapers = [scraperMap[website] for website in request.websites]
-    except KeyError:
-        return {"error": "Invalid website provided"}
+    # List to store results from all threads
+    results = []
+    cache = rd.get(request.cardName)
+    if cache:
+        print("cache hit")
+        return json.loads(cache)
+    else :
+        print("cache miss")
+        scraperMap = fetchScrapers(request.cardName)
+        # Filter out scrapers that are not requested in request.websites
+        try:
+            if "all" in request.websites:
+                scrapers = scraperMap.values()
+            else:
+                scrapers = [scraperMap[website] for website in request.websites]
+        except KeyError:
+            return {"error": "Invalid website provided"}
 
-    # Run scrapers in parallel
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-        threadResults = executor.map(transform, scrapers)
+        # Run scrapers in parallel
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+            threadResults = executor.map(transform, scrapers)
 
-    # Create a new search object and post it to the database
-    numResults = len(results)
-    log = Search(query=request.cardName, websites=','.join(request.websites), query_type="single",
-                 results="", num_results=numResults, timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    SQLModel.metadata.create_all(engine)
-    session = Session(engine)
-    session.add(log)
-    session.commit()
-    session.close()
-    background_tasks.add_task(post_price_entry, results)
-
-    return results
+        # Create a new search object and post it to the database
+        numResults = len(results)
+        log = Search(query=request.cardName, websites=','.join(request.websites), query_type="single",
+                    results="", num_results=numResults, timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        SQLModel.metadata.create_all(engine)
+        session = Session(engine)
+        session.add(log)
+        session.commit()
+        session.close()
+        background_tasks.add_task(post_price_entry, results)
+        rd.set(request.cardName, json.dumps(results))
+        rd.expire(request.cardName, 120)
+        return results
 
 
 @router.post("/bulk/")
