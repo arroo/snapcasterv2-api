@@ -191,29 +191,84 @@ def post_price_entry(results):
 
         # We want to add this search to the search table
         # If the table doesn't exist, create it. id is the primary key, and (oracle_id, date) is a unique constraint
-        cur.execute(
-            """
-        CREATE TABLE IF NOT EXISTS price_entry (
-            id SERIAL PRIMARY KEY,
-            oracle_id VARCHAR(255),
-            price_list TEXT,
-            date DATE,
-            UNIQUE (oracle_id, date)
-        );
-        """
-        )
+        # cur.execute(
+        #     """
+        # CREATE TABLE IF NOT EXISTS price_entry (
+        #     id SERIAL PRIMARY KEY,
+        #     oracle_id VARCHAR(255),
+        #     price_list TEXT,
+        #     date DATE,
+        #     UNIQUE (oracle_id, date)
+        # );
+        # """
+        # )
 
-        # on conflict do nothing
+        # on conflict, just increase frequency by 1
         cur.execute(
             """
         INSERT INTO
             price_entry (oracle_id, price_list, date)
         VALUES (%(oracle_id)s, %(price_list)s, %(date)s)
-        ON CONFLICT (oracle_id, date) DO NOTHING;
+        ON CONFLICT (oracle_id, date) DO UPDATE SET frequency = price_entry.frequency + 1;
         """,
             {
                 "oracle_id": oracle_id,
                 "price_list": price_list,
+                "date": date,
+                "frequency": 1
+            }
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(e)
+        
+
+def increment_frequency(card_name):
+    # connect to database find card from cards with card_name (compare lowercased)
+    # find price_entry with oracle_id and todays date
+    # increment frequency by 1
+    try:
+        # Connect to the database
+        conn = psycopg2.connect(
+            dbname=os.environ['PG_DB'],
+            user=os.environ['PG_USER'],
+            password=os.environ['PG_PASSWORD'],
+            host=os.environ['PG_HOST'],
+            port=os.environ['PG_PORT']
+        )
+        cur = conn.cursor()
+
+        # Get the oracle id for the card
+        cur.execute("SELECT oracle_id FROM cards WHERE lower(name) = %(card_name)s", {
+                    "card_name": card_name})
+        date = datetime.now().strftime("%Y-%m-%d")
+        oracle_id = cur.fetchone()
+
+        # We want to add this search to the search table
+        # If the table doesn't exist, create it. id is the primary key, and (oracle_id, date) is a unique constraint
+        # cur.execute(
+        #     """
+        # CREATE TABLE IF NOT EXISTS price_entry (
+        #     id SERIAL PRIMARY KEY,
+        #     oracle_id VARCHAR(255),
+        #     price_list TEXT,
+        #     date DATE,
+        #     UNIQUE (oracle_id, date)
+        # );
+        # """
+        # )
+
+        # on conflict, just increase frequency by 1
+        cur.execute(
+            """
+        UPDATE price_entry
+        SET frequency = frequency + 1
+        WHERE oracle_id = %(oracle_id)s AND date = %(date)s;
+        """,
+            {
+                "oracle_id": oracle_id,
                 "date": date
             }
         )
@@ -246,6 +301,7 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
     # request.cardName lowercased
     cache = rd.get(request.cardName.lower())
     if cache:
+        background_tasks.add_task(increment_frequency, request.cardName.lower())
         return json.loads(cache)
     else :
         scraperMap = fetchScrapers(request.cardName)
