@@ -7,12 +7,11 @@ import os
 from fastapi import BackgroundTasks, APIRouter
 
 
-        
-
-
 router = APIRouter()
 
 # get request where query params are the card name
+
+
 @router.get("/card/{card_name}")
 async def get_card(card_name: str):
     conn = psycopg2.connect(
@@ -23,18 +22,53 @@ async def get_card(card_name: str):
         port=os.environ['PG_PORT']
     )
     cur = conn.cursor()
-    # using card_name, find oracle_id for the card from the cards table
-    # ensure to compare card names in lowercase
-    # look up the oracle_id in the price_entry table
+    # The regexp_replace(cards.name, '[^[:alpha:]]', '', 'g') will remove all
+    # non-alphabetic characters from the cards.name column before it is passed to the LOWER function
     cur.execute(
         """
-        SELECT * FROM price_entry WHERE oracle_id = (
-            SELECT oracle_id FROM cards WHERE LOWER(name) = LOWER(%s)
-        )
-
+        SELECT date, avg(price) as avg_price, max(price) as max_price, min(price) as min_price, cards.name as card_name, cards.image_uris->'normal' as image_uri
+        FROM (
+            SELECT date, unnest(array_agg(price::double precision)) as price, oracle_id
+            FROM (
+                SELECT date, unnest(string_to_array(price_list, ',')) as price, oracle_id
+                FROM price_entry
+            ) as prices
+            GROUP BY date, price, oracle_id
+        ) as prices
+        JOIN cards ON prices.oracle_id = cards.oracle_id
+        WHERE LOWER(regexp_replace(cards.name, '[^[:alpha:]]', '', 'g')) = LOWER(regexp_replace(%s, '[^[:alpha:]]', '', 'g'))
+        GROUP BY date, cards.name, image_uri
+        ORDER BY date;
         """,
         (card_name,),
     )
     rows = cur.fetchall()
+    try:
+        cardName = rows[0][4]
+        imageUri = rows[0][5]
+        price_data = []
+        for row in rows:
+            price_data.append({
+                "date": row[0],
+                "avg_price": row[1],
+                "max_price": row[2],
+                "min_price": row[3]
+            })
+
+    except:
+        cur.close()
+        conn.close()
+        return {
+            "error": "Card not found"
+        }
+
+    # results should contain price data, and card info
+    results = {
+        "card_name": cardName,
+        "image_uri": imageUri,
+        "price_data": price_data
+    }
+
     cur.close()
     conn.close()
+    return results
