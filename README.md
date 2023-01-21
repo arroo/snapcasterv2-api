@@ -26,6 +26,16 @@ All non-promo or non specialty sets in mtg
 
 
 ## env variables
+PG_DB=
+PG_HOST=
+PG_PASSWORD=
+PG_PORT=
+PG_USER=
+RD_HOST=
+RD_PASSWORD=
+RD_PORT=
+
+
 
 ## adding sets to database
 1. Download SetList.json from MtgJson and place it in scripts/.
