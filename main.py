@@ -35,12 +35,11 @@ class User(BaseModel):
     email: str
     user_type: str
 
-# load the differently named dev.env file with dotenv
 dotenv.load_dotenv()
 app = FastAPI()
 app.include_router(search_router, prefix="/search", tags=["search"])
 app.include_router(pricedata_router, prefix="/pricedata", tags=["pricedata"])
-app.include_router(cron_router, prefix="/cron", tags=["cron"])
+# app.include_router(cron_router, prefix="/cron", tags=["cron"])
 app.include_router(utils_router, prefix="/utils", tags=["utils"])
 
 origins = [

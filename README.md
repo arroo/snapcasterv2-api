@@ -1,6 +1,30 @@
 ## running the live server for development
 
+
+`pip install -r requirements.txt`
+
 `uvicorn main:app --reload`
+
+Visit localhost:8000
+
+## db schema
+Card oracles
+`cards(id, name, oracle_id, scryfall_uri, image_uris::jsonb)`
+
+
+Price history (max 1 per day for each oracle)
+`price_entry(id, oracle_id, price_list, date, frequency) unique (date, oracle_id)`
+
+Used for caching prices of sealed products for certain stores
+`sealed_prices(id,name,link,image,price,stock,website,language,tags,updated_at)`
+
+Logging searches for analytics
+`search(id,query,websites,query_type,results,num_results,timestamp)`
+
+All non-promo or non specialty sets in mtg
+`set(id, name, base_set_size, total_set_size, code, release_date, type)`
+
+
 
 ## adding cards to database
 
