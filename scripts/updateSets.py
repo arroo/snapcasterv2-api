@@ -9,7 +9,7 @@ In the future I would like to set up a script to run this automatically when a n
 
 Instructions:
 Download SetList.json from MtgJson and place it in the same directory as this script and the .env file.
-Run python PopulateDB.py
+Run python updateSets.py 
 """
 # script to populate the database with the setList json file
 import json

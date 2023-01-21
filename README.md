@@ -25,6 +25,11 @@ All non-promo or non specialty sets in mtg
 `set(id, name, base_set_size, total_set_size, code, release_date, type)`
 
 
+## env variables
+
+## adding sets to database
+1. Download SetList.json from MtgJson and place it in scripts/.
+2. Run python updateSets.py 
 
 ## adding cards to database
 
@@ -33,7 +38,7 @@ https://konbert.com/blog/import-json-into-postgres-using-copy
 
 1. get oracle-cards.json from scryfall - strip it to only include wanted fields
 2. convert to NDJSON `jq -c '.[]' your_file.json > your_new_file.json`
-3. replace double quotes with single quotes, escape any chars
+3. replace double quotes with single quotes, escape any chars if needed
 4.
 
 ```sql
@@ -54,15 +59,4 @@ FROM temp;
 
 DROP TABLE temp;
 
-```
-
-## adding price entries
-```sql
-CREATE TABLE IF NOT EXISTS price_entry (
-    id SERIAL PRIMARY KEY ,
-    oracle_id TEXT NOT NULL,
-    price_list TEXT NOT NULL,
-    timestamp TEXT NOT NULL,
-    UNIQUE(oracle_id, timestamp)
-);
 ```

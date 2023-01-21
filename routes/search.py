@@ -63,7 +63,6 @@ class SealedSearch(BaseModel):
 class Card(BaseModel):
     cardName: str
 
-
 class PriceEntry(BaseModel):
     oracleId: str
     priceList: str
