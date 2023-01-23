@@ -44,7 +44,11 @@ class MagicStrongholdScraper(Scraper):
                 "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36"
             })
         # Load the response
-        data = json.loads(response.text)
+        try:
+            data = json.loads(response.text)
+        except:
+            print(f'Error loading response for {self.cardName} at {self.website}')
+            return
 
         # The image uri prefix
         # Cards that are high value and have scanned images will not use this image prefix.
