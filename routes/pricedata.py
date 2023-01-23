@@ -43,6 +43,7 @@ async def get_card(card_name: str):
         (card_name,),
     )
     rows = cur.fetchall()
+
     try:
         cardName = rows[0][4]
         imageUri = rows[0][5]
@@ -58,9 +59,12 @@ async def get_card(card_name: str):
     except:
         cur.close()
         conn.close()
-        return {
-            "error": "Card not found"
-        }
+        cardName = card_name
+        imageUri = ""
+        price_data = []
+        # return {
+        #     "error": "Card not found"
+        # }
 
     # results should contain price data, and card info
     results = {
