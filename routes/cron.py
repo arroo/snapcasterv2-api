@@ -29,7 +29,7 @@ from scrapers.base.BorderCityScraper import BorderCityScraper
 from scrapers.base.AetherVaultScraper import AetherVaultScraper
 from scrapers.base.FantasyForgedScraper import FantasyForgedScraper
 
-
+import random
 router = APIRouter()
 @router.get("")
 async def temp():
@@ -94,6 +94,8 @@ async def fetch_prices():
 
     # Scraper function
     def transform(scraper):
+        time.sleep(random.randint(5, 10))
+
         scraper.scrape()
         scraperResults = scraper.getResults()
         for result in scraperResults:
@@ -115,7 +117,7 @@ async def fetch_prices():
     # Fetch the cards from the database if they do not have an entry in the price_entry table in the last 30 days or today
     cur.execute("""
         SELECT name FROM cards
-        WHERE oracle_id NOT IN (
+        WHERE oracle_id  IN (
             SELECT oracle_id FROM price_entry
             WHERE date = CURRENT_DATE OR date > CURRENT_DATE - INTERVAL '30 days'
         )
@@ -124,9 +126,10 @@ async def fetch_prices():
 
     # List to store results from all threads
     results = []
-
     # convert the results to a list
     cards = cur.fetchall()
+    print(f'number of cards: {len(cards)}')
+
     cards = [card[0] for card in cards]
     # Iterate through the cards
     for card in cards:
@@ -169,9 +172,6 @@ async def fetch_prices():
 
         # Commit the changes to the database
         conn.commit()
-
-        # wait 2 seconds before executing the next command
-        time.sleep(2)
 
 
     cur.close()
