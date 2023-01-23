@@ -35,7 +35,11 @@ class FirstPlayerScraper(Scraper):
         
         for result in results:
             try:
-                name = result.select_one('div.meta h4.name').getText()
+                name = result.select_one('div.meta h4.name')
+                if name:
+                    name = name.text
+                else:
+                    continue
                 if "Art Card" in name:
                     continue
                 # foil status is in the name as - Foil, same with Borderless
