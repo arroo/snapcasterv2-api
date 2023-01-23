@@ -53,7 +53,15 @@ class AetherVaultScraper(Scraper):
 
         for result in results:
             try:
-                name = result.select_one('div.meta h4.name').text
+                name = result.find('h4', class_='name')
+                if name:
+                    name = name.text
+                else:
+                    continue
+
+                if self.cardName.lower() not in name.lower():
+                    continue
+
                 # foil status is in the name as - Foil, same with Borderless
                 foil = False
                 borderless = False
@@ -70,8 +78,6 @@ class AetherVaultScraper(Scraper):
                     # split card
                     name = name.split(' - ')[0]
 
-                if self.cardName.lower() not in name.lower():
-                    continue
 
                 # get the href from the a tag with an itemprop="url" attribute
                 link = self.baseUrl + \
@@ -104,7 +110,6 @@ class AetherVaultScraper(Scraper):
                 # get the image src from inside from the div with image class
                 image = result.select_one('div.image img')['src']
 
-                # TODO
                 # need to do this for each variant
                 for variant in result.select('div.variants div.variant-row'):
                     condition = variant.select_one(
@@ -138,8 +143,13 @@ class AetherVaultScraper(Scraper):
                     }
                     self.results.append(card)
             except Exception as e:
+                print('******************************')
                 print(f'Error searching for {self.cardName} on {self.website}')
-                print(e.args[-5:])
+                print(e.args)
                 print(f'Error on line {e.__traceback__.tb_lineno} ')
+                print('card name: ', name)
+                print('link: ', self.url)
+                print('******************************')
+
 
                 continue
