@@ -82,7 +82,7 @@ class FusionScraper(Scraper):
             elif "Damaged" in condition:
                 condition="DMG"
 
-            price = float(card.select_one('form.add-to-cart-form')['data-price'].replace('CAD$ ', ''))
+            price = float(card.select_one('form.add-to-cart-form')['data-price'].replace(",","").replace('CAD$ ', ''))
             # added = False
 
             # # Check to see if entry already exists in stockList
