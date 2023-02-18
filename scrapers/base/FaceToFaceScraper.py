@@ -71,8 +71,16 @@ class FaceToFaceScraper(Scraper):
 
 
                 for variant in cardDocument['hawk_child_attributes']:
+                    # check if variant['child_inventory_level'] exists, if yes get [0] and try to convert to int
+                    # if it fails, continue
+                    try:
+                        int(variant['child_inventory_level'][0])
+                    except:
+                        continue
+                    # if the inventory level is 0, continue
                     if int(variant['child_inventory_level'][0]) <= 0:
                         continue
+
                     # get price and strip comma before converting to float
                     price = variant['child_price_retail'][0].replace(',', '')
                     price = float(price)
