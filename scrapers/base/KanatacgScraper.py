@@ -90,7 +90,7 @@ class KanatacgScraper(Scraper):
                     condition="HP"
                 elif "Damaged" or "DMG" in condition:
                     condition="DMG"
-                price = float(c.select('td')[1].getText().replace('CAD$ ', ''))
+                price = float(c.select('td')[1].getText().replace('CAD$ ', '').replace(",", ""))
                 if (condition, price) not in variantStockList:
                     self.results.append({
                         'name': name,
