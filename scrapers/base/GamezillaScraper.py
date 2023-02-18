@@ -76,7 +76,7 @@ class GamezillaScraper(Scraper):
                     elif "HP" in conditionAndPrice:
                         condition = "HP"
 
-                    price = float(conditionAndPrice.split('(')[1].replace("$", "").split(')')[0].strip())
+                    price = float(conditionAndPrice.split('(')[1].replace("$", "").split(')')[0].strip().replace(',',''))
 
                     # Since gamezilla has multiple stores, they could have multiple cards with same condition and set
                     # We need to check if an identical card already exists in the list
