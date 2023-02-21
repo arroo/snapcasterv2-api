@@ -97,7 +97,7 @@ class AtlasScraper(Scraper):
                         condition = 'DMG'
 
                     # price comes from the span with class = "regular price"
-                    price = variant.select_one('span.regular.price').getText().replace('CAD$ ', '')
+                    price = float(variant.select_one('span.regular.price').getText().replace('CAD$ ', '').replace(',', ''))
 
                     card = {
                         'name': name,

@@ -114,7 +114,9 @@ class TopDeckHeroScraper(Scraper):
 
                     # price comes from the span with class = "regular price"
                     price = variant.select_one(
-                        'span.regular.price').getText().replace('CAD$ ', '')
+                        'span.regular.price').getText().replace('CAD$ ', '').replace(",", "")
+                    
+                    price = float(price)
 
                     card = {
                         'name': name,

@@ -122,8 +122,8 @@ class Jeux3DragonsScraper(Scraper):
                         condition = 'LP'
 
                     # price comes from the span with class = "regular price"
-                    price = variant.select_one('span.regular.price').getText().replace('CAD$ ', '')
-
+                    price = variant.select_one('span.regular.price').getText().replace('CAD$ ', '').replace(",", "")
+                    price = float(price)
                     card = {
                         'name': name,
                         'set': setName,
