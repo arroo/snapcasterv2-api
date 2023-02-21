@@ -129,7 +129,9 @@ class AetherVaultScraper(Scraper):
 
                     # price comes from the span with class = "regular price"
                     price = variant.select_one(
-                        'span.regular.price').text.replace('CAD$ ', '')
+                        'span.regular.price').text.replace('CAD$ ', '').replace(",", "")
+
+                    price = float(price)
 
                     card = {
                         'name': name,
