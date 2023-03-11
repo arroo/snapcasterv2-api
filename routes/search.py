@@ -41,6 +41,7 @@ import os
 from fastapi import BackgroundTasks, APIRouter
 import redis
 import re 
+from pymongo import MongoClient
 # Pydantic Models
 class SingleCardSearch(BaseModel):
     cardName: str
@@ -64,7 +65,8 @@ class PriceEntry(BaseModel):
     date: str
 
 rd = redis.Redis(host=os.environ['RD_HOST'], port=os.environ['RD_PORT'], password=os.environ['RD_PASSWORD'], db=0)
-
+mongoClient = MongoClient(os.environ['MONGO_URI'])
+db = mongoClient['snapcaster']
 def fetchScrapers(cardName):
     # Arrange scrapers
     houseOfCardsScraper = HouseOfCardsScraper(cardName)
@@ -161,12 +163,49 @@ def post_search(query, websites, query_type, results, num_results):
     cur.close()
     conn.close()
         
+def post_price_entry(query, price_list):
+    # We need to find the card with the best match for the query, ignore punctuation,
+    # ignore case, and ignore whitespace
+    try:
+        card_doc = db['cards'].find_one({"name": {"$regex": f"^{query}$", "$options": "i"}})
+        if card_doc is None:
+            return
+        
+        # If there is already a price entry for this card today, continue
+        todays_price_entry = db['price_entry'].find_one({"oracle_id": card_doc['oracle_id'], "date": {"$gte": datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)}})
+        if todays_price_entry is not None:
+            return
+
+        # Create a price entry for this card
+        price_entry = {
+            "oracle_id": card_doc['oracle_id'],
+            "date": datetime.now(),
+            "price_list": [{
+                "price": price_entry['price'],
+                "website": price_entry['website'],
+                "foil": price_entry['foil'],
+                "condition": price_entry['condition']
+            } for price_entry in price_list]
+        }
+
+        # Send the price entry to mongodb
+        # print(price_entry)
+        db['price_entry'].insert_one(price_entry)
+    except Exception as e:
+        print("Error in post_price_entry while trying to insert price entry into mongo")
+        print(e)
+
 
 router = APIRouter()
 
  
 @router.post("/single/")
 async def search_single(request: SingleCardSearch, background_tasks: BackgroundTasks):
+    # test_data = [{"name":"Dockside Extortionist","set":"Double Masters 2022","price":79.99,"foil":False,"condition":"NM","image":"https://cdn11.bigcommerce.com/s-641uhzxs7j/products/344429/images/392203/2X2107__74044.1655424375.220.290.png?c=1","link":"https://www.facetofacegames.com/dockside-extortionist-107-double-masters-2022/","website":"facetoface"},{"name":"Dockside Extortionist","set":"Double Masters 2022","price":139.99,"foil":False,"condition":"NM","image":"https://cdn11.bigcommerce.com/s-641uhzxs7j/products/344402/images/392176/2X2452__66517.1655424300.220.290.png?c=1","link":"https://www.facetofacegames.com/dockside-extortionist-452-etched-foil-double-masters-2022/","website":"facetoface"},{"name":"Dockside Extortionist","set":"Double Masters 2022","price":89.99,"foil":False,"condition":"NM","image":"https://cdn11.bigcommerce.com/s-641uhzxs7j/products/344389/images/392163/2X2360__74057.1655424277.220.290.png?c=1","link":"https://www.facetofacegames.com/dockside-extortionist-360-borderless-double-masters-2022/","website":"facetoface"},{"name":"Dockside Extortionist","set":"Commander 2019","price":79.99,"foil":False,"condition":"NM","image":"https://cdn11.bigcommerce.com/s-641uhzxs7j/products/249632/images/272731/571bc9eb-8d13-4008-86b5-2e348a326d58__63210.1587660227.220.290.jpg?c=1","link":"https://www.facetofacegames.com/dockside-extortionist-c19/","website":"facetoface"},{"name":"Dockside Extortionist","set":"Commander 2019","condition":"NM","price":80.0,"image":"https://cdn.shopify.com/s/files/1/1704/1809/products/9ee08c9245a123560a1d26f8ba84447fa901011f_large.jpg?v=1640016696","link":"https://store.401games.ca/products/dockside-extortionist-c19","foil":False,"website":"four01"},{"name":"Dockside Extortionist","image":"https://cdn.shopify.com/s/files/1/0567/4178/9882/products/ff188554-0e12-5639-93a1-70698148b309_0cb12531-5a98-493a-bfff-bf4b21f1e96f_large.jpg?v=1656444292","link":"https://houseofcards.ca/products/dockside-extortionist-borderless-alternate-art-double-masters-2022?_pos=1&_sid=d9fc74dfb&_ss=r","set":"Double Masters 2022","condition":"NM","price":90.1,"website":"houseOfCards","foil":False},{"name":"Dockside Extortionist","image":"https://cdn.shopify.com/s/files/1/0567/4178/9882/products/ff188554-0e12-5639-93a1-70698148b309_0cb12531-5a98-493a-bfff-bf4b21f1e96f_large.jpg?v=1656444292","link":"https://houseofcards.ca/products/dockside-extortionist-borderless-alternate-art-double-masters-2022?_pos=1&_sid=d9fc74dfb&_ss=r","set":"Double Masters 2022","condition":"NM","price":107.7,"website":"houseOfCards","foil":True},{"name":"Dockside Extortionist","link":"https://www.hairyt.com/products/dockside-extortionist-borderless-alternate-art-double-masters-2022","image":"https://images.binderpos.com/ff188554-0e12-5639-93a1-70698148b309.jpg","set":"Double Masters 2022","condition":"NM","foil":False,"price":80.0,"website":"hairyt"},{"name":"Dockside Extortionist","link":"https://www.hairyt.com/products/dockside-extortionist-borderless-alternate-art-double-masters-2022","image":"https://images.binderpos.com/ff188554-0e12-5639-93a1-70698148b309.jpg","set":"Double Masters 2022","condition":"NM","foil":True,"price":120.0,"website":"hairyt"},{"name":"Dockside Extortionist","link":"https://www.hairyt.com/products/dockside-extortionist-double-masters-2022","image":"https://images.binderpos.com/936e7c73-242d-5514-babf-9b52c3c3918d.jpg","set":"Double Masters 2022","condition":"NM","foil":False,"price":76.5,"website":"hairyt"},{"name":"Dockside Extortionist","link":"https://www.hairyt.com/products/dockside-extortionist-commander-2019","image":"https://images.binderpos.com/252b8cc1-d499-5e3f-a4e3-b042c91eb6ae.jpg","set":"Commander 2019","condition":"NM","foil":False,"price":75.8,"website":"hairyt"},{"name":"Dockside Extortionist","image":"https://cdn.shopify.com/s/files/1/0570/6308/0145/products/252b8cc1-d499-5e3f-a4e3-b042c91eb6ae_5a41c015-c7ac-47ab-a6f2-1376a73e01fc_large.jpg?v=1624920664","link":"https://gamezilla.ca/products/dockside-extortionist-commander-2019?_pos=1&_sid=3ae15e487&_ss=r","set":"Commander 2019","foil":False,"condition":"LP","price":75.8,"website":"gamezilla"},{"name":"Dockside Extortionist","set":"Commander 2019","condition":"NM","price":72.28,"link":"https://www.sequencecomics.ca/catalog/card_singles-magic_singles-commander_sets-commander_2019/dockside_extortionist/1027258","image":"https://crystal-cdn4.crystalcommerce.com/photos/6522815/medium/en_2UKUpFPSWV.png","foil":False,"website":"sequencegaming"},{"name":"Dockside Extortionist","set":"Double Masters 2022","condition":"NM","price":76.65,"link":"https://www.sequencecomics.ca/catalog/card_singles-magic_singles-masters_sets-double_masters_2022/dockside_extortionist/1108819","image":"https://crystal-cdn1.crystalcommerce.com/photos/6846958/medium/en_N97sUy6XwV20220630-94-1qs4xw1.png","foil":False,"website":"sequencegaming"},{"name":"Dockside Extortionist","link":"https://www.fusiongamingonline.com/catalog/magic_singles-commander_singles-commander_2019/dockside_extortionist/1627783","image":"https://crystal-cdn4.crystalcommerce.com/photos/6522815/medium/en_2UKUpFPSWV.png","set":"Commander 2019","price":79.99,"condition":"NM","website":"fusion","foil":False},{"name":"Dockside Extortionist","link":"https://www.bordercitygames.ca/products/dockside-extortionist-commander-2019","image":"https://images.binderpos.com/252b8cc1-d499-5e3f-a4e3-b042c91eb6ae.jpg","set":"Commander 2019","condition":"LP","foil":False,"price":68.0,"website":"bordercity"},{"name":"Dockside Extortionist","link":"https://www.chimeragamingonline.com/products/dockside-extortionist-foil-etched-double-masters-2022","image":"https://images.binderpos.com/f96624a0-716d-54cb-ae08-d85b8699d281.jpg","set":"Double Masters 2022","condition":"LP","foil":True,"price":139.2,"website":"chimera"},{"name":"Dockside Extortionist","link":"https://www.chimeragamingonline.com/products/dockside-extortionist-borderless-alternate-art-double-masters-2022","image":"https://images.binderpos.com/ff188554-0e12-5639-93a1-70698148b309.jpg","set":"Double Masters 2022","condition":"LP","foil":False,"price":84.7,"website":"chimera"},{"name":"Dockside Extortionist","link":"https://www.chimeragamingonline.com/products/dockside-extortionist-borderless-alternate-art-double-masters-2022","image":"https://images.binderpos.com/ff188554-0e12-5639-93a1-70698148b309.jpg","set":"Double Masters 2022","condition":"LP","foil":True,"price":101.2,"website":"chimera"},{"name":"Dockside Extortionist","link":"https://www.chimeragamingonline.com/products/dockside-extortionist-double-masters-2022","image":"https://images.binderpos.com/936e7c73-242d-5514-babf-9b52c3c3918d.jpg","set":"Double Masters 2022","condition":"LP","foil":False,"price":75.7,"website":"chimera"},{"name":"Dockside Extortionist","set":"Commander 2019","condition":"NM","price":89.99,"link":"https://www.theconnectiongames.com/catalog/magic_singles-commander_sets-commander_2019/dockside_extortionist/400623","image":"https://crystal-cdn4.crystalcommerce.com/photos/6522815/medium/en_2UKUpFPSWV.png","foil":False,"website":"connectiongames"},{"name":"Dockside Extortionist","set":"Double Masters 2022","condition":"NM","price":82.99,"link":"https://www.theconnectiongames.com/catalog/magic_singles-master__horizon_sets-double_masters_2022/dockside_extortionist/430237","image":"https://crystal-cdn1.crystalcommerce.com/photos/6846958/medium/en_N97sUy6XwV20220630-94-1qs4xw1.png","foil":False,"website":"connectiongames"}]
+
+    # background_tasks.add_task(post_price_entry, request.cardName, test_data)
+ 
+    # return test_data
     """
     Search for a single card and return all prices across the provided websites
     """
@@ -198,6 +237,7 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
 
         numResults = len(results)
         background_tasks.add_task(post_search, request.cardName, request.websites, "single", "", numResults)
+        background_tasks.add_task(post_price_entry, request.cardName, results)
 
         # Only update the cache if websites is "all" so cache hits don't get partial results
         if "all" in request.websites:
