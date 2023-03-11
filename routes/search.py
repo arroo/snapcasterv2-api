@@ -167,6 +167,8 @@ def post_price_entry(query, price_list):
     # We need to find the card with the best match for the query, ignore punctuation,
     # ignore case, and ignore whitespace
     try:
+        if len(price_list) == 0:
+            return
         card_doc = db['cards'].find_one({"name": {"$regex": f"^{query}$", "$options": "i"}})
         if card_doc is None:
             return
@@ -175,9 +177,9 @@ def post_price_entry(query, price_list):
         todays_price_entry = db['price_entry'].find_one({"oracle_id": card_doc['oracle_id'], "date": {"$gte": datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)}})
         if todays_price_entry is not None:
             return
-
-        # Create a price entry for this card
-        price_entry = {
+        # if no cards with foil, then no need to check for foil
+        if not any([price_entry['foil'] for price_entry in price_list]):
+            price_entry = {
             "oracle_id": card_doc['oracle_id'],
             "date": datetime.now(),
             "price_list": [{
@@ -185,8 +187,30 @@ def post_price_entry(query, price_list):
                 "website": price_entry['website'],
                 "foil": price_entry['foil'],
                 "condition": price_entry['condition']
-            } for price_entry in price_list]
-        }
+            } for price_entry in price_list],
+            "max": max([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]),
+            "min": min([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]),
+            "avg": sum([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]) / len(price_list),
+            }
+        else:
+            # Create a price entry for this card
+            price_entry = {
+                "oracle_id": card_doc['oracle_id'],
+                "date": datetime.now(),
+                "price_list": [{
+                    "price": price_entry['price'],
+                    "website": price_entry['website'],
+                    "foil": price_entry['foil'],
+                    "condition": price_entry['condition']
+                } for price_entry in price_list],
+                "max": max([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]),
+                "min": min([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]),
+                "avg": sum([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]) / len(price_list),
+                "foil_max": max([float(str(price_entry['price']).replace(',','')) for price_entry in price_list if price_entry['foil']]),
+                "foil_min": min([float(str(price_entry['price']).replace(',','')) for price_entry in price_list if price_entry['foil']]),
+                "foil_avg": sum([float(str(price_entry['price']).replace(',','')) for price_entry in price_list if price_entry['foil']]) / len([price_entry for price_entry in price_list if price_entry['foil']]),
+            }
+        
 
         # Send the price entry to mongodb
         # print(price_entry)
