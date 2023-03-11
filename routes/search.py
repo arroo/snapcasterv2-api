@@ -23,6 +23,7 @@ from scrapers.base.BorderCityScraper import BorderCityScraper
 from scrapers.base.AetherVaultScraper import AetherVaultScraper
 from scrapers.base.FantasyForgedScraper import FantasyForgedScraper
 from scrapers.base.TheComicHunterScraper import TheComicHunterScraper
+from scrapers.base.ChimeraScraper import ChimeraScraper
 from scrapers.sealed.GauntletSealedScraper import GauntletSealedScraper
 from scrapers.sealed.Four01SealedScraper import Four01SealedScraper
 from scrapers.sealed.FusionSealedScraper import FusionSealedScraper
@@ -90,6 +91,7 @@ def fetchScrapers(cardName):
     aetherVaultScraper = AetherVaultScraper(cardName)
     fantasyForgedScraper = FantasyForgedScraper(cardName)
     theComicHunterScraper = TheComicHunterScraper(cardName)
+    chimeraScraper = ChimeraScraper(cardName)
 
     # Map scrapers to an identifier keyword
     return {
@@ -117,7 +119,8 @@ def fetchScrapers(cardName):
         'bordercity': borderCityScraper,
         'aethervault': aetherVaultScraper,
         'fantasyforged': fantasyForgedScraper,
-        'thecomichunter': theComicHunterScraper
+        'thecomichunter': theComicHunterScraper,
+        'chimera': chimeraScraper
     }
 
 # Background tasks
