@@ -5,6 +5,7 @@ import dotenv
 
 # routes
 from routes.search import router as search_router
+from routes.prices import router as prices_router
 from routes.utils import router as utils_router
 
 # Pydantic Models
@@ -33,6 +34,7 @@ class User(BaseModel):
 
 dotenv.load_dotenv()
 app = FastAPI()
+app.include_router(prices_router, prefix="/prices", tags=["prices"])
 app.include_router(search_router, prefix="/search", tags=["search"])
 app.include_router(utils_router, prefix="/utils", tags=["utils"])
 
