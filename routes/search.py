@@ -24,6 +24,7 @@ from scrapers.base.AetherVaultScraper import AetherVaultScraper
 from scrapers.base.FantasyForgedScraper import FantasyForgedScraper
 from scrapers.base.TheComicHunterScraper import TheComicHunterScraper
 from scrapers.base.ChimeraScraper import ChimeraScraper
+from scrapers.sealed.ChimeraSealedScraper import ChimeraSealedScraper
 from scrapers.sealed.GauntletSealedScraper import GauntletSealedScraper
 from scrapers.sealed.Four01SealedScraper import Four01SealedScraper
 from scrapers.sealed.FusionSealedScraper import FusionSealedScraper
@@ -316,9 +317,11 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
     houseOfCardsScraper = HouseOfCardsSealedScraper(setName)
     jeux3DragonsScraper = Jeux3DragonsSealedScraper(setName)
     magicStrongholdScraper = MagicStrongholdSealedScraper(setName)
+    # chimeraScraper = ChimeraSealedScraper(setName)
 
     # Map scrapers to an identifier keyword
     scraperMap = {
+        # 'chimera': chimeraScraper,
         "connectiongames": connectionGamesScraper,
         "four01": four01Scraper,
         "fusion": fustionScraper,
