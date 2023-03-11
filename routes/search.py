@@ -188,9 +188,9 @@ def post_price_entry(query, price_list):
                 "foil": price_entry['foil'],
                 "condition": price_entry['condition']
             } for price_entry in price_list],
-            "max": max([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]),
-            "min": min([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]),
-            "avg": sum([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]) / len(price_list),
+            "max": round(max([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]), 2),
+            "min": round(min([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]), 2),
+            "avg": round(sum([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]) / len(price_list), 2),
             }
         else:
             # Create a price entry for this card
@@ -203,12 +203,12 @@ def post_price_entry(query, price_list):
                     "foil": price_entry['foil'],
                     "condition": price_entry['condition']
                 } for price_entry in price_list],
-                "max": max([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]),
-                "min": min([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]),
-                "avg": sum([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]) / len(price_list),
-                "foil_max": max([float(str(price_entry['price']).replace(',','')) for price_entry in price_list if price_entry['foil']]),
-                "foil_min": min([float(str(price_entry['price']).replace(',','')) for price_entry in price_list if price_entry['foil']]),
-                "foil_avg": sum([float(str(price_entry['price']).replace(',','')) for price_entry in price_list if price_entry['foil']]) / len([price_entry for price_entry in price_list if price_entry['foil']]),
+                "max": round(max([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]), 2),
+                "min": round(min([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]), 2),
+                "avg": round(sum([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]) / len(price_list), 2),
+                "foil_max": round(max([float(str(price_entry['price']).replace(',','')) for price_entry in price_list if price_entry['foil']]), 2),
+                "foil_min": round(min([float(str(price_entry['price']).replace(',','')) for price_entry in price_list if price_entry['foil']]), 2),
+                "foil_avg": round(sum([float(str(price_entry['price']).replace(',','')) for price_entry in price_list if price_entry['foil']]) / len([price_entry for price_entry in price_list if price_entry['foil']]), 2),
             }
         
 
