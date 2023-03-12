@@ -381,11 +381,11 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
     houseOfCardsScraper = HouseOfCardsSealedScraper(setName)
     jeux3DragonsScraper = Jeux3DragonsSealedScraper(setName)
     magicStrongholdScraper = MagicStrongholdSealedScraper(setName)
-    # chimeraScraper = ChimeraSealedScraper(setName)
+    chimeraScraper = ChimeraSealedScraper(setName)
 
     # Map scrapers to an identifier keyword
     scraperMap = {
-        # 'chimera': chimeraScraper,
+        'chimera': chimeraScraper,
         "connectiongames": connectionGamesScraper,
         "four01": four01Scraper,
         "fusion": fustionScraper,
