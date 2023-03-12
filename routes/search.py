@@ -33,6 +33,7 @@ from scrapers.sealed.HouseOfCardsSealedScraper import HouseOfCardsSealedScraper
 from scrapers.sealed.MagicStrongholdSealedScraper import MagicStrongholdSealedScraper
 from scrapers.sealed.ConnectionGamesSealedScraper import ConnectionGamesSealedScraper
 from scrapers.sealed.Jeux3DragonsSealedScraper import Jeux3DragonsSealedScraper
+from scrapers.sealed.TopDeckHeroSealedScraper import TopDeckHeroSealedScraper
 
 import json
 import concurrent.futures
@@ -385,6 +386,7 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
     magicStrongholdScraper = MagicStrongholdSealedScraper(setName)
     chimeraScraper = ChimeraSealedScraper(setName)
     comicHunterScraper = ComicHunterSealedScraper(setName)
+    TopDeckHeroScraper = TopDeckHeroSealedScraper(setName)
 
     # Map scrapers to an identifier keyword
     scraperMap = {
@@ -397,6 +399,7 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
         "magicstronghold": magicStrongholdScraper,
         "jeux3dragons": jeux3DragonsScraper,
         'thecomichunter': comicHunterScraper,
+        'topdeckhero': TopDeckHeroScraper
     }
 
     # Filter out scrapers that are not requested in request.websites
