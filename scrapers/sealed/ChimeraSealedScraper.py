@@ -25,7 +25,7 @@ class ChimeraSealedScraper(SealedScraper):
     database.
 
     Sealed product search is rendered with javascript, so we can't scrape it with bs4.
-    Instead I'll use playwright to scrape the page
+    Instead I'll use playwright to scrape the page and then use bs4 to parse the html I think.
     """
 
     def __init__(self, setName):
