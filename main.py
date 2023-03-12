@@ -41,6 +41,7 @@ app.include_router(utils_router, prefix="/utils", tags=["utils"])
 origins = [
     "http://127.0.0.1:5173",
     "http://localhost:5173",
+    "http://localhost",
     "https://snapcasterv2-client.vercel.app",
     "https://snapcaster.bryceeppler.com",
     "https://www.snapcaster.ca",

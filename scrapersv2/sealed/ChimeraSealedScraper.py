@@ -23,9 +23,6 @@ class ChimeraSealedScraper(SealedScraper):
 
     So Step 1 is to return the info from the database, and step 2 is to update the
     database.
-
-    Sealed product search is rendered with javascript, so we can't scrape it with bs4.
-    Instead I'll use playwright to scrape the page
     """
 
     def __init__(self, setName):
