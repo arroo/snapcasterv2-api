@@ -6,6 +6,7 @@ import os
 import psycopg2
 import dotenv
 dotenv.load_dotenv()
+from playwright.sync_api import sync_playwright
 
 
 class ChimeraSealedScraper(SealedScraper):
@@ -82,65 +83,92 @@ class ChimeraSealedScraper(SealedScraper):
             
             # otherwise, scrape the site and update the database
             else:
+                print("Scraping chimera")
+                pageData = []
                 # We need to check three different pages and they are all paginated
                 curPage = 1
-                url = self.baseUrl + '/magic-the-gathering-sealed?filter.v.availability=1&page=' + str(curPage)
+                # print('https://chimeragamingonline.com/collections/magic-the-gathering-sealed?filter.v.availability=1&page=1')
+                url = self.baseUrl + '/collections/magic-the-gathering-sealed?filter.v.availability=1&page=' + str(curPage)
+                # get page data with playwright
+                print("starting playwright")
+                with sync_playwright() as p:
+                    browser = p.chromium.launch(headless=False)
+                    page = browser.new_page()
+                    page.goto(url)
+                    # wait for page to load and then get the html
+                    # page.wait_for_load_state()
+                    # wait for dynamic content to load
+                    # once we see a span with class product-price__price, we know the page is loaded
 
-                while True:
-                    r = requests.get(url)
-                    soup = BeautifulSoup(r.text, 'html.parser')
+                    page.wait_for_selector('span.product-price__price')
+                    html = page.content()
+                    pageData.append(html)
+                    # if div.pag_next <a> doesnt have btn--disabled class, click it and get the next page
+                    nextButton = page.query_selector('div.pag_next a.btn')
+                    nextButtonDisabled = page.query_selector('div.pag_next a.btn--disabled')
+                    while nextButton and not nextButtonDisabled:
+                        nextButton.click()
+                        page.wait_for_selector('span.product-price__price')
+                        html = page.content()
+                        pageData.append(html)
+                        nextButton = page.query_selector('div.pag_next a.btn')
+                        nextButtonDisabled = page.query_selector('div.pag_next a.btn--disabled')
+                    browser.close()
+                # now we have all the page data, we can parse it with bs4
+                print(f'Got {len(pageData)} pages of data')
+                    
+
+
+            
+                # for each page in pageData: we need to get the products
+                allProducts = []
+                for page in pageData:
+                    soup = BeautifulSoup(page, 'html.parser')
                     products = soup.find_all('div', class_='grid-view-item')
-                    print(f'Checking page {curPage}')
                     for product in products:
+                        allProducts.append(product)
+                print(f'total length of allProducts: {len(allProducts)}')
+                # soup = BeautifulSoup(r.text, 'html.parser')
+                # products = soup.find_all('div', class_='grid-view-item')
+                i=0
+                for product in allProducts:
+                    i+=1
+                    print('----------------------------------')
+                    print(f'Adding product number {i} of {len(allProducts)}')
+                    try:
+                        name = product.find('div', class_='h4 grid-view-item__title').text
+                        # print(f'Name {name}')
+                        price = product.find('span', class_='product-price__price').text.replace("$",'').replace(',','')
+                        # print(f'Price {price}')
+                        tags = self.setTags(name)
+                        # print(f'Tags {tags}')
                         try:
-                            name = product.find('div', class_='h4 grid-view-item__title')
-                            print(f'Name {name}')
-                            # name = self.removeLanguage(name).replace(" - ", " ").strip()
-                            price = product.find('span', class_='product-price__price').text.replace("$",'')
-                            # print(f'Price {price}')
-                            # tags = self.setTags(name)
-                            # image = "https:" + product.find('img', class_='productCard__img')['data-src']
-                            # # if there is a newline, take the first line
-                            # if '\n' in price:
-                            #     price = price.split('\n')[0] 
-                            # price = float(price.replace('$', '').replace(' CAD', '').replace(',',"").strip())
-                            # print(f'Name is {name}, price is {price}')
-                            # print(f'tags are {tags}')
-                            self.results.append({
-                                'name': name,
-                                # 'link': self.baseUrl + product.find('a', class_='productCard__a')['href'],
-                                # 'image': image,
-                                'price': float(price),
-                                # 'stock': -1,
-                                # 'website': self.website,
-                                # 'language': 'English',
-                                # 'tags': tags
-                            }) 
+                            image = 'https:' + product.find('img', class_='grid-view-item__image')['src']
+                        except:
+                            image = ''
+                        # print(f'Image {image}')
+                        try:
+                            link = self.baseUrl + '/' + product.find('div', class_='grid-view-item__image-wrapper js').find('a')['href']
+                        except:
+                            link = ''
+                            
+                        self.results.append({
+                            'name': name,
+                            'link': link,
+                            'image': image,
+                            'price': float(price),
+                            'stock': -1,
+                            'website': self.website,
+                            'language': 'English',
+                            'tags': tags
+                        }) 
+                        print(f'Product number {i} of {len(allProducts)} added successfully to self.results')
+                        print(f'New self results length: {len(self.results)}')
 
-                        except Exception as e:
-                            print(f'Error searching for sealed on {self.website}')
-                            print(e.args[-5:])
-
-                    # Check the ol.pagination and see if there is an li element with a class of disabled that contains the text 'Next'
-                    pagination = soup.find('ol', class_='pagination')
-                    if (pagination):
-                        buttons = pagination.find_all('li', class_='disabled')
-                        # If there is a disabled button with "next" in it, we are done, exit the while loop
-                        if any('Next' in button.text for button in buttons):
-                            curPage = 1
-                            break
-                                        
-                        elif curPage > 10:
-                            # just incase we get stuck in an infinite loop
-                            curPage = 1
-                            break
-
-                        else:
-                            curPage += 1
-                            url = url[:-1] + str(curPage)
-                    else:
-                        curPage = 1
-                        break
+                    except Exception as e:
+                        print(f'Error searching for sealed on {self.website}')
+                        print(f'Error on line {sys.exc_info()[-1].tb_lineno} type {e}')
+                        print(e.args[-5:])
 
 
 
