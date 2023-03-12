@@ -95,7 +95,7 @@ class ComicHunterSealedScraper(SealedScraper):
                     link = 'https://www.comichunter.net' + product.select_one('div.image a')['href']
                     name = product.select_one('div.image a')['title']
                     imageUrl = product.select_one('img')['src']
-                    price = product.select_one('div.variant-row').select_one('form.add-to-cart-form')['data-price'].replace("CAD$ ","")
+                    price = product.select_one('div.variant-row').select_one('form.add-to-cart-form')['data-price'].replace("CAD$ ","").replace(",","")
                     stock = product.select_one('div.variant-row span.variant-qty').text.replace(" In Stock", "")
                     tags = self.setTags(name)
 

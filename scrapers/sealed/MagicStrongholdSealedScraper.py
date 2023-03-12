@@ -147,6 +147,7 @@ class MagicStrongholdSealedScraper(SealedScraper):
                 # update the database
                 # create the table if it doesn't exist, primary key is a composite of name, website, language, and tags
                 cur.execute("CREATE TABLE IF NOT EXISTS sealed_prices (id serial, name text, link text, image text, price float, stock int, website text, language text, tags text[], updated_at timestamp DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (name, website, language, tags))")
+                # remove any old data for this site
                 # insert the data, if there is a conflict, update the price, link, image, and updated_at
                 for result in self.results:
                     cur.execute("INSERT INTO sealed_prices (name, link, image, price, stock, website, language, tags) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (name, website, language, tags) DO UPDATE SET price = EXCLUDED.price, link = EXCLUDED.link, image = EXCLUDED.image, updated_at = EXCLUDED.updated_at", (result['name'], result['link'], result['image'], result['price'], result['stock'], result['website'], result['language'], result['tags']))
