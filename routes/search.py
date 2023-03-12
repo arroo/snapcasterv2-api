@@ -25,6 +25,7 @@ from scrapers.base.FantasyForgedScraper import FantasyForgedScraper
 from scrapers.base.TheComicHunterScraper import TheComicHunterScraper
 from scrapers.base.ChimeraScraper import ChimeraScraper
 from scrapers.sealed.ChimeraSealedScraper import ChimeraSealedScraper
+from scrapers.sealed.ComicHunterSealedScraper import ComicHunterSealedScraper
 from scrapers.sealed.GauntletSealedScraper import GauntletSealedScraper
 from scrapers.sealed.Four01SealedScraper import Four01SealedScraper
 from scrapers.sealed.FusionSealedScraper import FusionSealedScraper
@@ -32,6 +33,7 @@ from scrapers.sealed.HouseOfCardsSealedScraper import HouseOfCardsSealedScraper
 from scrapers.sealed.MagicStrongholdSealedScraper import MagicStrongholdSealedScraper
 from scrapers.sealed.ConnectionGamesSealedScraper import ConnectionGamesSealedScraper
 from scrapers.sealed.Jeux3DragonsSealedScraper import Jeux3DragonsSealedScraper
+
 import json
 import concurrent.futures
 from pydantic import BaseModel
@@ -376,23 +378,25 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
     # Arrange scrapers
     connectionGamesScraper = ConnectionGamesSealedScraper(setName)
     four01Scraper = Four01SealedScraper(setName)
-    fustionScraper = FusionSealedScraper(setName)
+    fusionScraper = FusionSealedScraper(setName)
     gauntletScraper = GauntletSealedScraper(setName)
     houseOfCardsScraper = HouseOfCardsSealedScraper(setName)
     jeux3DragonsScraper = Jeux3DragonsSealedScraper(setName)
     magicStrongholdScraper = MagicStrongholdSealedScraper(setName)
     chimeraScraper = ChimeraSealedScraper(setName)
+    comicHunterScraper = ComicHunterSealedScraper(setName)
 
     # Map scrapers to an identifier keyword
     scraperMap = {
         'chimera': chimeraScraper,
         "connectiongames": connectionGamesScraper,
         "four01": four01Scraper,
-        "fusion": fustionScraper,
+        "fusion": fusionScraper,
         "gauntlet": gauntletScraper,
         "houseofcards": houseOfCardsScraper,
         "magicstronghold": magicStrongholdScraper,
         "jeux3dragons": jeux3DragonsScraper,
+        'thecomichunter': comicHunterScraper,
     }
 
     # Filter out scrapers that are not requested in request.websites
