@@ -92,7 +92,7 @@ class ChimeraSealedScraper(SealedScraper):
                 # get page data with playwright
                 print("starting playwright")
                 with sync_playwright() as p:
-                    browser = p.chromium.launch(headless=False)
+                    browser = p.chromium.launch(headless=True)
                     page = browser.new_page()
                     page.goto(url)
                     # wait for page to load and then get the html
