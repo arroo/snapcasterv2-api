@@ -24,6 +24,7 @@ from scrapers.base.AetherVaultScraper import AetherVaultScraper
 from scrapers.base.FantasyForgedScraper import FantasyForgedScraper
 from scrapers.base.TheComicHunterScraper import TheComicHunterScraper
 from scrapers.base.ChimeraScraper import ChimeraScraper
+from scrapers.sealed.AtlasSealedScraper import AtlasSealedScraper
 from scrapers.sealed.ChimeraSealedScraper import ChimeraSealedScraper
 from scrapers.sealed.ComicHunterSealedScraper import ComicHunterSealedScraper
 from scrapers.sealed.GamezillaSealedScraper import GamezillaSealedScraper
@@ -379,6 +380,7 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
         return
 
     # Arrange scrapers
+    atlasScraper = AtlasSealedScraper(setName)
     connectionGamesScraper = ConnectionGamesSealedScraper(setName)
     four01Scraper = Four01SealedScraper(setName)
     fusionScraper = FusionSealedScraper(setName)
@@ -393,6 +395,7 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
     hairyTScraper = HairyTSealedScraper(setName)
     # Map scrapers to an identifier keyword
     scraperMap = {
+        'atlas': atlasScraper,
         'chimera': chimeraScraper,
         "connectiongames": connectionGamesScraper,
         "four01": four01Scraper,
