@@ -5,15 +5,21 @@ import redis
 import re
 from pymongo import MongoClient
 from typing import List
+from pydantic import BaseModel
 
 rd = redis.Redis(host=os.environ['RD_HOST'], port=os.environ['RD_PORT'], password=os.environ['RD_PASSWORD'], db=0)
 router = APIRouter()
 mongoClient = MongoClient(os.environ['MONGO_URI'])
 db = mongoClient['snapcaster']
 
+# define pydantic model for the request body
+class PriceSearch(BaseModel):
+    cardName: str
 
-@router.get("/{query}/")
-def getPriceHistory(query: str) -> List[dict]:
+@router.post("/")
+def getPriceHistory(request: PriceSearch) -> List[dict]:
+    # remove any %2F and replace with /
+    query = request.cardName
     # Find the card document with the closest 'name' to the query
     card_doc = db.cards.find_one({'name': {'$regex': query, '$options': 'i'}}, sort=[('name', 1)])
     if not card_doc:
