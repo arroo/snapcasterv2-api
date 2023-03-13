@@ -26,6 +26,7 @@ from scrapers.base.TheComicHunterScraper import TheComicHunterScraper
 from scrapers.base.ChimeraScraper import ChimeraScraper
 from scrapers.sealed.ChimeraSealedScraper import ChimeraSealedScraper
 from scrapers.sealed.ComicHunterSealedScraper import ComicHunterSealedScraper
+from scrapers.sealed.GamezillaSealedScraper import GamezillaSealedScraper
 from scrapers.sealed.GauntletSealedScraper import GauntletSealedScraper
 from scrapers.sealed.Four01SealedScraper import Four01SealedScraper
 from scrapers.sealed.FusionSealedScraper import FusionSealedScraper
@@ -381,6 +382,7 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
     connectionGamesScraper = ConnectionGamesSealedScraper(setName)
     four01Scraper = Four01SealedScraper(setName)
     fusionScraper = FusionSealedScraper(setName)
+    gamezillaScraper = GamezillaSealedScraper(setName)
     gauntletScraper = GauntletSealedScraper(setName)
     houseOfCardsScraper = HouseOfCardsSealedScraper(setName)
     jeux3DragonsScraper = Jeux3DragonsSealedScraper(setName)
@@ -395,6 +397,7 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
         "connectiongames": connectionGamesScraper,
         "four01": four01Scraper,
         "fusion": fusionScraper,
+        "gamezilla": gamezillaScraper,
         "gauntlet": gauntletScraper,
         'hairyt': hairyTScraper,
         "houseofcards": houseOfCardsScraper,
