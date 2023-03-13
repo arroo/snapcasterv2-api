@@ -9,14 +9,14 @@ dotenv.load_dotenv()
 from playwright.sync_api import sync_playwright
 
 
-class ChimeraSealedScraper(SealedScraper):
+class BorderCitySealedScraper(SealedScraper):
     """
     This is a bit different, The sealed portion of the ecommerce site is rendered
     serverside, so the API isn't exposed. I will have to check all the pages 
 
-    1. https://chimeragamingonline.com/collections/magic-the-gathering-sealed?filter.v.availability=1
-    2. https://chimeragamingonline.com/collections/magic-the-gathering-sealed?filter.v.availability=1&page=2
-    3. https://chimeragamingonline.com/collections/magic-the-gathering-sealed?filter.v.availability=1&page=3
+    1. https://bordercitygames.ca/collections/magic-sealed-products?filter.v.availability=1
+    2. https://bordercitygames.ca/collections/magic-sealed-products?filter.v.availability=1&page=2
+    3. https://bordercitygames.ca/collections/magic-sealed-products?filter.v.availability=1&page=3
 
     Also, there is no way to reliably search for a specific set, so I will have to
     iterate through all the sets and check if the name matches. This is a bit slow,
@@ -31,8 +31,8 @@ class ChimeraSealedScraper(SealedScraper):
 
     def __init__(self, setName):
         SealedScraper.__init__(self, setName)
-        self.baseUrl = 'https://chimeragamingonline.com'
-        self.website='chimera'
+        self.baseUrl = 'https://bordercitygames.ca'
+        self.website='bordercity'
 
     def getResults(self):
         # we are overriding this for now. HouseofCards scrapes ALL sealed data, so we will filter out
@@ -41,7 +41,7 @@ class ChimeraSealedScraper(SealedScraper):
         return self.results
 
     def scrape(self):
-        # We want to check the database for chimera data, if it has been updated in the last 8 hours, return the data
+        # We want to check the database for bordercity data, if it has been updated in the last 8 hours, return the data
         # otherwise, scrape the site and update the database, then return the data
 
         try:
@@ -57,7 +57,7 @@ class ChimeraSealedScraper(SealedScraper):
 
             try:
                 # check if the data has been updated in the last 8 hours
-                cur.execute("SELECT * FROM sealed_prices WHERE website = 'chimera' AND updated_at > NOW() - INTERVAL '8 hours'")
+                cur.execute("SELECT * FROM sealed_prices WHERE website = 'bordercity' AND updated_at > NOW() - INTERVAL '8 hours'")
                 rows = cur.fetchall()
             except:
                 conn.rollback()
@@ -83,16 +83,14 @@ class ChimeraSealedScraper(SealedScraper):
             
             # otherwise, scrape the site and update the database
             else:
-                print("Scraping chimera")
                 pageData = []
                 # We need to check three different pages and they are all paginated
                 curPage = 1
-                # print('https://chimeragamingonline.com/collections/magic-the-gathering-sealed?filter.v.availability=1&page=1')
-                url = self.baseUrl + '/collections/magic-the-gathering-sealed?filter.v.availability=1&page=' + str(curPage)
+                # print('https://bordercitygames.ca/collections/magic-sealed-products?filter.v.availability=1&page=1')
+                url = self.baseUrl + '/collections/magic-sealed-products?filter.v.availability=1&page=' + str(curPage)
                 # get page data with playwright
-                print("starting playwright")
                 with sync_playwright() as p:
-                    browser = p.chromium.launch(headless=True)
+                    browser = p.chromium.launch(headless=False)
                     page = browser.new_page()
                     page.goto(url)
                     # wait for page to load and then get the html
@@ -100,22 +98,28 @@ class ChimeraSealedScraper(SealedScraper):
                     # wait for dynamic content to load
                     # once we see a span with class product-price__price, we know the page is loaded
 
-                    page.wait_for_selector('span.product-price__price')
+                    page.wait_for_selector('div.product-price')
+                    # wait for the selector to have 
+                    # sleep for 5 seconds to make sure the page is loaded
                     html = page.content()
                     pageData.append(html)
-                    # if div.pag_next <a> doesnt have btn--disabled class, click it and get the next page
+                    # <div class="pag_next">
+                    #     <a href="/collections/magic-sealed-products?filter.v.availability=1&amp;page=2" class="btn btn--secondary btn--narrow">
+                    #         <i class="material-icons"></i>
+                    #         <span class="icon__fallback-text">Next</span>
+                    #     </a>
+                    #  </div>
                     nextButton = page.query_selector('div.pag_next a.btn')
                     nextButtonDisabled = page.query_selector('div.pag_next a.btn--disabled')
                     while nextButton and not nextButtonDisabled:
                         nextButton.click()
-                        page.wait_for_selector('span.product-price__price')
+                        page.wait_for_selector('div.product-price')
                         html = page.content()
                         pageData.append(html)
                         nextButton = page.query_selector('div.pag_next a.btn')
-                        nextButtonDisabled = page.query_selector('div.pag_next a.btn--disabled')
+                    nextButtonDisabled = page.query_selector('div.pag_next a.btn--disabled')
                     browser.close()
                 # now we have all the page data, we can parse it with bs4
-                print(f'Got {len(pageData)} pages of data')
                     
 
 
@@ -127,21 +131,16 @@ class ChimeraSealedScraper(SealedScraper):
                     products = soup.find_all('div', class_='grid-view-item')
                     for product in products:
                         allProducts.append(product)
-                print(f'total length of allProducts: {len(allProducts)}')
                 # soup = BeautifulSoup(r.text, 'html.parser')
                 # products = soup.find_all('div', class_='grid-view-item')
                 i=0
                 for product in allProducts:
                     i+=1
-                    print('----------------------------------')
-                    print(f'Adding product number {i} of {len(allProducts)}')
                     try:
                         name = product.find('div', class_='h4 grid-view-item__title').text
-                        # print(f'Name {name}')
                         price = product.find('span', class_='product-price__price').text.replace("$",'').replace(',','')
-                        # print(f'Price {price}')
+                        stock = -1
                         tags = self.setTags(name)
-                        # print(f'Tags {tags}')
                         try:
                             image = 'https:' + product.find('img', class_='grid-view-item__image')['src']
                         except:
@@ -162,8 +161,6 @@ class ChimeraSealedScraper(SealedScraper):
                             'language': 'English',
                             'tags': tags
                         }) 
-                        print(f'Product number {i} of {len(allProducts)} added successfully to self.results')
-                        print(f'New self results length: {len(self.results)}')
 
                     except Exception as e:
                         print(f'Error searching for sealed on {self.website}')
@@ -190,3 +187,4 @@ class ChimeraSealedScraper(SealedScraper):
 
         except Exception as e:
             print("Error on line {}".format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
+        
