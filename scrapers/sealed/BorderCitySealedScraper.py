@@ -90,7 +90,7 @@ class BorderCitySealedScraper(SealedScraper):
                 url = self.baseUrl + '/collections/magic-sealed-products?filter.v.availability=1&page=' + str(curPage)
                 # get page data with playwright
                 with sync_playwright() as p:
-                    browser = p.chromium.launch(headless=False)
+                    browser = p.chromium.launch(headless=True)
                     page = browser.new_page()
                     page.goto(url)
                     # wait for page to load and then get the html

@@ -47,6 +47,7 @@ origins = [
     "https://www.snapcaster.ca",
     "https://snapcaster.ca",
     "http://localhost:3000",
+    "http://localhost:3001",
     "https://snapcaster-nextjs.vercel.app",
 ]
 
