@@ -5,12 +5,25 @@ import pymongo
 import redis
 import re
 from datetime import datetime, timedelta, timezone
+import json
 
 rd = redis.Redis(host=os.environ['RD_HOST'], port=os.environ['RD_PORT'], password=os.environ['RD_PASSWORD'], db=0)
 router = APIRouter()
 
 @router.get("/popular_cards/")
 def popular_cards():
+    # First check cache
+    # When retrieving the data from Redis, parse the JSON string back to a list of dictionaries
+    if rd.exists("popular_cards"):
+        popular_cards_cache = {k.decode(): v for k, v in rd.hgetall("popular_cards").items()}
+        return {
+            "allTime":  json.loads(popular_cards_cache.get("allTime", "[]")),
+            "monthly": json.loads(popular_cards_cache.get("monthly", "[]")),
+            "weekly":  json.loads(popular_cards_cache.get("weekly", "[]"))
+        }
+
+    
+    # if cache is empty, connect to postgres and get the top 10 cards from the last 30 days
     # connect to pg
     conn = psycopg2.connect(
         dbname=os.environ['PG_DB'],
@@ -107,6 +120,14 @@ def popular_cards():
 
     
     mongoClient.close()
+    # add the results to redis
+    rd.hmset("popular_cards", {
+        "allTime":  json.dumps(topAllTimeCardInfo),
+        "monthly": json.dumps(topMonthlyCardInfo),
+        "weekly":  json.dumps(topWeeklyCardInfo)
+    })
+    rd.expire("popular_cards", 86400) # expire in 1 day
+
 
     return {
         "allTime":  topAllTimeCardInfo,
