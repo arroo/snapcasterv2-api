@@ -46,7 +46,7 @@ def popular_cards():
     monthlyCardDict = {}
     for row in rows:
         # covert the timestamp (2022-10-24 18:10:03) to a datetime object and compare it to the current time
-        if datetime.now() - row[1] < timedelta(days=30):
+        if datetime.now() - datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') < timedelta(days=30):
             if row[0].lower() in monthlyCardDict:
                 monthlyCardDict[row[0].lower()] += 1
             else:
@@ -57,7 +57,7 @@ def popular_cards():
     weeklyCardDict = {}
     for row in rows:
         # covert the timestamp (2022-10-24 18:10:03) to a datetime object and compare it to the current time
-        if datetime.now() - row[1] < timedelta(days=7):
+        if datetime.now() - datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') < timedelta(days=7):
             if row[0].lower() in weeklyCardDict:
                 weeklyCardDict[row[0].lower()] += 1
             else:
