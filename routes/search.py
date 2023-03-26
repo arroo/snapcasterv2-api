@@ -29,6 +29,7 @@ from scrapers.sealed.BorderCitySealedScraper import BorderCitySealedScraper
 from scrapers.sealed.ChimeraSealedScraper import ChimeraSealedScraper
 from scrapers.sealed.ComicHunterSealedScraper import ComicHunterSealedScraper
 from scrapers.sealed.EnterTheBattlefieldSealedScraper import EnterTheBattlefieldSealedScraper
+from scrapers.sealed.EverythingGamesSealedScraper import EverythingGamesSealedScraper
 from scrapers.sealed.GamezillaSealedScraper import GamezillaSealedScraper
 from scrapers.sealed.GauntletSealedScraper import GauntletSealedScraper
 from scrapers.sealed.Four01SealedScraper import Four01SealedScraper
@@ -386,6 +387,7 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
     borderCityScaper = BorderCitySealedScraper(setName)
     connectionGamesScraper = ConnectionGamesSealedScraper(setName)
     enterTheBattlefieldScraper = EnterTheBattlefieldSealedScraper(setName)
+    everythingGamesScraper = EverythingGamesSealedScraper(setName)
     four01Scraper = Four01SealedScraper(setName)
     fusionScraper = FusionSealedScraper(setName)
     gamezillaScraper = GamezillaSealedScraper(setName)
@@ -404,6 +406,7 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
         'chimera': chimeraScraper,
         "connectiongames": connectionGamesScraper,
         'enterthebattlefield': enterTheBattlefieldScraper,
+        'everythinggames': everythingGamesScraper,
         "four01": four01Scraper,
         "fusion": fusionScraper,
         "gamezilla": gamezillaScraper,
