@@ -40,6 +40,7 @@ from scrapers.sealed.HouseOfCardsSealedScraper import HouseOfCardsSealedScraper
 from scrapers.sealed.MagicStrongholdSealedScraper import MagicStrongholdSealedScraper
 from scrapers.sealed.ConnectionGamesSealedScraper import ConnectionGamesSealedScraper
 from scrapers.sealed.Jeux3DragonsSealedScraper import Jeux3DragonsSealedScraper
+from scrapers.sealed.SequenceSealedScraper import SequenceSealedScraper
 from scrapers.sealed.TopDeckHeroSealedScraper import TopDeckHeroSealedScraper
 
 import json
@@ -399,6 +400,7 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
     magicStrongholdScraper = MagicStrongholdSealedScraper(setName)
     chimeraScraper = ChimeraSealedScraper(setName)
     comicHunterScraper = ComicHunterSealedScraper(setName)
+    sequenceScraper = SequenceSealedScraper(setName)
     TopDeckHeroScraper = TopDeckHeroSealedScraper(setName)
     hairyTScraper = HairyTSealedScraper(setName)
     # Map scrapers to an identifier keyword
@@ -418,6 +420,7 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
         "houseofcards": houseOfCardsScraper,
         "magicstronghold": magicStrongholdScraper,
         "jeux3dragons": jeux3DragonsScraper,
+        "sequence": sequenceScraper,
         'thecomichunter': comicHunterScraper,
         'topdeckhero': TopDeckHeroScraper,
     }

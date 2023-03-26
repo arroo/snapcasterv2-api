@@ -85,12 +85,10 @@ class ExorGamesSealedScraper(SealedScraper):
             
             # otherwise, scrape the site and update the database
             else:
-                print("scraping exor")
                 pageData = []
                 # We need to check three different pages and they are all paginated
                 curPage = 1
                 url = self.baseUrl + '/collections/sealed-magic?filter.v.availability=1&page=' + str(curPage)
-                print(f'First url to scrape is {url}')
                 # get page data with playwright
                 with sync_playwright() as p:
                     browser = p.chromium.launch(headless=True)
