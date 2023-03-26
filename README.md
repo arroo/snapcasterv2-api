@@ -66,6 +66,9 @@ requirements.txt
 ## Database schema
 The database is primarily used to log search history for the application for debugging, and is only essential for sealed searches. 
 
+DB requires pg_trgm extension for searching/matching text `similarity()` func.
+`CREATE EXTENSION IF NOT EXISTS pg_trgm;`
+
 Used for storing prices of sealed products for certain stores
 `sealed_prices(id,name,link,image,price,stock,website,language,tags,updated_at)`
 
