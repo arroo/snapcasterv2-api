@@ -40,6 +40,7 @@ from scrapers.sealed.FusionSealedScraper import FusionSealedScraper
 from scrapers.sealed.HairyTSealedScraper import HairyTSealedScraper
 from scrapers.sealed.HouseOfCardsSealedScraper import HouseOfCardsSealedScraper
 from scrapers.sealed.MagicStrongholdSealedScraper import MagicStrongholdSealedScraper
+from scrapers.sealed.OrchardCitySealedScraper import OrchardCitySealedScraper
 from scrapers.sealed.ConnectionGamesSealedScraper import ConnectionGamesSealedScraper
 from scrapers.sealed.Jeux3DragonsSealedScraper import Jeux3DragonsSealedScraper
 from scrapers.sealed.SequenceSealedScraper import SequenceSealedScraper
@@ -402,6 +403,7 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
     houseOfCardsScraper = HouseOfCardsSealedScraper(setName)
     jeux3DragonsScraper = Jeux3DragonsSealedScraper(setName)
     magicStrongholdScraper = MagicStrongholdSealedScraper(setName)
+    orchardCityScraper = OrchardCitySealedScraper(setName)
     chimeraScraper = ChimeraSealedScraper(setName)
     comicHunterScraper = ComicHunterSealedScraper(setName)
     sequenceScraper = SequenceSealedScraper(setName)
@@ -425,6 +427,7 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
         'hairyt': hairyTScraper,
         "houseofcards": houseOfCardsScraper,
         "magicstronghold": magicStrongholdScraper,
+        "orchardcity": orchardCityScraper,
         "jeux3dragons": jeux3DragonsScraper,
         "sequence": sequenceScraper,
         'thecomichunter': comicHunterScraper,
