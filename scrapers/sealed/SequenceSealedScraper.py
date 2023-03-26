@@ -24,7 +24,7 @@ https://www.sequencecomics.ca/advanced_search?utf8=%E2%9C%93&search%5Bfuzzy_sear
 
     def __init__(self, setName):
         SealedScraper.__init__(self, setName)
-        self.website = 'sequence'
+        self.website = 'sequencegaming'
         self.url = 'https://www.sequencecomics.ca/advanced_search?utf8=%E2%9C%93&search%5Bfuzzy_search%5D=&search%5Btags_name_eq%5D=&search%5Bsell_price_gte%5D=&search%5Bsell_price_lte%5D=&search%5Bbuy_price_gte%5D=&search%5Bbuy_price_lte%5D=&search%5Bin_stock%5D=0&search%5Bin_stock%5D=1&buylist_mode=0&search%5Bcategory_ids_with_descendants%5D%5B%5D=&search%5Bcategory_ids_with_descendants%5D%5B%5D=6723&search%5Bwith_descriptor_values%5D%5B2653%5D=&search%5Bwith_descriptor_values%5D%5B2654%5D=&search%5Bwith_descriptor_values%5D%5B2655%5D=&search%5Bwith_descriptor_values%5D%5B2656%5D=&search%5Bwith_descriptor_values%5D%5B2658%5D=&search%5Bwith_descriptor_values%5D%5B2660%5D=&search%5Bwith_descriptor_values%5D%5B2661%5D=&search%5Bwith_descriptor_values%5D%5B2663%5D=&search%5Bwith_descriptor_values%5D%5B2671%5D=&search%5Bwith_descriptor_values%5D%5B2672%5D=&search%5Bwith_descriptor_values%5D%5B2674%5D=&search%5Bwith_descriptor_values%5D%5B2678%5D=&search%5Bwith_descriptor_values%5D%5B2679%5D=&search%5Bwith_descriptor_values%5D%5B2681%5D=&search%5Bwith_descriptor_values%5D%5B2682%5D=&search%5Bwith_descriptor_values%5D%5B2684%5D=&search%5Bvariants_with_identifier%5D%5B19%5D%5B%5D=&search%5Bsort%5D=name&search%5Bdirection%5D=ascend&commit=Search&search%5Bcatalog_group_id_eq%5D='
 
 
@@ -45,7 +45,7 @@ https://www.sequencecomics.ca/advanced_search?utf8=%E2%9C%93&search%5Bfuzzy_sear
 
             try:
                 # check if the data has been updated in the last 8 hours
-                cur.execute("SELECT * FROM sealed_prices WHERE website = 'sequence' AND updated_at > NOW() - INTERVAL '8 hours'")
+                cur.execute("SELECT * FROM sealed_prices WHERE website = 'sequencegaming' AND updated_at > NOW() - INTERVAL '8 hours'")
                 rows = cur.fetchall()
             except:
                 conn.rollback()
