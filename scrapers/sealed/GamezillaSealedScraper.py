@@ -98,7 +98,7 @@ class GamezillaSealedScraper(SealedScraper):
                         print(f"GamezillaSealedScraper: Couldn't find image for {name} product number {allProducts.index(product)} of {len(allProducts)}")
                         print(product.select_one('img.productCard__img'))
                               
-                    price = product.select_one('p.productPrice').text.replace("$", "").replace(",", "").strip()
+                    price = product.select_one('p.productPrice').text.replace("$", "").replace(",", "").strip().replace("\r", "").replace("\n", "")
                     # if '\n' in price:
                     #     price = price.split('\n')
                     #     price = [p for p in price if p != '']
