@@ -110,7 +110,7 @@ class GamezillaSealedScraper(SealedScraper):
                         'name': name,
                         'link': link,
                         'image': imageUrl,
-                        'price': float(price),
+                        'price': float(price.strip()),
                         'stock': int(stock),
                         'website': self.website,
                         'language': self.setLanguage(name),
