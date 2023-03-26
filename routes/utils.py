@@ -311,19 +311,22 @@ def popular_sealed():
             "product_price": result[2],
         } if result else None
 
-    # Update matched_sets with cheapest product information
     def update_sets_with_products(matched_sets):
+        updated_sets = []
         for set_info in matched_sets:
             set_name = set_info["name"]
             cheapest_product = find_cheapest_product(set_name)
-            if cheapest_product:
+            if cheapest_product and cheapest_product["product_image"] and cheapest_product["product_price"]:
                 set_info.update(cheapest_product)
+                updated_sets.append(set_info)
+        return updated_sets
 
-    # Update all time, monthly, and weekly matched sets with product information
-    update_sets_with_products(all_time_matched_sets)
-    update_sets_with_products(monthly_matched_sets)
-    update_sets_with_products(weekly_matched_sets)
+    # Update all time, monthly, and weekly matched sets with product information and filter out sets with missing images or prices
+    all_time_matched_sets = update_sets_with_products(all_time_matched_sets)
+    monthly_matched_sets = update_sets_with_products(monthly_matched_sets)
+    weekly_matched_sets = update_sets_with_products(weekly_matched_sets)
 
+    
     # Cache the results in Redis
     rd.hset("popular_sealed", "allTime", json.dumps(all_time_matched_sets))
     rd.hset("popular_sealed", "monthly", json.dumps(monthly_matched_sets))
