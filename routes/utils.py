@@ -141,7 +141,6 @@ def popular_cards():
 def autocomplete(query: str):
 
     if rd.exists("sets"):
-        print("cache hit")
         # get the list of sets from redis
         sets = rd.hgetall("sets")
         # return the value of the first 10 keys that match the query in lowercase
@@ -294,11 +293,43 @@ def popular_sealed():
     monthly_matched_sets = match_sets_with_names(topMonthlyQueries)
     weekly_matched_sets = match_sets_with_names(topWeeklyQueries)
 
+    # Now we need to get the cheapest product from sealed_prices with a name containing the set name
+    # and return the set name, and the cheapest product image, name and price
+    # Define a function to get the cheapest product for each set
+    def find_cheapest_product(set_name):
+        cur.execute("""
+            SELECT name, image, price
+            FROM sealed_prices
+            WHERE LOWER(name) LIKE %s
+            ORDER BY price ASC
+            LIMIT 1;
+        """, (f'%{set_name.lower()}%',))
+        result = cur.fetchone()
+        return {
+            "product_name": result[0],
+            "product_image": result[1],
+            "product_price": result[2],
+        } if result else None
+
+    # Update matched_sets with cheapest product information
+    def update_sets_with_products(matched_sets):
+        for set_info in matched_sets:
+            set_name = set_info["name"]
+            cheapest_product = find_cheapest_product(set_name)
+            if cheapest_product:
+                set_info.update(cheapest_product)
+
+    # Update all time, monthly, and weekly matched sets with product information
+    update_sets_with_products(all_time_matched_sets)
+    update_sets_with_products(monthly_matched_sets)
+    update_sets_with_products(weekly_matched_sets)
+
     # Cache the results in Redis
     rd.hset("popular_sealed", "allTime", json.dumps(all_time_matched_sets))
     rd.hset("popular_sealed", "monthly", json.dumps(monthly_matched_sets))
     rd.hset("popular_sealed", "weekly", json.dumps(weekly_matched_sets))
-    rd.expire("popular_sealed", 3600)  # Set cache to expire in 1 hour
+    rd.expire("popular_sealed", 86400)  # Set cache to expire in 1 hour
+    
 
     # Close cursor and connection
     cur.close()
