@@ -31,6 +31,7 @@ from scrapers.sealed.ComicHunterSealedScraper import ComicHunterSealedScraper
 from scrapers.sealed.EnterTheBattlefieldSealedScraper import EnterTheBattlefieldSealedScraper
 from scrapers.sealed.EverythingGamesSealedScraper import EverythingGamesSealedScraper
 from scrapers.sealed.ExorGamesSealedScraper import ExorGamesSealedScraper
+from scrapers.sealed.FantasyForgedSealedScraper import FantasyForgedSealedScraper
 from scrapers.sealed.FirstPlayerSealedScraper import FirstPlayerSealedScraper
 from scrapers.sealed.GameKnightSealedScraper import GameKnightSealedScraper
 from scrapers.sealed.GamezillaSealedScraper import GamezillaSealedScraper
@@ -394,6 +395,7 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
     enterTheBattlefieldScraper = EnterTheBattlefieldSealedScraper(setName)
     everythingGamesScraper = EverythingGamesSealedScraper(setName)
     exorGamesScraper = ExorGamesSealedScraper(setName)
+    fantasyForgedScraper = FantasyForgedSealedScraper(setName)
     firstPlayerScraper = FirstPlayerSealedScraper(setName)
     four01Scraper = Four01SealedScraper(setName)
     fusionScraper = FusionSealedScraper(setName)
@@ -418,6 +420,7 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
         'enterthebattlefield': enterTheBattlefieldScraper,
         'everythinggames': everythingGamesScraper,
         'exorgames': exorGamesScraper,
+        'fantasyforged': fantasyForgedScraper,
         'firstplayer': firstPlayerScraper,
         "four01": four01Scraper,
         "fusion": fusionScraper,
