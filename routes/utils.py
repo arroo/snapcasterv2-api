@@ -202,9 +202,6 @@ def autocomplete(query: str):
 
 
 
-
-
-
 @router.get("/popular_sealed/")
 def popular_sealed():
 
