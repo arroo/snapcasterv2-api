@@ -87,11 +87,31 @@ def popular_cards():
     def get_card_info(card_names):
         card_info_list = []
         for card_name in card_names:
+            if "wrenn and six" in card_name.lower():
+                print("Wrenn and Six")
+                print(f'Card name: {card_name}')
             try:
+                # This will return the first card that matches the regex
+                # card = cardCollection.find_one(
+                #     {"name": {"$regex": f"^{card_name}$", "$options": "i"}},
+                #     sort=[("name", pymongo.ASCENDING), ("name", pymongo.ASCENDING)]
+                # )
+
+                # Updated MongoDB query and sorting to prioritize exact card name matches
                 card = cardCollection.find_one(
                     {"name": {"$regex": f"^{card_name}$", "$options": "i"}},
                     sort=[("name", pymongo.ASCENDING), ("name", pymongo.ASCENDING)]
                 )
+
+                if not card:
+                    print("Second attempt")
+                    card = cardCollection.find_one(
+                        {"name": {"$regex": card_name, "$options": "i"}},
+                        sort=[("name", pymongo.ASCENDING), ("name", pymongo.ASCENDING)]
+                    )
+                else:
+                    print("First attempt card found")
+                    print(card["name"])
 
                 if card:
                     oracle_id = card["oracle_id"]
