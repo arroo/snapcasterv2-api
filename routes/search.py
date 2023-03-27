@@ -275,6 +275,24 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
             threadResults = executor.map(transform, scrapers)
 
+        # Filter the results
+        # Check if result name contains the card name
+        # Check if the result contains "Token" or "Emblem" and the request.cardName does not contain "Token" or "Emblem", remove result
+
+        filteredResults = []
+        for result in results:
+            if request.cardName.lower() in result['name'].lower():
+                if "token" in result['name'].lower() and "token" not in request.cardName.lower() and "emblem" not in request.cardName.lower():
+                    continue
+                elif "emblem" in result['name'].lower() and "emblem" not in request.cardName.lower() and "token" not in request.cardName.lower():
+                    continue
+                else:
+                    filteredResults.append(result)
+            else:
+                continue
+
+        results = filteredResults
+
         numResults = len(results)
         background_tasks.add_task(post_search, request.cardName, request.websites, "single", "", numResults)
         background_tasks.add_task(post_price_entry, request.cardName, results)

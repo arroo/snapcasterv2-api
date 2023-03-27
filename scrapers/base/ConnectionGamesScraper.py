@@ -49,7 +49,7 @@ class ConnectionGamesScraper(Scraper):
             try:
 
                 name = result.select_one('div.meta h4.name').getText()
-                if "Art Card" in name:
+                if "art card" in name.lower() or "art series" in name.lower():
                     continue
                 # foil status is in the name as - Foil, same with Borderless
                 foil = False
