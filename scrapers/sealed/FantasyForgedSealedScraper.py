@@ -124,7 +124,7 @@ https://fantasyforged.ca/collections/mtg-sealed?filter.v.availability=1&filter.v
                     print(f'product {i}')
                     i+=1
                     try:
-                        name = product.find('span', class_='card-information__text').text.replace('\n','').strip()
+                        name = product.find('a', class_='full-unstyled-link').text.replace('\n','').strip()
                         price = product.find('span', class_='price-item--regular').text.replace("$",'').replace(',','').replace('CAD','').strip()
                         stock = -1
                         tags = self.setTags(name)
