@@ -29,15 +29,14 @@ class FantasyForgedScraper(Scraper):
 
     def scrape(self):
         page = requests.get(self.url)
- 
         sp = BeautifulSoup(page.text, 'html.parser')
         cards = sp.select('li.grid__item')
 
         for card in cards:
             try:
                 # We check for in stock in the search link, don't need to check here
-
-                cardName = card.select_one('span.card-information__text').getText().strip()
+                
+                cardName = card.select_one('a.full-unstyled-link').getText().strip()
                 if "Art Card".lower() in cardName.lower():
                     continue
                 foil = False
