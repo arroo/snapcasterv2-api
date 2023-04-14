@@ -56,7 +56,7 @@ class FantasyForgedScraper(Scraper):
                 if not self.compareCardNames(self.cardName.lower(), cardName.lower()):
                     continue
 
-                price = card.select_one('span.price-item--regular').getText().replace('$', '').replace("CAD", "").strip()
+                price = card.select_one('span.price-item--regular').getText().replace('$', '').replace("CAD", "").replace(',', '').strip()
 
                 # Since FantasyForged has multiple stores, they could have multiple cards with same condition and set
                 # We need to check if an identical card already exists in the list
@@ -67,7 +67,7 @@ class FantasyForgedScraper(Scraper):
                     'set': cardSet,
                     'foil': foil,
                     'condition': "NM",
-                    'price': price,
+                    'price': float(price),
                     'website': self.website
                 }
 
