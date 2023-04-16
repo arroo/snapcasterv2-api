@@ -360,3 +360,43 @@ def popular_sealed():
         "monthly": monthly_matched_sets,
         "weekly": weekly_matched_sets
     }
+
+
+@router.get('/unsubscribe/{uid}/')
+def unsubscribe(uid: str):
+    success = update_email_enabled(uid, False)
+
+    if success:
+        return {"message": "Successfully unsubscribed."}
+    else:
+        return {"error": "Failed to unsubscribe. Invalid user ID."}, 400
+
+def update_email_enabled(user_id: str, email_enabled: bool):
+    # This is a placeholder function. You need to implement this function
+    # to update the emailEnabled field in your database for the given user_id.
+    success = True
+    try:
+        conn = psycopg2.connect(
+            dbname=os.environ['PG_DB'],
+            user=os.environ['PG_USER'],
+            password=os.environ['PG_PASSWORD'],
+            host=os.environ['PG_HOST'],
+            port=os.environ['PG_PORT']
+        )
+        cur = conn.cursor()
+
+        cur.execute("""
+            UPDATE users
+            email_enabled = %s
+            WHERE id = %s
+            """, (email_enabled, user_id))
+        conn.commit()
+        cur.close()
+    except Exception as e:
+        print(e)
+        success = False
+    
+    conn.close()
+
+    return success
+
