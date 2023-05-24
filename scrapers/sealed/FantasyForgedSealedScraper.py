@@ -85,7 +85,7 @@ https://fantasyforged.ca/collections/mtg-sealed?filter.v.availability=1&filter.v
                     # wait for dynamic content to load
                     # once we see a span with class product-price__price, we know the page is loaded
 
-                    page.wait_for_selector('span.price-item')
+                    page.wait_for_selector('span.product-price__price')
                     # wait for the selector to have 
                     # sleep for 5 seconds to make sure the page is loaded
                     html = page.content()
@@ -96,13 +96,13 @@ https://fantasyforged.ca/collections/mtg-sealed?filter.v.availability=1&filter.v
                     #         <span class="icon__fallback-text">Next</span>
                     #     </a>  
                     #  </div>
-                    nextButton = page.query_selector('ul.pagination__list a.pagination__item-prev')
+                    nextButton = page.query_selector('div.pagination-block div.pag_next a')
                     while nextButton:
                         nextButton.click()
-                        page.wait_for_selector('span.price-item')
+                        page.wait_for_selector('span.product-price__price')
                         html = page.content()
                         pageData.append(html)
-                        nextButton = page.query_selector('ul.pagination__list a.pagination__item-prev')
+                        nextButton = page.query_selector('div.pagination-block div.pag_next a')
 
                     browser.close()
                 # now we have all the page data, we can parse it with bs4
@@ -121,23 +121,31 @@ https://fantasyforged.ca/collections/mtg-sealed?filter.v.availability=1&filter.v
                 # products = soup.find_all('div', class_='grid-view-item')
                 i=0
                 for product in allProducts:
-                    print(f'product {i}')
+                    # print(f'product {i}')
                     i+=1
                     try:
-                        name = product.find('a', class_='full-unstyled-link').text.replace('\n','').strip()
-                        price = product.find('span', class_='price-item--regular').text.replace("$",'').replace(',','').replace('CAD','').strip()
-                        stock = -1
+                        name = product.select_one('div.grid-view-item__title').getText().replace('\n','').strip()
+                        # name = product.find('div', class_='full-unstyled-link').getText().replace('\n','').strip()
+                        # price = product.select_one('div.grid-view-item__meta > div > span.product-price__price.is-bold.qv-regularprice').getText().replace('$', '').replace("CAD", "").replace(',', '').strip()                        
+                        price = product.select_one('div.grid-view-item__meta > div > span.product-price__price.is-bold.qv-regularprice').getText().replace('$', '').replace("CAD", "").replace(',', '').strip()                        
                         tags = self.setTags(name)
                         try:
-                            image = 'https:' + product.find('img', class_='motion-reduce')['src']
+                            image = "https:" + product.select_one('div.image-inner img')['src'].split(' ')[0].replace('1x', '2x')
                         except:
-                            image = ''
-                        # print(f'Image {image}')
+                            print(f'No image in the following html')
+                            # print(product)
+                            print()
+                            image = ""
+                            # continue
+
                         try:
-                            link = self.baseUrl + product.find('div', class_='card-wrapper').find('a')['href']
+                            link = self.baseUrl + product.select_one('div.grid-view-item__link div.grid-view-item__image-wrapper > a')['href']
                         except:
-                            link = ''
-                            
+                            print(f'No link in the following html')
+                            # print(card)
+                            print()
+                            # continue
+
                         self.results.append({
                             'name': name,
                             'link': link,
