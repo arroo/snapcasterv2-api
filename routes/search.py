@@ -137,7 +137,7 @@ def fetchScrapers(cardName):
         'orchardcity': orchardCityScraper,
         'bordercity': borderCityScraper,
         'aethervault': aetherVaultScraper,
-        'fantasyforged': fantasyForgedScraper,
+        # 'fantasyforged': fantasyForgedScraper,
         'thecomichunter': theComicHunterScraper,
         'chimera': chimeraScraper
     }
@@ -441,7 +441,7 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
         'everythinggames': everythingGamesScraper,
         'exorgames': exorGamesScraper,
         'facetoface': faceToFaceScraper,
-        'fantasyforged': fantasyForgedScraper,
+        # 'fantasyforged': fantasyForgedScraper,
         'firstplayer': firstPlayerScraper,
         "four01": four01Scraper,
         "fusion": fusionScraper,

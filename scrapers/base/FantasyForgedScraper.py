@@ -37,7 +37,10 @@ class FantasyForgedScraper(Scraper):
         
         for card in cards:
             try:
-                # We check for in stock in the search link, don't need to check here
+                
+                stockTag = card.select_one('#tag-container')
+                print(stockTag)
+
                 try: 
                     cardName = card.select_one('div.grid-view-item__title').getText().strip()
                 except:
