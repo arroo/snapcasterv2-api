@@ -53,7 +53,7 @@ class ChimeraScraper(Scraper):
         )
         # Load the response
         data = json.loads(response.text)
-
+        # print (data)
         for card in data['products']:
             titleAndSet = card['title']
             if "Art Card" in titleAndSet:

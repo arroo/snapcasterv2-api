@@ -25,7 +25,7 @@ class OrchardCityScraper(Scraper):
 
     def scrape(self):
         page = requests.get(self.url)
-    
+        print(self.url)
         soup = BeautifulSoup(page.content, 'html.parser')
         results = soup.find_all('li', class_='product')
 
@@ -34,7 +34,7 @@ class OrchardCityScraper(Scraper):
         
         for result in results:
             name = result.select_one('div.meta h4.name').getText()
-            if "Art Card" or "Art Series" in name:
+            if "Art Card"  in name or "Art Series" in name:
                 continue
             # foil status is in the name as - Foil, same with Borderless
             foil = False
