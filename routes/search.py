@@ -27,6 +27,7 @@ from scrapers.base.FantasyForgedScraper import FantasyForgedScraper
 from scrapers.base.TheComicHunterScraper import TheComicHunterScraper
 from scrapers.base.ChimeraScraper import ChimeraScraper
 from scrapers.base.GameBreakersScraper import GameBreakersScraper
+from scrapers.base.CryptScraper import CryptScraper
 from scrapers.base.DragonCardsScraper import DragonCardsScraper
 from scrapers.base.MythicStoreScraper import MythicStoreScraper
 from scrapers.base.VortexGamesScraper import VortexGamesScraper
@@ -124,6 +125,7 @@ def fetchScrapers(cardName):
     mythicStoreScraper = MythicStoreScraper(cardName)
     vortexGamesScraper = VortexGamesScraper(cardName)
     abyssScraper = AbyssScraper(cardName)
+    cryptScraper = CryptScraper(cardName)
     silverGoblinScraper = SilverGoblinScraper(cardName)
 
     # Map scrapers to an identifier keyword
@@ -159,7 +161,8 @@ def fetchScrapers(cardName):
         'mythicstore': mythicStoreScraper,
         'vortexgames': vortexGamesScraper,
         'abyss': abyssScraper,
-        'silvergoblin': silverGoblinScraper
+        'silvergoblin': silverGoblinScraper,
+        'crypt': cryptScraper
     }
 
 # Background tasks
