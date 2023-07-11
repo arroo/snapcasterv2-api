@@ -19,6 +19,8 @@ class ExorGamesScraper(Scraper):
         # make the card name url friendly
         cardName = self.cardName.replace('"', '%22')
         
+        print(f"-----------------------------------")
+        print(f"Scraping {self.website} for {cardName}")
         response = requests.post(self.url, 
             json={
                 "storeUrl": "most-wanted-ca.myshopify.com",
@@ -57,7 +59,17 @@ class ExorGamesScraper(Scraper):
                 "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36"
             }
         )
+        # Log information about response, status code, and url, number of results
+        print(f"Response: {response.status_code}")
+        print(f"Response: {response.reason}")
+        print(f"URL: {response.url}")
+        print(f"Number of results: {len(response.json()['products'])}")
+        print(f"-----------------------------------")
+
+
         data = json.loads(response.text)
+
+
 
         for card in data['products']:
             titleAndSet = card['title']
