@@ -4,7 +4,7 @@ import json
 from .Scraper import Scraper
 
 # This is scraped using an API requests that returns the stock in json
-# is nice
+# Broken Right now, need to update api call - Henry
 
 class Four01Scraper(Scraper):
     """
@@ -31,10 +31,11 @@ class Four01Scraper(Scraper):
     def scrape(self):
         # make the api request
         responseJson = requests.get(self.url)
-
+        print(self.url)
+        
         # parse the json response
         data = json.loads(responseJson.content)      
-
+        print(data)
         # create a list to return
         cardList = []
 

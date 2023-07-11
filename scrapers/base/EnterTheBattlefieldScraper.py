@@ -62,10 +62,10 @@ class EnterTheBattlefieldScraper(Scraper):
         )
         # Load the response
         data = json.loads(response.text)
-
+        
         for card in data['products']:
             titleAndSet = card['title']
-            if "Art Card" or "Art Series" in titleAndSet:
+            if "Art Card" in titleAndSet or "Art Series" in titleAndSet:
                 continue
             # split the title and set
             title = titleAndSet.split("[")[0].strip()

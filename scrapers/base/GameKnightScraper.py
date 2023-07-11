@@ -60,10 +60,13 @@ class GameKnightScraper(Scraper):
         data = json.loads(response.text)
 
         # print (data)
+
         # parse the json data
         for card in data['products']:
+            
             titleAndSet = card['title']
-            if "Art Card" or "Art Series" in titleAndSet:
+            print (titleAndSet)
+            if "Art Card" in titleAndSet or "Art Series" in titleAndSet:
                 continue
             # split the title and set
             title = titleAndSet.split("[")[0].strip()
@@ -75,7 +78,6 @@ class GameKnightScraper(Scraper):
             image = card['img']
             handle = card['handle']
             link = f"{self.siteUrl}/products/{handle}"
-
             for variant in card['variants']:
                 # this string contains the condition and foil status
                 # variant['title'] = "Lightly Played Foil"
