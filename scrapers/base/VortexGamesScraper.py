@@ -80,15 +80,15 @@ class VortexGamesScraper(Scraper):
                 # getting the first element here will yield
                 # "Lightly" or "Near" or "Moderately" or "Heavily" or "Damaged"
                 # We want to code this to "LP" or "NM" or "MP" or "HP" or "DMG"
-                if condition == "Lightly":
+                if "light" in condition.lower():
                     condition = "LP"
-                elif condition == "Near":
+                elif "near" in condition.lower() or "mint" in condition.lower():
                     condition = "NM"
-                elif condition == "Moderately":
+                elif "moderat" in condition.lower():
                     condition = "MP"
-                elif condition == "Heavily":
+                elif "heav" in condition.lower():
                     condition = "HP"
-                elif condition == "Damaged":
+                elif "dam" in condition.lower() or "dmg" in condition.lower():
                     condition = "DMG"
                 
                 # check if the card is foil

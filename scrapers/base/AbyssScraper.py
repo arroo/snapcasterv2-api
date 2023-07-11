@@ -2,18 +2,18 @@ import requests
 import json
 from .Scraper import Scraper
 
-class DragonCardsScraper(Scraper):
+class AbyssScraper(Scraper):
     """
     Identical to MythicStore
-    DragonCards can be scraped by hitting their API.
+    Abyss can be scraped by hitting their API.
 
     Split cards can be searched using "//" as a split
     """
     def __init__(self, cardName):
         Scraper.__init__(self, cardName)
-        self.siteUrl = 'https://tcg.dragoncardsandgames.com'
+        self.siteUrl = 'https://www.abyssgamestore.com'
         self.url = "https://portal.binderpos.com/external/shopify/products/forStore"
-        self.website = 'dragoncards'
+        self.website = 'abyss'
 
     def scrape(self):
         # make the card name url friendly
@@ -21,7 +21,7 @@ class DragonCardsScraper(Scraper):
         
         response = requests.post(self.url, 
             json={
-                "storeUrl":"dragoncardsandgames.myshopify.com",
+                "storeUrl":"abyss-game-store.myshopify.com",
                 "game":"mtg",
                 "strict":None,
                 "sortTypes":[{"type":"price","asc":False,"order":1}],
@@ -39,9 +39,9 @@ class DragonCardsScraper(Scraper):
                 'accept-language': 'en-US,en;q=0.9',
                 'cache-control': 'no-cache',
                 'content-type': 'application/json; charset=UTF-8',
-                'origin': 'https://tcg.dragoncardsandgames.com',
+                'origin': 'https://www.abyssgamestore.com',
                 'pragma': 'no-cache',
-                'referer': 'https://tcg.dragoncardsandgames.com/',
+                'referer': 'https://www.abyssgamestore.com/',
                 'sec-ch-ua': '"Google Chrome";v="107", "Chromium";v="107", "Not=A?Brand";v="24"',
                 'sec-ch-ua-mobile': '?1',
                 'sec-ch-ua-platform': '"Android"',
