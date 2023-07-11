@@ -25,7 +25,7 @@ class OrchardCityScraper(Scraper):
 
     def scrape(self):
         page = requests.get(self.url)
-        print(self.url)
+        # print(self.url)
         soup = BeautifulSoup(page.content, 'html.parser')
         results = soup.find_all('li', class_='product')
 

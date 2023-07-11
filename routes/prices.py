@@ -24,7 +24,7 @@ def getPriceHistory(request: PriceSearch) -> List[dict]:
     card_doc = db.cards.find_one({'name': {'$regex': query, '$options': 'i'}}, sort=[('name', 1)])
     if not card_doc:
         raise HTTPException(status_code=404, detail="Card not found")
-    print("getting price entries")
+    # print("getting price entries")
     # Use the 'oracle_id' field to query the price_entry collection
         # Convert the MongoDB ObjectId to string for each price entry
 

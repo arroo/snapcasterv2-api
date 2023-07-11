@@ -19,8 +19,7 @@ class ExorGamesScraper(Scraper):
         # make the card name url friendly
         cardName = self.cardName.replace('"', '%22')
         
-        print(f"-----------------------------------")
-        print(f"Scraping {self.website} for {cardName}")
+
         response = requests.post(self.url, 
             json={
                 "storeUrl": "most-wanted-ca.myshopify.com",
@@ -65,6 +64,8 @@ class ExorGamesScraper(Scraper):
             return
             
         # Log information about response, status code, and url, number of results
+        # print(f"-----------------------------------")
+        # print(f"Scraping {self.website} for {cardName}")
         # print(f"Response: {response.status_code}")
         # print(f"Response: {response.reason}")
         # print(f"URL: {response.url}")
