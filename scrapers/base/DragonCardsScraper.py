@@ -5,19 +5,19 @@ import sys
 
 
 
-class FantasyForgedScraper(Scraper):
+class DragonCardsScraper(Scraper):
     """
-    Identical to DragonCards
+    Identical to FantasyForged
     
     TODO:
     - properly parse all available conditions and foils, right now we just hardcode NM and non-foil
     """
     def __init__(self, cardName):
         Scraper.__init__(self, cardName)
-        self.baseUrl = 'https://FantasyForged.ca'
+        self.baseUrl = 'https://tcg.dragoncardsandgames.com'
         self.searchUrl = self.baseUrl + '/search?options%5Bprefix%5D=last&type=product&q='
         self.url = self.createUrl()
-        self.website = 'fantasyforged'
+        self.website = 'dragoncards'
 
         # https://FantasyForged.ca/search?q=Elspeth%2C+Sun%27s*+product_type%3A%22mtg%22
 
@@ -29,7 +29,7 @@ class FantasyForgedScraper(Scraper):
         # , = %2C
         # " = %22
         urlCardName = self.cardName.replace(' ', '+').replace('/', '%2F').replace("'", "%27").replace(',', '%2C')
-        return self.searchUrl + urlCardName# + '&options%5Bprefix%5D=last&filter_availability=in-stock'
+        return self.searchUrl + urlCardName + '&options%5Bprefix%5D=last&filter_availability=in-stock'
        
        
 
