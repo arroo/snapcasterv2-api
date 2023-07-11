@@ -61,6 +61,7 @@ class ExorGamesScraper(Scraper):
         )
         # Log information about response, status code, and url, number of results
         print(f"Response: {response.status_code}")
+        print(f"Response: {response.reason}")
         print(f"URL: {response.url}")
         print(f"Number of results: {len(response.json()['products'])}")
         print(f"-----------------------------------")
