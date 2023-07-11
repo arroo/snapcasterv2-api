@@ -415,7 +415,7 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
     everythingGamesScraper = EverythingGamesSealedScraper(setName)
     exorGamesScraper = ExorGamesSealedScraper(setName)
     faceToFaceScraper = FaceToFaceSealedScraper(setName)
-    fantasyForgedScraper = FantasyForgedSealedScraper(setName)
+    # fantasyForgedScraper = FantasyForgedSealedScraper(setName)
     firstPlayerScraper = FirstPlayerSealedScraper(setName)
     four01Scraper = Four01SealedScraper(setName)
     fusionScraper = FusionSealedScraper(setName)
@@ -441,7 +441,7 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
         'everythinggames': everythingGamesScraper,
         'exorgames': exorGamesScraper,
         'facetoface': faceToFaceScraper,
-        'fantasyforged': fantasyForgedScraper,
+        # 'fantasyforged': fantasyForgedScraper,
         'firstplayer': firstPlayerScraper,
         "four01": four01Scraper,
         "fusion": fusionScraper,
