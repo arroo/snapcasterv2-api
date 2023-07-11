@@ -27,6 +27,7 @@ from scrapers.base.ChimeraScraper import ChimeraScraper
 from scrapers.base.GameBreakersScraper import GameBreakersScraper
 from scrapers.base.DragonCardsScraper import DragonCardsScraper
 from scrapers.base.MythicStoreScraper import MythicStoreScraper
+from scrapers.base.VortexGamesScraper import VortexGamesScraper
 from scrapers.sealed.AtlasSealedScraper import AtlasSealedScraper
 from scrapers.sealed.BorderCitySealedScraper import BorderCitySealedScraper
 from scrapers.sealed.ChimeraSealedScraper import ChimeraSealedScraper
@@ -50,6 +51,7 @@ from scrapers.sealed.ConnectionGamesSealedScraper import ConnectionGamesSealedSc
 from scrapers.sealed.Jeux3DragonsSealedScraper import Jeux3DragonsSealedScraper
 from scrapers.sealed.SequenceSealedScraper import SequenceSealedScraper
 from scrapers.sealed.TopDeckHeroSealedScraper import TopDeckHeroSealedScraper
+
 
 
 import json
@@ -118,6 +120,7 @@ def fetchScrapers(cardName):
     dragonCardsScraper = DragonCardsScraper(cardName)
     gameBreakersScraper = GameBreakersScraper(cardName)
     mythicStoreScraper = MythicStoreScraper(cardName)
+    vortexGamesScraper = VortexGamesScraper(cardName)
 
     # Map scrapers to an identifier keyword
     return {
@@ -150,6 +153,7 @@ def fetchScrapers(cardName):
         'dragoncards': dragonCardsScraper,
         'gamebreakers': gameBreakersScraper,
         'mythicstore': mythicStoreScraper,
+        'vortexgames': vortexGamesScraper
     }
 
 # Background tasks
