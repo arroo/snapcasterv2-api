@@ -53,13 +53,13 @@ class NorthOfExileScraper(Scraper):
         )
 
         # Log information about response, status code, and url, number of results
-        print(f"-----------------------------------")
-        print(f"Scraping {self.website} for {cardName}")
-        print(f"Response: {response.status_code}")
-        print(f"Response: {response.reason}")
-        print(f"URL: {response.url}")
-        print(f"Number of results: {len(response.json()['products'])}")
-        print(f"-----------------------------------")
+        # print(f"-----------------------------------")
+        # print(f"Scraping {self.website} for {cardName}")
+        # print(f"Response: {response.status_code}")
+        # print(f"Response: {response.reason}")
+        # print(f"URL: {response.url}")
+        # print(f"Number of results: {len(response.json()['products'])}")
+        # print(f"-----------------------------------")
 
         if response.status_code == 429: # Too many requests
             print(f"NorthOfExile: HTTP 429 Too many requests, skipping...")
