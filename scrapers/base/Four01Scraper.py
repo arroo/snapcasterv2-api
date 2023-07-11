@@ -14,7 +14,7 @@ class Four01Scraper(Scraper):
     def __init__(self, cardName):
         Scraper.__init__(self, cardName)
         self.siteUrl = 'https://store.401games.ca'
-        self.baseUrl = 'https://api.fastsimon.com/categories_navigation?request_source=v-next&src=v-next&UUID=d3cae9c0-9d9b-4fe3-ad81-873270df14b5&uuid=d3cae9c0-9d9b-4fe3-ad81-873270df14b5&store_id=17041809&api_type=json&category_id=268483363003&narrow=\[\[%22In+Stock%22,%22True%22\]\]&facets_required=1&products_per_page=40&page_num=1&with_product_attributes=true&search_within_search='
+        self.baseUrl = 'https://api.fastsimon.com/categories_navigation?request_source=v-next&src=v-next&UUID=d3cae9c0-9d9b-4fe3-ad81-873270df14b5&uuid=d3cae9c0-9d9b-4fe3-ad81-873270df14b5&store_id=17041809&api_type=json&category_id=268483363003&narrow=\[\[%22In+Stock%22,%22True%22\]\]&facets_required=1&products_per_page=120&page_num=1&with_product_attributes=true&search_within_search='
         self.url = self.createUrl()
         self.website = 'four01'
 
@@ -31,11 +31,11 @@ class Four01Scraper(Scraper):
     def scrape(self):
         # make the api request
         responseJson = requests.get(self.url)
-        print(self.url)
+        # print(self.url)
         
         # parse the json response
         data = json.loads(responseJson.content)      
-        print(data)
+        # print(data)
         # create a list to return
         cardList = []
 
