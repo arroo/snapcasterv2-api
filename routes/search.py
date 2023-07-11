@@ -24,6 +24,7 @@ from scrapers.base.AetherVaultScraper import AetherVaultScraper
 from scrapers.base.FantasyForgedScraper import FantasyForgedScraper
 from scrapers.base.TheComicHunterScraper import TheComicHunterScraper
 from scrapers.base.ChimeraScraper import ChimeraScraper
+from scrapers.base.GameBreakersScraper import GameBreakersScraper
 from scrapers.base.DragonCardsScraper import DragonCardsScraper
 from scrapers.sealed.AtlasSealedScraper import AtlasSealedScraper
 from scrapers.sealed.BorderCitySealedScraper import BorderCitySealedScraper
@@ -48,6 +49,7 @@ from scrapers.sealed.ConnectionGamesSealedScraper import ConnectionGamesSealedSc
 from scrapers.sealed.Jeux3DragonsSealedScraper import Jeux3DragonsSealedScraper
 from scrapers.sealed.SequenceSealedScraper import SequenceSealedScraper
 from scrapers.sealed.TopDeckHeroSealedScraper import TopDeckHeroSealedScraper
+
 
 import json
 import concurrent.futures
@@ -113,6 +115,7 @@ def fetchScrapers(cardName):
     theComicHunterScraper = TheComicHunterScraper(cardName)
     chimeraScraper = ChimeraScraper(cardName)
     dragonCardsScraper = DragonCardsScraper(cardName)
+    gameBreakersScraper = GameBreakersScraper(cardName)
 
     # Map scrapers to an identifier keyword
     return {
@@ -142,7 +145,8 @@ def fetchScrapers(cardName):
         'fantasyforged': fantasyForgedScraper,
         'thecomichunter': theComicHunterScraper,
         'chimera': chimeraScraper,
-        'dragoncards': dragonCardsScraper
+        'dragoncards': dragonCardsScraper,
+        'gamebreakers': gameBreakersScraper
     }
 
 # Background tasks
