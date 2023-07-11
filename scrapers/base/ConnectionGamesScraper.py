@@ -106,7 +106,7 @@ class ConnectionGamesScraper(Scraper):
                         condition = 'DMG'
 
                     # price comes from the span with class = "regular price"
-                    price = variant.select_one('span.regular.price').getText().replace('CAD$ ', '')
+                    price = variant.select_one('span.regular.price').getText().replace('CAD$ ', '').replace(",", "")
 
                     card = {
                         'name': name,
