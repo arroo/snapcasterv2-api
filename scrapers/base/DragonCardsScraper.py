@@ -1,116 +1,111 @@
-from bs4 import BeautifulSoup
 import requests
+import json
 from .Scraper import Scraper
-import sys
-
-
 
 class DragonCardsScraper(Scraper):
     """
-    Identical to FantasyForged
-    
-    TODO:
-    - properly parse all available conditions and foils, right now we just hardcode NM and non-foil
+    Identical to MythicStore
+    DragonCards can be scraped by hitting their API.
+
+    Split cards can be searched using "//" as a split
     """
     def __init__(self, cardName):
         Scraper.__init__(self, cardName)
-        self.baseUrl = 'https://tcg.dragoncardsandgames.com'
-        self.searchUrl = self.baseUrl + '/search?options%5Bprefix%5D=last&type=product&q='
-        self.url = self.createUrl()
+        self.siteUrl = 'https://tcg.dragoncardsandgames.com'
+        self.url = "https://portal.binderpos.com/external/shopify/products/forStore"
         self.website = 'dragoncards'
 
-        # https://FantasyForged.ca/search?q=Elspeth%2C+Sun%27s*+product_type%3A%22mtg%22
-
-    def createUrl(self):
-        # make cardName url friendly
-        # spaces = +
-        # / = %2F
-        # ' = %27
-        # , = %2C
-        # " = %22
-        urlCardName = self.cardName.replace(' ', '+').replace('/', '%2F').replace("'", "%27").replace(',', '%2C')
-        return self.searchUrl + urlCardName + '&options%5Bprefix%5D=last&filter_availability=in-stock'
-       
-       
-
     def scrape(self):
-        page = requests.get(self.url)
-
-        # log infor about the request
-        # Log information about response, status code, and url, number of results
-        print(f"-----------------------------------")
-        print(f"Response: {page.status_code}")
-        print(f"Response: {page.reason}")
-        print(f"URL: {page.url}")
-        # print(f"Number of results: {
-        print(f"-----------------------------------")
+        # make the card name url friendly
+        cardName = self.cardName.replace('"', '%22')
         
-        
-        sp = BeautifulSoup(page.text, 'html.parser')
-        cards = sp.select('div.products-display div.product-card-list2')
-        
-        print(f"Number of results: {len(cards)}")
-        print(f"-----------------------------------")
+        response = requests.post(self.url, 
+            json={
+                "storeUrl":"dragoncardsandgames.myshopify.com",
+                "game":"mtg",
+                "strict":None,
+                "sortTypes":[{"type":"price","asc":False,"order":1}],
+                "variants":None,
+                "title":cardName,
+                "priceGreaterThan":0,
+                "priceLessThan":None,
+                "instockOnly":True,
+                "limit":30,
+                "offset":0
+            },
+            headers={
+                'authority': 'portal.binderpos.com',
+                'accept': 'application/json, text/javascript, */*; q=0.01',
+                'accept-language': 'en-US,en;q=0.9',
+                'cache-control': 'no-cache',
+                'content-type': 'application/json; charset=UTF-8',
+                'origin': 'https://tcg.dragoncardsandgames.com',
+                'pragma': 'no-cache',
+                'referer': 'https://tcg.dragoncardsandgames.com/',
+                'sec-ch-ua': '"Google Chrome";v="107", "Chromium";v="107", "Not=A?Brand";v="24"',
+                'sec-ch-ua-mobile': '?1',
+                'sec-ch-ua-platform': '"Android"',
+                'sec-fetch-dest': 'empty',
+                'sec-fetch-mode': 'cors',
+                'sec-fetch-site': 'cross-site',
+                'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36'
+            }
+        )
+        # Load the response
+        data = json.loads(response.text)
 
-        for card in cards:
-            try:
-                
-                stockTag = card.select_one('#tag-container')
-                print(stockTag)
-
-                try: 
-                    cardName = card.select_one('div.grid-view-item__title').getText().strip()
-                except:
-                    # print(f'No card name in the following html')
-                    # print(card)
-                    # print()
-                    continue
-                if "Art Card".lower() in cardName.lower():
-                    continue
-
-
-                # remove any brackets and their contents from the card name
-                cardName = cardName.split(' (')[0].strip()
-                # card set is inside square brackets in card name
-                if '[' in cardName:
-                    cardSet = cardName.split('[')[1].split(']')[0].strip()
-                    cardName = cardName.split('[')[0].strip()
-
-                else :
-                    cardSet = ""
-
-                try:
-                    link = self.baseUrl + card.select_one('div.grid-view-item__link div.product-card-list2__image-wrapper > a')['href']
-                except:
-                    continue
-
-                try:
-                    image = "https:" + card.select_one('div.image-inner img')['src'].split(' ')[0].replace('1x', '2x')
-                except:
-                    image = ""
-                    continue
-
-                # Verify card name is correct
-                if not self.compareCardNames(self.cardName.lower(), cardName.lower()):
-                    continue
-
-                price = card.select_one('div.product-card-list2__details.product-description > div.grid-view-item__meta > div > span.product-price__price.is-bold.qv-regularprice').getText().replace('$', '').replace("CAD", "").replace(',', '').strip()
-                cardToAdd = {
-                    'name': cardName,
-                    'image': image,
-                    'link': link,
-                    'set': cardSet,
-                    'foil': False,
-                    'condition': "NM",
-                    'price': float(price),
-                    'website': self.website
-                }
-
-                if cardToAdd not in self.results:
-                    self.results.append(cardToAdd)
-
-            except Exception as e:
-                print(f'Error searching for {self.cardName} on {self.website} on line {sys.exc_info()[-1].tb_lineno}')
-                print(e.args[-5:])
+        for card in data['products']:
+            titleAndSet = card['title']
+            if "Art Card" in titleAndSet:
                 continue
-        
+            # split the title and set
+            title = titleAndSet.split("[")[0].strip()
+            setName = titleAndSet.split("[")[1].split("]")[0].strip()
+
+            # remove any excess tags inside () or [] in the title
+            title = title.split("(")[0].strip()
+
+            image = card['img']
+            handle = card['handle']
+            link = f"{self.siteUrl}/collections/mtg-singles/products/{handle}"
+
+            for variant in card['variants']:
+                # this string contains the condition and foil status
+                # variant['title'] = "Lightly Played Foil"
+                # print the variant as json
+                if(variant['quantity'] <= 0):
+                    continue
+
+                condition = variant['title'].split(" ")[0].strip()
+                # getting the first element here will yield
+                # "Lightly" or "Near" or "Moderately" or "Heavily" or "Damaged"
+                # We want to code this to "LP" or "NM" or "MP" or "HP" or "DMG"
+                if condition == "Lightly":
+                    condition = "LP"
+                elif condition == "Near":
+                    condition = "NM"
+                elif condition == "Moderately":
+                    condition = "MP"
+                elif condition == "Heavily":
+                    condition = "HP"
+                elif condition == "Damaged":
+                    condition = "DMG"
+                
+                # check if the card is foil
+                foil = False
+                if "Foil" in variant['title']:
+                    foil = True
+
+                price = variant['price']
+
+                self.results.append({
+                    'name': title,
+                    'link': link,
+                    'image': image,
+                    'set': setName,
+                    'condition': condition,
+                    'foil': foil,
+                    'price': price,
+                    'website': self.website
+                })
+
