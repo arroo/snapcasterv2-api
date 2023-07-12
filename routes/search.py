@@ -25,6 +25,7 @@ from scrapers.base.HFXScraper import HFXScraper
 from scrapers.base.AetherVaultScraper import AetherVaultScraper
 from scrapers.base.AbyssScraper import AbyssScraper
 from scrapers.base.OMGScraper import OMGScraper
+from scrapers.base.KesselRunScraper import KesselRunScraper
 from scrapers.base.NorthOfExileScraper import NorthOfExileScraper
 from scrapers.base.FantasyForgedScraper import FantasyForgedScraper
 from scrapers.base.TheComicHunterScraper import TheComicHunterScraper
@@ -133,6 +134,7 @@ def fetchScrapers(cardName):
     northOfExileScraper = NorthOfExileScraper(cardName)
     hfxScraper = HFXScraper(cardName)
     omgScraper = OMGScraper(cardName)
+    kesselRunScraper = KesselRunScraper(cardName)
 
     # Map scrapers to an identifier keyword
     return {
@@ -171,7 +173,8 @@ def fetchScrapers(cardName):
         'crypt': cryptScraper,
         'northofexile': northOfExileScraper,
         'hfx': hfxScraper,
-        'omg': omgScraper
+        'omg': omgScraper,
+        'kesselrun': kesselRunScraper
     }
 
 # Background tasks
