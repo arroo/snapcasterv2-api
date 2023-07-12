@@ -21,17 +21,31 @@ from scrapers.base.FirstPlayerScraper import FirstPlayerScraper
 from scrapers.base.OrchardCityScraper import OrchardCityScraper
 from scrapers.base.BorderCityScraper import BorderCityScraper
 from scrapers.base.SilverGoblinScraper import SilverGoblinScraper
+from scrapers.base.BlackKnightScraper import BlackKnightScraper
+from scrapers.base.HFXScraper import HFXScraper
 from scrapers.base.AetherVaultScraper import AetherVaultScraper
 from scrapers.base.AbyssScraper import AbyssScraper
+from scrapers.base.OMGScraper import OMGScraper
+from scrapers.base.KesselRunScraper import KesselRunScraper
 from scrapers.base.NorthOfExileScraper import NorthOfExileScraper
+from scrapers.base.RedDragonScraper import RedDragonScraper
 from scrapers.base.FantasyForgedScraper import FantasyForgedScraper
 from scrapers.base.TheComicHunterScraper import TheComicHunterScraper
+from scrapers.base.NerdzCafeScraper import NerdzCafeScraper
 from scrapers.base.ChimeraScraper import ChimeraScraper
 from scrapers.base.GameBreakersScraper import GameBreakersScraper
+from scrapers.base.TimeVaultScraper import TimeVaultScraper
+from scrapers.base.TapsScraper import TapsScraper
+from scrapers.base.EastRidgeScraper import EastRidgeScraper
 from scrapers.base.CryptScraper import CryptScraper
 from scrapers.base.DragonCardsScraper import DragonCardsScraper
+from scrapers.base.UpNorthScraper import UpNorthScraper
 from scrapers.base.MythicStoreScraper import MythicStoreScraper
 from scrapers.base.VortexGamesScraper import VortexGamesScraper
+from scrapers.base.WaypointScraper import WaypointScraper
+from scrapers.base.SkyfoxScraper import SkyfoxScraper
+from scrapers.base.OutOfTheBoxScraper import OutOfTheBoxScraper
+from scrapers.base.PandorasBooxScraper import PandorasBooxScraper
 from scrapers.sealed.AtlasSealedScraper import AtlasSealedScraper
 from scrapers.sealed.BorderCitySealedScraper import BorderCitySealedScraper
 from scrapers.sealed.ChimeraSealedScraper import ChimeraSealedScraper
@@ -129,7 +143,20 @@ def fetchScrapers(cardName):
     cryptScraper = CryptScraper(cardName)
     silverGoblinScraper = SilverGoblinScraper(cardName)
     northOfExileScraper = NorthOfExileScraper(cardName)
-
+    hfxScraper = HFXScraper(cardName)
+    omgScraper = OMGScraper(cardName)
+    kesselRunScraper = KesselRunScraper(cardName)
+    redDragonScraper = RedDragonScraper(cardName)
+    tapsScraper = TapsScraper(cardName)
+    blackKnightScraper = BlackKnightScraper(cardName)
+    outOfTheBoxScraper = OutOfTheBoxScraper(cardName)
+    timeVaultScraper = TimeVaultScraper(cardName)
+    eastRidgeScraper = EastRidgeScraper(cardName)
+    upNorthScraper = UpNorthScraper(cardName)
+    pandorasBooxScraper = PandorasBooxScraper(cardName)
+    waypointScraper = WaypointScraper(cardName)
+    skyfoxScraper = SkyfoxScraper(cardName)
+    nerdzCafeScraper = NerdzCafeScraper(cardName)
     # Map scrapers to an identifier keyword
     return {
         "houseofcards": houseOfCardsScraper,
@@ -165,7 +192,21 @@ def fetchScrapers(cardName):
         'abyss': abyssScraper,
         'silvergoblin': silverGoblinScraper,
         'crypt': cryptScraper,
-        'northofexile': northOfExileScraper
+        'northofexile': northOfExileScraper,
+        'hfx': hfxScraper,
+        'omg': omgScraper,
+        'kesselrun': kesselRunScraper,
+        'reddragon': redDragonScraper,
+        'taps': tapsScraper,
+        'blackknight': blackKnightScraper,
+        'outofthebox': outOfTheBoxScraper,
+        'pandorasboox': pandorasBooxScraper,
+        'timevault': timeVaultScraper,
+        'eastridge': eastRidgeScraper,
+        'upnorth': upNorthScraper,
+        'waypoint': waypointScraper,
+        'skyfox': skyfoxScraper,
+        'nerdzcafe': nerdzCafeScraper
     }
 
 # Background tasks
