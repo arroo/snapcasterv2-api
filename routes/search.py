@@ -21,6 +21,7 @@ from scrapers.base.FirstPlayerScraper import FirstPlayerScraper
 from scrapers.base.OrchardCityScraper import OrchardCityScraper
 from scrapers.base.BorderCityScraper import BorderCityScraper
 from scrapers.base.SilverGoblinScraper import SilverGoblinScraper
+from scrapers.base.HFXScraper import HFXScraper
 from scrapers.base.AetherVaultScraper import AetherVaultScraper
 from scrapers.base.AbyssScraper import AbyssScraper
 from scrapers.base.NorthOfExileScraper import NorthOfExileScraper
@@ -129,6 +130,7 @@ def fetchScrapers(cardName):
     cryptScraper = CryptScraper(cardName)
     silverGoblinScraper = SilverGoblinScraper(cardName)
     northOfExileScraper = NorthOfExileScraper(cardName)
+    hfxScraper = HFXScraper(cardName)
 
     # Map scrapers to an identifier keyword
     return {
@@ -165,7 +167,8 @@ def fetchScrapers(cardName):
         'abyss': abyssScraper,
         'silvergoblin': silverGoblinScraper,
         'crypt': cryptScraper,
-        'northofexile': northOfExileScraper
+        'northofexile': northOfExileScraper,
+        'hfx': hfxScraper
     }
 
 # Background tasks
