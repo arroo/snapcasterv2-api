@@ -60,7 +60,7 @@ class ExorGamesScraper(Scraper):
         )
 
         if response.status_code == 429: # Too many requests
-            print(f"Exor Games: HTTP 429 Too many requests, skipping...")
+            print(f"{self.website}: HTTP 429 Too many requests, skipping...")
             return
             
         # Log information about response, status code, and url, number of results
