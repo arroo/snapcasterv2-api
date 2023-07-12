@@ -35,6 +35,7 @@ from scrapers.base.ChimeraScraper import ChimeraScraper
 from scrapers.base.GameBreakersScraper import GameBreakersScraper
 from scrapers.base.TimeVaultScraper import TimeVaultScraper
 from scrapers.base.TapsScraper import TapsScraper
+from scrapers.base.EastRidgeScraper import EastRidgeScraper
 from scrapers.base.CryptScraper import CryptScraper
 from scrapers.base.DragonCardsScraper import DragonCardsScraper
 from scrapers.base.MythicStoreScraper import MythicStoreScraper
@@ -146,6 +147,7 @@ def fetchScrapers(cardName):
     blackKnightScraper = BlackKnightScraper(cardName)
     outOfTheBoxScraper = OutOfTheBoxScraper(cardName)
     timeVaultScraper = TimeVaultScraper(cardName)
+    eastRidgeScraper = EastRidgeScraper(cardName)
     pandorasBooxScraper = PandorasBooxScraper(cardName)
     # Map scrapers to an identifier keyword
     return {
@@ -191,7 +193,8 @@ def fetchScrapers(cardName):
         'blackknight': blackKnightScraper,
         'outofthebox': outOfTheBoxScraper,
         'pandorasboox': pandorasBooxScraper,
-        'timevault': timeVaultScraper
+        'timevault': timeVaultScraper,
+        'eastridge': eastRidgeScraper
     }
 
 # Background tasks
