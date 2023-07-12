@@ -2,17 +2,17 @@ import requests
 import json
 from .Scraper import Scraper
 
-class TapsScraper(Scraper):
+class OutOfTheBoxScraper(Scraper):
     """
-    Taps can be scraped by hitting their API.
+    OutOfTheBox can be scraped by hitting their API.
 
     Split cards can be searched using "//" as a split
     """
     def __init__(self, cardName):
         Scraper.__init__(self, cardName)
-        self.siteUrl = 'https://www.tapsgames.com'
+        self.siteUrl = 'https://outoftheboxtcg.com'
         self.url = "https://portal.binderpos.com/external/shopify/products/forStore"
-        self.website = 'taps'
+        self.website = 'outofthebox'
 
     def scrape(self):
         # make the card name url friendly
@@ -20,7 +20,7 @@ class TapsScraper(Scraper):
         
         response = requests.post(self.url, 
             json={
-                "storeUrl":"taps-games.myshopify.com",
+                "storeUrl":"out-of-the-box-ca.myshopify.com",
                 "game":"mtg",
                 "strict":None,
                 "sortTypes":[{"type":"price","asc":False,"order":1}],
@@ -38,9 +38,9 @@ class TapsScraper(Scraper):
                 'accept-language': 'en-US,en;q=0.9',
                 'cache-control': 'no-cache',
                 'content-type': 'application/json; charset=UTF-8',
-                'origin': 'https://tapsgames.com',
+                'origin': 'https://outoftheboxtcg.com',
                 'pragma': 'no-cache',
-                'referer': 'https://tapsgames.com/',
+                'referer': 'https://outoftheboxtcg.com/',
                 'sec-ch-ua': '"Google Chrome";v="107", "Chromium";v="107", "Not=A?Brand";v="24"',
                 'sec-ch-ua-mobile': '?1',
                 'sec-ch-ua-platform': '"Android"',

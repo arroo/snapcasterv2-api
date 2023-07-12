@@ -21,6 +21,7 @@ from scrapers.base.FirstPlayerScraper import FirstPlayerScraper
 from scrapers.base.OrchardCityScraper import OrchardCityScraper
 from scrapers.base.BorderCityScraper import BorderCityScraper
 from scrapers.base.SilverGoblinScraper import SilverGoblinScraper
+from scrapers.base.BlackKnightScraper import BlackKnightScraper
 from scrapers.base.HFXScraper import HFXScraper
 from scrapers.base.AetherVaultScraper import AetherVaultScraper
 from scrapers.base.AbyssScraper import AbyssScraper
@@ -37,6 +38,7 @@ from scrapers.base.CryptScraper import CryptScraper
 from scrapers.base.DragonCardsScraper import DragonCardsScraper
 from scrapers.base.MythicStoreScraper import MythicStoreScraper
 from scrapers.base.VortexGamesScraper import VortexGamesScraper
+from scrapers.base.OutOfTheBoxScraper import OutOfTheBoxScraper
 from scrapers.sealed.AtlasSealedScraper import AtlasSealedScraper
 from scrapers.sealed.BorderCitySealedScraper import BorderCitySealedScraper
 from scrapers.sealed.ChimeraSealedScraper import ChimeraSealedScraper
@@ -139,7 +141,8 @@ def fetchScrapers(cardName):
     kesselRunScraper = KesselRunScraper(cardName)
     redDragonScraper = RedDragonScraper(cardName)
     tapsScraper = TapsScraper(cardName)
-
+    blackKnightScraper = BlackKnightScraper(cardName)
+    outOfTheBoxScraper = OutOfTheBoxScraper(cardName)
     # Map scrapers to an identifier keyword
     return {
         "houseofcards": houseOfCardsScraper,
@@ -180,7 +183,9 @@ def fetchScrapers(cardName):
         'omg': omgScraper,
         'kesselrun': kesselRunScraper,
         'reddragon': redDragonScraper,
-        'taps': tapsScraper
+        'taps': tapsScraper,
+        'blackknight': blackKnightScraper,
+        'outofthebox': outOfTheBoxScraper
     }
 
 # Background tasks
