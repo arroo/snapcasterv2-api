@@ -53,7 +53,7 @@ class BlackKnightScraper(Scraper):
 
 
         if response.status_code == 429: # Too many requests
-            print(f"Black Knight Games: HTTP 429 Too many requests, skipping...")
+            print(f"{self.website}: HTTP 429 Too many requests, skipping...")
             return
         
         # Load the response
