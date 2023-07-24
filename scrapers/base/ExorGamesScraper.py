@@ -44,9 +44,12 @@ class ExorGamesScraper(Scraper):
         allProducts = []
         for page in pageData:
             soup = BeautifulSoup(page, 'html.parser')
-            products = soup.find_all('div', class_='grid-view-item')
+            products = soup.find_all('div', class_='grid-view-item') 
+            products = [product for product in products if 'product-price--sold-out' not in product["class"]]
             for product in products:
                 allProducts.append(product)
+
+
 
         for card in allProducts:
             titleAndSet = card.find('div', class_='h4 grid-view-item__title').text
