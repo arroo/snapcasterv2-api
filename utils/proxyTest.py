@@ -55,6 +55,7 @@ def getProxiesFromFile(filename):
     return proxies
 
 def checkProxy(proxy):
+    # This is the request we send to Exor games, but it's basically identical for all the shopify sites.
     headers={
         "authority": "portal.binderpos.com",
         "accept": "application/json, text/javascript, */*; q=0.01",
@@ -96,9 +97,9 @@ def checkProxy(proxy):
     proxy_url = f'http://{user}:{password}@{host}:{port}'
 
     proxies = {'http': proxy_url, 'https': proxy_url}
-    try:
-        r = requests.post('https://portal.binderpos.com/api/v1/products', json=body, headers=headers, proxies=proxies, timeout=5)
-        # r = requests.get('https://shopify.com/', proxies=proxies, timeout=5)
+    try: 
+        r = requests.post('https://portal.binderpos.com/api/v1/products', json=body, headers=headers, proxies=proxies, timeout=5) # this doesn't work and returns 404s
+        # r = requests.get('https://shopify.com/', proxies=proxies, timeout=5) # this works and returns 200s
         if r.status_code == 200:
             print(proxy)
         else:
