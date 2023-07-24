@@ -80,8 +80,11 @@ import psycopg2
 import os
 from fastapi import BackgroundTasks, APIRouter
 import redis
+import random
 import re 
 from pymongo import MongoClient
+from requests.exceptions import ProxyError, Timeout, SSLError, RetryError
+
 # Pydantic Models
 class SingleCardSearch(BaseModel):
     cardName: str
@@ -103,6 +106,11 @@ class PriceEntry(BaseModel):
     oracleId: str
     priceList: str
     date: str
+
+def getProxiesFromFile(filename):
+    with open(filename, 'r') as f:
+        proxies = [line.strip() for line in f]
+    return proxies
 
 rd = redis.Redis(host=os.environ['RD_HOST'], port=os.environ['RD_PORT'], password=os.environ['RD_PASSWORD'], db=0)
 mongoClient = MongoClient(os.environ['MONGO_URI'])
@@ -316,13 +324,21 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
     """
     Search for a single card and return all prices across the provided websites
     """
+    proxies = getProxiesFromFile("proxies.txt")
+
     # Scraper function
     def transform(scraper):
-        scraper.scrape()
-        scraperResults = scraper.getResults()
-        for result in scraperResults:
-            results.append(result)
-        return
+        while proxies:  # try as long as there are proxies left
+            proxy = random.choice(proxies)
+            try:
+                scraper.scrape(proxy)  
+                scraperResults = scraper.getResults()
+                for result in scraperResults:
+                    results.append(result)
+                return
+            except (ProxyError, Timeout, SSLError, RetryError): 
+                proxies.remove(proxy)  # remove the failing proxy from the list
+                print(f"Proxy {proxy} removed.")
    
     results = [] # List to store results from all threads
     cache = rd.get(request.cardName.lower())

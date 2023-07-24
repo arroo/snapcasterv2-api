@@ -8,4 +8,5 @@ __pycache__
 .vscode
 SetList.json
 env.bak
+proxies.txt
 ```
