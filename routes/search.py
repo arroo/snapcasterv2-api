@@ -327,19 +327,29 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
     proxies = getProxiesFromFile("proxies.txt")
 
     # Scraper function
+    # TODO: Update each scraper with a usesProxies bool
+    # TODO: Update each scrape method to take in a proxy
+    
     def transform(scraper):
-        while proxies:  # try as long as there are proxies left
-            proxy = random.choice(proxies)
-            try:
-                scraper.scrape(proxy)  
-                scraperResults = scraper.getResults()
-                for result in scraperResults:
-                    results.append(result)
-                return
-            except (ProxyError, Timeout, SSLError, RetryError): 
-                proxies.remove(proxy)  # remove the failing proxy from the list
-                print(f"Proxy {proxy} removed.")
-   
+        if scraper.usesProxies: 
+            while proxies:  # try as long as there are proxies left
+                proxy = random.choice(proxies)
+                try:
+                    scraper.scrape(proxy)  
+                    scraperResults = scraper.getResults()
+                    for result in scraperResults:
+                        results.append(result)
+                    return
+                except (ProxyError, Timeout, SSLError, RetryError): 
+                    proxies.remove(proxy)  # remove the failing proxy from the list
+                    print(f"Proxy {proxy} removed.")
+        else:
+            scraper.scrape()
+            scraperResults = scraper.getResults()
+            for result in scraperResults:
+                results.append(result)
+            return
+        
     results = [] # List to store results from all threads
     cache = rd.get(request.cardName.lower())
     if cache:
