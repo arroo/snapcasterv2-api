@@ -92,12 +92,18 @@ def checkProxy(proxy):
         "offset": 0
     }
     
+    host, port, user, password = proxy.split(":")
+    proxy_url = f'http://{user}:{password}@{host}:{port}'
 
+    proxies = {'http': proxy_url, 'https': proxy_url}
     try:
-        r = requests.post('https://portal.binderpos.com/api/v1/products', json=body, headers=headers, proxies={'http': proxy, 'https':proxy}, timeout=10)
-        # r = requests.get('https://shopify.com/', proxies={'http': proxy, 'https':proxy}, timeout=5)
+        r = requests.post('https://portal.binderpos.com/api/v1/products', json=body, headers=headers, proxies=proxies, timeout=5)
+        # r = requests.get('https://shopify.com/', proxies=proxies, timeout=5)
         if r.status_code == 200:
             print(proxy)
+        else:
+            print(f"Bad proxy: {proxy}")
+            print(r.status_code)
     except requests.ConnectionError:
         print(f"Connection Error with proxy: {proxy}")
     except Exception as e:
