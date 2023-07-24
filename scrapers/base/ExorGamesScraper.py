@@ -1,6 +1,6 @@
-import requests
-import json
 from .Scraper import Scraper
+from playwright.sync_api import sync_playwright
+from bs4 import BeautifulSoup
 
 class ExorGamesScraper(Scraper):
     """
@@ -12,72 +12,47 @@ class ExorGamesScraper(Scraper):
     def __init__(self, cardName):
         Scraper.__init__(self, cardName)
         self.siteUrl = 'https://www.exorgames.com'
-        self.url = "https://portal.binderpos.com/external/shopify/products/forStore"
+        self.url = "https://exorgames.com/search?type=product&options%5Bprefix%5D=last&q="
         self.website = 'exorgames'
 
     def scrape(self):
         # make the card name url friendly
-        cardName = self.cardName.replace('"', '%22')
-        
+        cardName = self.cardName.replace('"', '%22').replace(' ', '+').replace('//', '%2F%2F').replace("'", '%27').replace(",", "%2C")
+        pageData = []
+        currPage = 1
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            page.goto(f"{self.url}{cardName}")
+            page.wait_for_selector('span.product-price__price')        
 
-        response = requests.post(self.url, 
-            json={
-                "storeUrl": "most-wanted-ca.myshopify.com",
-                "game": "mtg",
-                "strict": None,
-                "sortTypes": [
-                    {
-                        "type": "price",
-                        "asc": False,
-                        "order": 1
-                    }
-                ],
-                "variants": None,
-                "title": cardName,
-                "priceGreaterThan": 0,
-                "priceLessThan": None,
-                "instockOnly": True,
-                "limit": 18,
-                "offset": 0
-            },
-            headers={
-                "authority": "portal.binderpos.com",
-                "accept": "application/json, text/javascript, */*; q=0.01",
-                "accept-language": "en-US,en;q=0.9",
-                "cache-control": "no-cache",
-                "content-type": "application/json; charset=UTF-8",
-                "origin": "https://exorgames.com",
-                "pragma": "no-cache",
-                "referer": "https://exorgames.com/",
-                "sec-ch-ua": '"Google Chrome";v="107", "Chromium";v="107", "Not=A?Brand";v="24"',
-                "sec-ch-ua-mobile": "?0",
-                "sec-ch-ua-platform": '"macOS"',
-                "sec-fetch-dest": "empty",
-                "sec-fetch-mode": "cors",
-                "sec-fetch-site": "cross-site",
-                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36"
-            }
-        )
+            html = page.content()
+            pageData.append(html)
+            # if div.pag_next <a> doesnt have btn--disabled class, click it and get the next page
+            nextButton = page.query_selector('div.pag_next a.btn')
+            nextButtonDisabled = page.query_selector('div.pag_next a.btn--disabled')
+            while nextButton and not nextButtonDisabled:
+                nextButton.click()
+                page.wait_for_selector('span.product-price__price')
+                html = page.content()
+                pageData.append(html)
+                nextButton = page.query_selector('div.pag_next a.btn')
+                nextButtonDisabled = page.query_selector('div.pag_next a.btn--disabled')
+            browser.close()
+        # now we have all the page data, we can parse it with bs4
 
-        if response.status_code == 429: # Too many requests
-            print(f"{self.website}: HTTP 429 Too many requests, skipping...")
-            return
-            
-        # Log information about response, status code, and url, number of results
-        # print(f"-----------------------------------")
-        # print(f"Scraping {self.website} for {cardName}")
-        # print(f"Response: {response.status_code}")
-        # print(f"Response: {response.reason}")
-        # print(f"URL: {response.url}")
-        # print(f"Number of results: {len(response.json()['products'])}")
-        # print(f"-----------------------------------")
-
-        data = json.loads(response.text)
+        allProducts = []
+        for page in pageData:
+            soup = BeautifulSoup(page, 'html.parser')
+            products = soup.find_all('div', class_='grid-view-item') 
+            products = [product for product in products if 'product-price--sold-out' not in product["class"]]
+            for product in products:
+                allProducts.append(product)
 
 
 
-        for card in data['products']:
-            titleAndSet = card['title']
+        for card in allProducts:
+            titleAndSet = card.find('div', class_='h4 grid-view-item__title').text
             if 'Art Card' in titleAndSet:
                 continue
             # split the title and set
@@ -86,40 +61,68 @@ class ExorGamesScraper(Scraper):
 
             # remove any excess tags inside () or [] in the title
             title = title.split("(")[0].strip()
+            try:
+                image = 'https:' + card.find('img', class_='grid-view-item__image')['src']
+            except:
+                image = ''
 
-            image = card['img']
-            handle = card['handle']
-            link = f"{self.siteUrl}/products/{handle}"
+            try:
+                image_wrapper = card.find('div', class_='grid-view-item__image-container')
+                if not image_wrapper:
+                    print('no image wrapper')
+                inner_div = image_wrapper.find('div')
+                if not inner_div:
+                    print('no inner div')
+                link_tag = inner_div.find('a')
+                if not link_tag:
+                    print('no link tag')
+                link = self.siteUrl + link_tag['href']
+            except AttributeError:
+                link = ''
 
-            for variant in card['variants']:
-                if(variant['quantity'] <= 0):
-                    continue
+            price = card.find('span', class_='product-price__price').text.replace("$",'').replace(',','')
 
-                condition = variant['title'].split(" ")[0].strip()
-                if condition == "Lightly":
-                    condition = "LP"
-                elif condition == "Near":
-                    condition = "NM"
-                elif condition == "Moderately":
-                    condition = "MP"
-                elif condition == "Heavily":
-                    condition = "HP"
-                elif condition == "Damaged":
-                    condition = "DMG"
+            self.results.append({
+                'name': title,
+                'link': link,
+                'image':image,
+                'set': setName,
+                'condition': 'NM',
+                'foil': False,
+                'price': price,
+                'website': self.website
+            })
+            # for variant in card['variants']:
+            #     if(variant['quantity'] <= 0):
+            #         continue
+
+            #     condition = variant['title'].split(" ")[0].strip()
+            #     if condition == "Lightly":
+            #         condition = "LP"
+            #     elif condition == "Near":
+            #         condition = "NM"
+            #     elif condition == "Moderately":
+            #         condition = "MP"
+            #     elif condition == "Heavily":
+            #         condition = "HP"
+            #     elif condition == "Damaged":
+            #         condition = "DMG"
                 
-                foil = False
-                if "Foil" in variant['title']:
-                    foil = True
+            #     foil = False
+            #     if "Foil" in variant['title']:
+            #         foil = True
 
-                price = variant['price']
+            #     price = variant['price']
 
-                self.results.append({
-                    'name': title,
-                    'link': link,
-                    'image': image,
-                    'set': setName,
-                    'condition': condition,
-                    'foil': foil,
-                    'price': price,
-                    'website': self.website
-                })
+            #     self.results.append({
+            #         'name': title,
+            #         'link': link,
+            #         'image': image,
+            #         'set': setName,
+            #         'condition': condition,
+            #         'foil': foil,
+            #         'price': price,
+            #         'website': self.website
+            #     })
+
+            
