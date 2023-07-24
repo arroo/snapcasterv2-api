@@ -1,53 +1,5 @@
 import requests
-from bs4 import BeautifulSoup
 import concurrent.futures
-from playwright.sync_api import sync_playwright
-
-def freeProxyListProxies():
-    url = 'https://free-proxy-list.net/'
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content, 'html.parser')
-    table = soup.find('tbody')
-    proxies = []
-    for row in table:
-        if row.find_all('td')[4].text == 'elite proxy':
-            proxy = ':'.join([row.find_all('td')[0].text, row.find_all('td')[1].text])
-            proxies.append(proxy)
-        else:
-            pass
-
-    return proxies
-
-def scrapingAntProxies():
-    url = 'https://scrapingant.com/free-proxies/'
-    proxies = []
-    
-    # Use playwright to load the page
-    with sync_playwright() as p:
-        browser = p.chromium.launch() # Launch a new browser
-        context = browser.new_context() # Create a new browser context
-        page = context.new_page() # Create a new page in this context
-        page.goto(url) # Go to the url
-        page.wait_for_selector('table') # Wait for the table to load
-        content = page.content() # Get page content after JS is loaded
-        
-        # Parse the content with BeautifulSoup
-        soup = BeautifulSoup(content, 'html.parser')
-        table = soup.find('tbody')
-
-        for row in table.find_all('tr'):
-            tds = row.find_all('td')
-        
-            if tds and tds[2].text.strip() == 'HTTP':
-                proxy = ':'.join([tds[0].text.strip(), tds[1].text.strip()])
-                proxies.append(proxy)
-        
-        # Close browser context and browser
-        context.close()
-        browser.close()
-    
-    return proxies
-
 
 def getProxiesFromFile(filename):
     with open(filename, 'r') as f:
@@ -117,18 +69,7 @@ def checkProxy(proxy):
     return proxy
 
 def main():
-    # freeProxyList = freeProxyListProxies()
-    # # scrapingAnt = scrapingAntProxies()
-
-    txtProxyList = getProxiesFromFile('utils/proxies.txt')
-
-    proxyList = txtProxyList
-
-    # for p in scrapingAnt:
-    #     proxyList.append(p)
-
-    # for p in freeProxyList:
-    #     proxyList.append(p)
+    proxyList = getProxiesFromFile('utils/proxies.txt')
 
     print(f'Got {len(proxyList)} proxies')
 
