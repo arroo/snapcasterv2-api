@@ -71,7 +71,7 @@ from scrapers.sealed.SequenceSealedScraper import SequenceSealedScraper
 from scrapers.sealed.TopDeckHeroSealedScraper import TopDeckHeroSealedScraper
 
 
-
+from utils.customExceptions import TooManyRequestsError
 import json
 import concurrent.futures
 from pydantic import BaseModel
@@ -333,7 +333,7 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
                     for result in scraperResults:
                         results.append(result)
                     return
-                except (ProxyError, Timeout, SSLError, RetryError): 
+                except (ProxyError, Timeout, SSLError, RetryError, TooManyRequestsError): 
                     proxies.remove(proxy)  # remove the failing proxy from the list
                     print(f"Proxy {proxy} removed.")
         else:
