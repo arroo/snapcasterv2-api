@@ -1,6 +1,7 @@
 import requests
 import json
 from .Scraper import Scraper
+from utils.customExceptions import TooManyRequestsError
 
 class GameKnightScraper(Scraper):
     """
@@ -68,6 +69,10 @@ class GameKnightScraper(Scraper):
                 "user-agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36"
             }
         )
+
+        if response.status_code == 429: # Too many requests
+            raise TooManyRequestsError(f"{self.website} {ip_address}: HTTP 429 Too many requests...")
+        
         # Load the response 
         data = json.loads(response.text)
 

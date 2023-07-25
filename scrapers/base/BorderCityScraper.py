@@ -1,6 +1,7 @@
 import requests
 import json
 from .Scraper import Scraper
+from utils.customExceptions import TooManyRequestsError
 
 class BorderCityScraper(Scraper):
     """
@@ -16,26 +17,7 @@ class BorderCityScraper(Scraper):
         self.website = 'bordercity'
 
     def scrape(self, proxy):
-        # make the card name url friendly
         cardName = self.cardName.replace('"', '%22')
-#         curl 'https://appbeta.binderpos.com/external/shopify/products/forStore' \
-#   -H 'authority: appbeta.binderpos.com' \
-#   -H 'accept: application/json, text/javascript, */*; q=0.01' \
-#   -H 'accept-language: en-US,en;q=0.9' \
-#   -H 'cache-control: no-cache' \
-#   -H 'content-type: application/json; charset=UTF-8' \
-#   -H 'origin: https://www.bordercitygames.ca' \
-#   -H 'pragma: no-cache' \
-#   -H 'referer: https://www.bordercitygames.ca/' \
-#   -H 'sec-ch-ua: "Google Chrome";v="107", "Chromium";v="107", "Not=A?Brand";v="24"' \
-#   -H 'sec-ch-ua-mobile: ?0' \
-#   -H 'sec-ch-ua-platform: "macOS"' \
-#   -H 'sec-fetch-dest: empty' \
-#   -H 'sec-fetch-mode: cors' \
-#   -H 'sec-fetch-site: cross-site' \
-#   -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36' \
-#   --data-raw '{"storeUrl":"border-city-games-ab.myshopify.com","game":"mtg","strict":"true","sortTypes":[{"type":"title","asc":true,"order":1}],"variants":[],"rarities":[],"types":[],"setNames":[],"monsterTypes":[],"colors":[],"title":"Dockside Extortionist","priceGreaterThan":"","priceLessThan":"","instockOnly":"true"}' \
-#   --compressed
         proxy_parts = proxy.split(":")
         ip_address = proxy_parts[0]
         port = proxy_parts[1]
@@ -89,8 +71,7 @@ class BorderCityScraper(Scraper):
             },
         )
         if response.status_code == 429: # Too many requests
-            print(f"{self.website}: HTTP 429 Too many requests, skipping...")
-            return
+                raise TooManyRequestsError(f"{self.website} {ip_address}: HTTP 429 Too many requests...")
         
         # Load the response
         data = json.loads(response.text)

@@ -1,6 +1,7 @@
 import requests
 import json
 from .Scraper import Scraper
+from utils.customExceptions import TooManyRequestsError
 
 class HFXScraper(Scraper):
     """
@@ -64,8 +65,7 @@ class HFXScraper(Scraper):
             }
         )
         if response.status_code == 429: # Too many requests
-            print(f"{self.website}: HTTP 429 Too many requests, skipping...")
-            return
+                raise TooManyRequestsError(f"{self.website} {ip_address}: HTTP 429 Too many requests...")
         
         # Load the response
         data = json.loads(response.text)

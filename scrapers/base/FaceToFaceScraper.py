@@ -1,6 +1,4 @@
 from re import I
-from unittest import result
-from bs4 import BeautifulSoup
 import requests
 import json
 from .Scraper import Scraper
@@ -49,9 +47,6 @@ class FaceToFaceScraper(Scraper):
                 "sec-fetch-site": "cross-site",
                 "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36"
             })
-        if response.status_code == 429: # Too many requests
-            print(f"{self.website}: HTTP 429 Too many requests, skipping...")
-            return
         
         # Load the response
         data = json.loads(response.text)

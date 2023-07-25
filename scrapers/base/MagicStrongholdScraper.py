@@ -1,6 +1,7 @@
 import requests
 import json
 from .Scraper import Scraper
+from utils.customExceptions import TooManyRequestsError
 
 class MagicStrongholdScraper(Scraper):
     """
@@ -55,6 +56,10 @@ class MagicStrongholdScraper(Scraper):
                 "sec-fetch-site": "cross-site",
                 "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36"
             })
+
+        if response.status_code == 429: # Too many requests
+            raise TooManyRequestsError(f"{self.website} {ip_address}: HTTP 429 Too many requests...")
+        
         # Load the response
         try:
             data = json.loads(response.text)

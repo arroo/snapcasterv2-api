@@ -1,6 +1,7 @@
 import requests
 import json
 from .Scraper import Scraper
+from utils.customExceptions import TooManyRequestsError
 
 class ExorGamesScraper(Scraper):
     """
@@ -73,8 +74,7 @@ class ExorGamesScraper(Scraper):
         )
 
         if response.status_code == 429: # Too many requests
-            print(f"{self.website}: HTTP 429 Too many requests, skipping...")
-            return
+                raise TooManyRequestsError(f"{self.website} {ip_address}: HTTP 429 Too many requests...")
             
         # Log information about response, status code, and url, number of results
         # print(f"-----------------------------------")

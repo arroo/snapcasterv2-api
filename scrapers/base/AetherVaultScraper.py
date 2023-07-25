@@ -1,7 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
 from .Scraper import Scraper
-import json
 
 
 class AetherVaultScraper(Scraper):
