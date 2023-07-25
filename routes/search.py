@@ -50,7 +50,9 @@ from scrapers.sealed.AtlasSealedScraper import AtlasSealedScraper
 from scrapers.sealed.BorderCitySealedScraper import BorderCitySealedScraper
 from scrapers.sealed.ChimeraSealedScraper import ChimeraSealedScraper
 from scrapers.sealed.ComicHunterSealedScraper import ComicHunterSealedScraper
-from scrapers.sealed.EnterTheBattlefieldSealedScraper import EnterTheBattlefieldSealedScraper
+from scrapers.sealed.EnterTheBattlefieldSealedScraper import (
+    EnterTheBattlefieldSealedScraper,
+)
 from scrapers.sealed.EverythingGamesSealedScraper import EverythingGamesSealedScraper
 from scrapers.sealed.ExorGamesSealedScraper import ExorGamesSealedScraper
 from scrapers.sealed.FaceToFaceSealedScraper import FaceToFaceSealedScraper
@@ -81,41 +83,55 @@ import os
 from fastapi import BackgroundTasks, APIRouter
 import redis
 import random
-import re 
+import re
 from pymongo import MongoClient
 from requests.exceptions import ProxyError, Timeout, SSLError, RetryError
 import time
+
 
 # Pydantic Models
 class SingleCardSearch(BaseModel):
     cardName: str
     websites: list
 
+
 class BulkCardSearch(BaseModel):
     cardNames: list
     websites: list
     worstCondition: str
 
+
 class SealedSearch(BaseModel):
     setName: str
     websites: list
 
+
 class Card(BaseModel):
     cardName: str
+
 
 class PriceEntry(BaseModel):
     oracleId: str
     priceList: str
     date: str
 
+
 def getProxiesFromFile(filename):
-    with open(filename, 'r') as f:
+    with open(filename, "r") as f:
         proxies = [line.strip() for line in f]
     return proxies
 
-rd = redis.Redis(host=os.environ['RD_HOST'], port=os.environ['RD_PORT'], password=os.environ['RD_PASSWORD'], db=0)
-mongoClient = MongoClient(os.environ['MONGO_URI'])
-db = mongoClient['snapcaster']
+
+rd = redis.Redis(
+    host=os.environ["RD_HOST"],
+    port=os.environ["RD_PORT"],
+    password=os.environ["RD_PASSWORD"],
+    db=0,
+)
+mongoClient = MongoClient(os.environ["MONGO_URI"])
+db = mongoClient["snapcaster"]
+
+
 def fetchScrapers(cardName):
     # Arrange scrapers
     houseOfCardsScraper = HouseOfCardsScraper(cardName)
@@ -179,54 +195,55 @@ def fetchScrapers(cardName):
         "connectiongames": connectionGamesScraper,
         "topdeckhero": topDeckHeroScraper,
         "jeux3dragons": jeux3DragonsScraper,
-        'sequencegaming': sequenceScraper,
-        'atlas': atlasScraper,
-        'hairyt': hairyTScraper,
-        'gamezilla': gamezillaScraper,
-        'exorgames': exorGamesScraper,
-        'gameknight': gameKnightScraper,
-        'enterthebattlefield': enterTheBattlefieldScraper,
-        'firstplayer': firstPlayerScraper,
-        'manaforce': manaforceScraper,
-        'orchardcity': orchardCityScraper,
-        'bordercity': borderCityScraper,
-        'aethervault': aetherVaultScraper,
-        'fantasyforged': fantasyForgedScraper,
-        'thecomichunter': theComicHunterScraper,
-        'chimera': chimeraScraper,
-        'dragoncards': dragonCardsScraper,
-        'gamebreakers': gameBreakersScraper,
-        'mythicstore': mythicStoreScraper,
-        'vortexgames': vortexGamesScraper,
-        'abyss': abyssScraper,
-        'silvergoblin': silverGoblinScraper,
-        'crypt': cryptScraper,
-        'northofexile': northOfExileScraper,
-        'hfx': hfxScraper,
-        'omg': omgScraper,
-        'kesselrun': kesselRunScraper,
-        'reddragon': redDragonScraper,
-        'taps': tapsScraper,
-        'blackknight': blackKnightScraper,
-        'outofthebox': outOfTheBoxScraper,
-        'pandorasboox': pandorasBooxScraper,
-        'timevault': timeVaultScraper,
-        'eastridge': eastRidgeScraper,
-        'upnorth': upNorthScraper,
-        'waypoint': waypointScraper,
-        'skyfox': skyfoxScraper,
-        'nerdzcafe': nerdzCafeScraper
+        "sequencegaming": sequenceScraper,
+        "atlas": atlasScraper,
+        "hairyt": hairyTScraper,
+        "gamezilla": gamezillaScraper,
+        "exorgames": exorGamesScraper,
+        "gameknight": gameKnightScraper,
+        "enterthebattlefield": enterTheBattlefieldScraper,
+        "firstplayer": firstPlayerScraper,
+        "manaforce": manaforceScraper,
+        "orchardcity": orchardCityScraper,
+        "bordercity": borderCityScraper,
+        "aethervault": aetherVaultScraper,
+        "fantasyforged": fantasyForgedScraper,
+        "thecomichunter": theComicHunterScraper,
+        "chimera": chimeraScraper,
+        "dragoncards": dragonCardsScraper,
+        "gamebreakers": gameBreakersScraper,
+        "mythicstore": mythicStoreScraper,
+        "vortexgames": vortexGamesScraper,
+        "abyss": abyssScraper,
+        "silvergoblin": silverGoblinScraper,
+        "crypt": cryptScraper,
+        "northofexile": northOfExileScraper,
+        "hfx": hfxScraper,
+        "omg": omgScraper,
+        "kesselrun": kesselRunScraper,
+        "reddragon": redDragonScraper,
+        "taps": tapsScraper,
+        "blackknight": blackKnightScraper,
+        "outofthebox": outOfTheBoxScraper,
+        "pandorasboox": pandorasBooxScraper,
+        "timevault": timeVaultScraper,
+        "eastridge": eastRidgeScraper,
+        "upnorth": upNorthScraper,
+        "waypoint": waypointScraper,
+        "skyfox": skyfoxScraper,
+        "nerdzcafe": nerdzCafeScraper,
     }
+
 
 # Background tasks
 def post_search(query, websites, query_type, results, num_results):
     # Connect to the database
     conn = psycopg2.connect(
-        dbname=os.environ['PG_DB'],
-        user=os.environ['PG_USER'],
-        password=os.environ['PG_PASSWORD'],
-        host=os.environ['PG_HOST'],
-        port=os.environ['PG_PORT']
+        dbname=os.environ["PG_DB"],
+        user=os.environ["PG_USER"],
+        password=os.environ["PG_PASSWORD"],
+        host=os.environ["PG_HOST"],
+        port=os.environ["PG_PORT"],
     )
     cur = conn.cursor()
 
@@ -234,7 +251,9 @@ def post_search(query, websites, query_type, results, num_results):
     # If the table doesn't exist, create it
     #  We also need to protect against SQL injection for the query field
 
-    cur.execute("CREATE TABLE IF NOT EXISTS search (id SERIAL PRIMARY KEY, query VARCHAR, websites VARCHAR(512), query_type VARCHAR(60), results VARCHAR(255), num_results INT, timestamp TIMESTAMP);")
+    cur.execute(
+        "CREATE TABLE IF NOT EXISTS search (id SERIAL PRIMARY KEY, query VARCHAR, websites VARCHAR(512), query_type VARCHAR(60), results VARCHAR(255), num_results INT, timestamp TIMESTAMP);"
+    )
     cur.execute(
         """
     INSERT INTO 
@@ -243,70 +262,171 @@ def post_search(query, websites, query_type, results, num_results):
     """,
         {
             "query": query,
-            "websites": ','.join(websites),
+            "websites": ",".join(websites),
             "query_type": query_type,
             "results": results,
             "num_results": num_results,
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        },
     )
 
     conn.commit()
     cur.close()
     conn.close()
-        
+
+
 def post_price_entry(query, price_list):
     # We need to find the card with the best match for the query, ignore punctuation,
     # ignore case, and ignore whitespace
     try:
         if len(price_list) == 0:
             return
-        card_doc = db['cards'].find_one({"name": {"$regex": f"^{query}$", "$options": "i"}})
+        card_doc = db["cards"].find_one(
+            {"name": {"$regex": f"^{query}$", "$options": "i"}}
+        )
         if card_doc is None:
             return
-        
+
         # If there is already a price entry for this card today, continue
-        todays_price_entry = db['price_entry'].find_one({"oracle_id": card_doc['oracle_id'], "date": {"$gte": datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)}})
+        todays_price_entry = db["price_entry"].find_one(
+            {
+                "oracle_id": card_doc["oracle_id"],
+                "date": {
+                    "$gte": datetime.now().replace(
+                        hour=0, minute=0, second=0, microsecond=0
+                    )
+                },
+            }
+        )
         if todays_price_entry is not None:
             return
         # if no cards with foil, then no need to check for foil
-        if not any([price_entry['foil'] for price_entry in price_list]):
+        if not any([price_entry["foil"] for price_entry in price_list]):
             price_entry = {
-            "oracle_id": card_doc['oracle_id'],
-            "date": datetime.now(),
-            "price_list": [{
-                "price": price_entry['price'],
-                "website": price_entry['website'],
-                "foil": price_entry['foil'],
-                "condition": price_entry['condition']
-            } for price_entry in price_list],
-            "max": round(max([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]), 2),
-            "min": round(min([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]), 2),
-            "avg": round(sum([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]) / len(price_list), 2),
+                "oracle_id": card_doc["oracle_id"],
+                "date": datetime.now(),
+                "price_list": [
+                    {
+                        "price": price_entry["price"],
+                        "website": price_entry["website"],
+                        "foil": price_entry["foil"],
+                        "condition": price_entry["condition"],
+                    }
+                    for price_entry in price_list
+                ],
+                "max": round(
+                    max(
+                        [
+                            float(str(price_entry["price"]).replace(",", ""))
+                            for price_entry in price_list
+                        ]
+                    ),
+                    2,
+                ),
+                "min": round(
+                    min(
+                        [
+                            float(str(price_entry["price"]).replace(",", ""))
+                            for price_entry in price_list
+                        ]
+                    ),
+                    2,
+                ),
+                "avg": round(
+                    sum(
+                        [
+                            float(str(price_entry["price"]).replace(",", ""))
+                            for price_entry in price_list
+                        ]
+                    )
+                    / len(price_list),
+                    2,
+                ),
             }
         else:
             # Create a price entry for this card
             price_entry = {
-                "oracle_id": card_doc['oracle_id'],
+                "oracle_id": card_doc["oracle_id"],
                 "date": datetime.now(),
-                "price_list": [{
-                    "price": price_entry['price'],
-                    "website": price_entry['website'],
-                    "foil": price_entry['foil'],
-                    "condition": price_entry['condition']
-                } for price_entry in price_list],
-                "max": round(max([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]), 2),
-                "min": round(min([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]), 2),
-                "avg": round(sum([float(str(price_entry['price']).replace(',','')) for price_entry in price_list]) / len(price_list), 2),
-                "foil_max": round(max([float(str(price_entry['price']).replace(',','')) for price_entry in price_list if price_entry['foil']]), 2),
-                "foil_min": round(min([float(str(price_entry['price']).replace(',','')) for price_entry in price_list if price_entry['foil']]), 2),
-                "foil_avg": round(sum([float(str(price_entry['price']).replace(',','')) for price_entry in price_list if price_entry['foil']]) / len([price_entry for price_entry in price_list if price_entry['foil']]), 2),
+                "price_list": [
+                    {
+                        "price": price_entry["price"],
+                        "website": price_entry["website"],
+                        "foil": price_entry["foil"],
+                        "condition": price_entry["condition"],
+                    }
+                    for price_entry in price_list
+                ],
+                "max": round(
+                    max(
+                        [
+                            float(str(price_entry["price"]).replace(",", ""))
+                            for price_entry in price_list
+                        ]
+                    ),
+                    2,
+                ),
+                "min": round(
+                    min(
+                        [
+                            float(str(price_entry["price"]).replace(",", ""))
+                            for price_entry in price_list
+                        ]
+                    ),
+                    2,
+                ),
+                "avg": round(
+                    sum(
+                        [
+                            float(str(price_entry["price"]).replace(",", ""))
+                            for price_entry in price_list
+                        ]
+                    )
+                    / len(price_list),
+                    2,
+                ),
+                "foil_max": round(
+                    max(
+                        [
+                            float(str(price_entry["price"]).replace(",", ""))
+                            for price_entry in price_list
+                            if price_entry["foil"]
+                        ]
+                    ),
+                    2,
+                ),
+                "foil_min": round(
+                    min(
+                        [
+                            float(str(price_entry["price"]).replace(",", ""))
+                            for price_entry in price_list
+                            if price_entry["foil"]
+                        ]
+                    ),
+                    2,
+                ),
+                "foil_avg": round(
+                    sum(
+                        [
+                            float(str(price_entry["price"]).replace(",", ""))
+                            for price_entry in price_list
+                            if price_entry["foil"]
+                        ]
+                    )
+                    / len(
+                        [
+                            price_entry
+                            for price_entry in price_list
+                            if price_entry["foil"]
+                        ]
+                    ),
+                    2,
+                ),
             }
-        
 
         # Send the price entry to mongodb
         # print(price_entry)
-        db['price_entry'].insert_one(price_entry)
+        db["price_entry"].insert_one(price_entry)
     except Exception as e:
         print("Error in post_price_entry while trying to insert price entry into mongo")
         print(e)
@@ -314,53 +434,63 @@ def post_price_entry(query, price_list):
 
 router = APIRouter()
 
- 
+
 @router.post("/single/")
 async def search_single(request: SingleCardSearch, background_tasks: BackgroundTasks):
     """
     Search for a single card and return all prices across the provided websites
     """
     # proxies = getProxiesFromFile("proxies.txt")
-    proxies = os.environ['PROXIES'].split(',')
+    proxies = os.environ["PROXIES"].split(",")
 
     def transform(scraper):
         try:
             temp_proxies = proxies.copy()
             num_failed_proxies = 0
-            if scraper.usesProxies: 
+            if scraper.usesProxies:
                 while temp_proxies:  # try as long as there are proxies left
                     proxy = random.choice(temp_proxies)
                     try:
-                        scraper.scrape(proxy)  
+                        scraper.scrape(proxy)
                         scraperResults = scraper.getResults()
                         for result in scraperResults:
                             results.append(result)
                         return
-                    except (ProxyError, Timeout, SSLError, RetryError, TooManyRequestsError): 
-                        temp_proxies.remove(proxy)  # remove the failing proxy from the list
+                    except (
+                        ProxyError,
+                        Timeout,
+                        SSLError,
+                        RetryError,
+                        TooManyRequestsError,
+                    ):
+                        temp_proxies.remove(
+                            proxy
+                        )  # remove the failing proxy from the list
                         num_failed_proxies += 1
-                        print(f"{num_failed_proxies} Proxy {proxy} failed for {scraper.website}")
-                
+                        print(
+                            f"{num_failed_proxies} Proxy {proxy} failed for {scraper.website}"
+                        )
+
                 if not temp_proxies:
                     print(f"*** All proxies failed for {scraper.website}")
                     return
-                
+
         except Exception as e:
             print("Error in search_single while trying to scrape")
             print(e)
-            
+
         else:
             scraper.scrape()
             scraperResults = scraper.getResults()
             for result in scraperResults:
                 results.append(result)
             return
-        
-    results = [] # List to store results from all threads
+
+    results = []  # List to store results from all threads
     cache = rd.get(request.cardName.lower())
     if cache:
         return json.loads(cache)
-    else :
+    else:
         scraperMap = fetchScrapers(request.cardName)
         try:
             if "all" in request.websites:
@@ -380,10 +510,18 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
 
         filteredResults = []
         for result in results:
-            if request.cardName.lower() in result['name'].lower():
-                if "token" in result['name'].lower() and "token" not in request.cardName.lower() and "emblem" not in request.cardName.lower():
+            if request.cardName.lower() in result["name"].lower():
+                if (
+                    "token" in result["name"].lower()
+                    and "token" not in request.cardName.lower()
+                    and "emblem" not in request.cardName.lower()
+                ):
                     continue
-                elif "emblem" in result['name'].lower() and "emblem" not in request.cardName.lower() and "token" not in request.cardName.lower():
+                elif (
+                    "emblem" in result["name"].lower()
+                    and "emblem" not in request.cardName.lower()
+                    and "token" not in request.cardName.lower()
+                ):
                     continue
                 else:
                     filteredResults.append(result)
@@ -393,13 +531,15 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
         results = filteredResults
 
         numResults = len(results)
-        background_tasks.add_task(post_search, request.cardName, request.websites, "single", "", numResults)
+        background_tasks.add_task(
+            post_search, request.cardName, request.websites, "single", "", numResults
+        )
         background_tasks.add_task(post_price_entry, request.cardName, results)
 
         # Only update the cache if websites is "all" so cache hits don't get partial results
         if "all" in request.websites:
             rd.set(request.cardName.lower(), json.dumps(results))
-            rd.expire(request.cardName.lower(), 420) #blazeit expire in 7 mins
+            rd.expire(request.cardName.lower(), 420)  # blazeit expire in 7 mins
         return results
 
 
@@ -409,24 +549,29 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
     Search for a list of cards and return all prices across the provided websites
     """
     cardNames = request.cardNames
-    cardNames = cardNames[:5] # Max 5 cards for bulk search
+    cardNames = cardNames[:5]  # Max 5 cards for bulk search
     websites = request.websites
-    worstCondition = request.worstCondition # Not used at the moment,
+    worstCondition = request.worstCondition  # Not used at the moment,
 
     # List to store results from all threads
     totalResults = []
     results = {}
 
     # Clean card names
-    cardNames = [re.sub(r"^\d+\s*", "", cardName).strip() for cardName in cardNames] # remove prefix nums
-    cardNames = [re.sub(r"\s*\([^)]*\)", "", cardName).strip() for cardName in cardNames] # remove brackets
-    cardNames = [re.sub(r"\s*\d+$", "", cardName).strip() for cardName in cardNames] # remove suffix nums
-    cardNames = [cardName.lower() for cardName in cardNames] # lowercase
-    cardNames = list(set(cardNames))    # remove duplicates
+    cardNames = [
+        re.sub(r"^\d+\s*", "", cardName).strip() for cardName in cardNames
+    ]  # remove prefix nums
+    cardNames = [
+        re.sub(r"\s*\([^)]*\)", "", cardName).strip() for cardName in cardNames
+    ]  # remove brackets
+    cardNames = [
+        re.sub(r"\s*\d+$", "", cardName).strip() for cardName in cardNames
+    ]  # remove suffix nums
+    cardNames = [cardName.lower() for cardName in cardNames]  # lowercase
+    cardNames = list(set(cardNames))  # remove duplicates
 
+    proxies = os.environ["PROXIES"].split(",")
 
-    proxies = os.environ['PROXIES'].split(',')
-    
     def transform(scraper):
         if scraper.usesProxies:
             time.sleep(random.randint(1, 2))
@@ -436,13 +581,19 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
                     scraper.scrape(proxy)
                     scraperResults = scraper.getResults()
                     for result in scraperResults:
-                        tempResultName = re.sub(r"[^\w\s]", "", result['name']).lower()
+                        tempResultName = re.sub(r"[^\w\s]", "", result["name"]).lower()
                         if tempResultName in results:
                             results[tempResultName].append(result)
                         else:
                             results[tempResultName] = [result]
                     return
-                except (ProxyError, Timeout, SSLError, RetryError, TooManyRequestsError):
+                except (
+                    ProxyError,
+                    Timeout,
+                    SSLError,
+                    RetryError,
+                    TooManyRequestsError,
+                ):
                     proxies.remove(proxy)
                     print(f"Proxy {proxy} removed for {scraper.website}")
         else:
@@ -450,7 +601,7 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
             scraperResults = scraper.getResults()
             for result in scraperResults:
                 # remove any punctuation from the result['name'] and lowercase it,
-                tempResultName = re.sub(r"[^\w\s]", "", result['name']).lower()
+                tempResultName = re.sub(r"[^\w\s]", "", result["name"]).lower()
                 if tempResultName in results:
                     results[tempResultName].append(result)
                 else:
@@ -467,13 +618,13 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
         except KeyError:
             return {"error": "Invalid website provided"}
 
-        # Run scrapers 
+        # Run scrapers
         with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
             threadResults = executor.map(transform, scrapers)
 
         cardObject = {
             "cardName": cardName.lower(),
-            "variants": results[re.sub(r"[^\w\s]", "", cardName).lower()]
+            "variants": results[re.sub(r"[^\w\s]", "", cardName).lower()],
         }
         totalResults.append(cardObject)
         return
@@ -483,9 +634,11 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
 
     numResults = 0
     for card in totalResults:
-        numResults += len(card['variants'])
+        numResults += len(card["variants"])
 
-    background_tasks.add_task(post_search, request.cardNames, request.websites, "multi", "", numResults)
+    background_tasks.add_task(
+        post_search, request.cardNames, request.websites, "multi", "", numResults
+    )
 
     return totalResults
 
@@ -533,29 +686,29 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
     hairyTScraper = HairyTSealedScraper(setName)
     # Map scrapers to an identifier keyword
     scraperMap = {
-        'atlas': atlasScraper,
-        'bordercity': borderCityScaper,
-        'chimera': chimeraScraper,
+        "atlas": atlasScraper,
+        "bordercity": borderCityScaper,
+        "chimera": chimeraScraper,
         "connectiongames": connectionGamesScraper,
-        'enterthebattlefield': enterTheBattlefieldScraper,
-        'everythinggames': everythingGamesScraper,
-        'exorgames': exorGamesScraper,
-        'facetoface': faceToFaceScraper,
+        "enterthebattlefield": enterTheBattlefieldScraper,
+        "everythinggames": everythingGamesScraper,
+        "exorgames": exorGamesScraper,
+        "facetoface": faceToFaceScraper,
         # 'fantasyforged': fantasyForgedScraper,
-        'firstplayer': firstPlayerScraper,
+        "firstplayer": firstPlayerScraper,
         "four01": four01Scraper,
         "fusion": fusionScraper,
         "gameknight": gameKnightScraper,
         "gamezilla": gamezillaScraper,
         "gauntlet": gauntletScraper,
-        'hairyt': hairyTScraper,
+        "hairyt": hairyTScraper,
         "houseofcards": houseOfCardsScraper,
         "magicstronghold": magicStrongholdScraper,
         "orchardcity": orchardCityScraper,
         "jeux3dragons": jeux3DragonsScraper,
         "sequence": sequenceScraper,
-        'thecomichunter': comicHunterScraper,
-        'topdeckhero': TopDeckHeroScraper,
+        "thecomichunter": comicHunterScraper,
+        "topdeckhero": TopDeckHeroScraper,
     }
 
     # Filter out scrapers that are not requested in request.websites
@@ -571,7 +724,13 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         threadResults = executor.map(transform, scrapers)
 
-    background_tasks.add_task(post_search, query=setName, websites=websites,
-                              query_type="sealed", results="", num_results=len(results))
+    background_tasks.add_task(
+        post_search,
+        query=setName,
+        websites=websites,
+        query_type="sealed",
+        results="",
+        num_results=len(results),
+    )
 
     return results
