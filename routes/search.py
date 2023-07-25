@@ -84,6 +84,7 @@ import random
 import re 
 from pymongo import MongoClient
 from requests.exceptions import ProxyError, Timeout, SSLError, RetryError
+import time
 
 # Pydantic Models
 class SingleCardSearch(BaseModel):
@@ -402,6 +403,10 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
     # For each card in the list, we want to run the single card search
     # then we want to return an array of cardObjects
     cardNames = request.cardNames
+
+    # We only take the first 5 cards in the list that are non empty
+    cardNames = cardNames[:5]
+
     websites = request.websites
     worstCondition = request.worstCondition
 
@@ -426,6 +431,8 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
     # Scraper function
     def transform(scraper):
         if scraper.usesProxies:
+            # wait between 1-2 seconds before starting the scrape
+            time.sleep(random.randint(1, 2))
             while proxies:
                 proxy = random.choice(proxies)
                 try:
