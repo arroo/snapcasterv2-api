@@ -8,7 +8,7 @@ This Python application uses FastAPI and BeautifulSoup to scrape multiple tradin
 ### Installation
 1. Clone the repository
 2. Install the dependencies by running `pip install -r requirements.txt`
-3. Create a .env file and fill in the necessary environment variables (e.g. database URL, Redis info)
+3. Create a .env file and fill in the necessary environment variables (e.g. database URL, Redis info, proxy IPs)
 4. Start the app by running `uvicorn main:app --reload`
 
 ### Usage
@@ -24,44 +24,6 @@ The application provides three main API endpoints:
 The application comes with a script to update the available card sets. To update the card sets:
 1. Download SetList.json from MtgJson and place it in scripts/.
 2. Run python updateSets.py 
-
-## File Structure
-```
-db/
-    - database.py
-    - models.py
-routes/
-    - pricedata.py
-    - search.py
-    - utils.py
-scrapers/
-    - base/
-        - AtlasScraper.py
-        - BorderCityScraper.py
-        - ConnectionGamesScraper.py
-        - Scraper.py
-    - sealed/
-        - AtlasSealedScraper.py
-        - BorderCitySealedScraper.py
-        - ConnectionGamesSealedScraper.py
-        - SealedScraper.py
-scripts/
-    - updateSets.py
-main.py
-.env
-requirements.txt
-```
-
-- db/: Contains the database related files.
-
-- routes/: Contains the main FastAPI routes that serve the API endpoints.
-
-- scrapers/: Contains the scrapers used to scrape the card prices from the various websites. The scrapers are organized by whether they scrape for singles or sealed products.
-
-- scripts/: Contains scripts for updating the available card sets in the database.
-
-- main.py: The main entry point for the application.
-
 
 ## Database schema
 The database is primarily used to log search history for the application for debugging, and is only essential for sealed searches. 
@@ -88,3 +50,4 @@ PG_USER=
 RD_HOST=
 RD_PASSWORD=
 RD_PORT=
+PROXIES=

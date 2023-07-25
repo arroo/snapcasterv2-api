@@ -1,8 +1,6 @@
 from fastapi import APIRouter, HTTPException
 import os
-import psycopg2
 import redis
-import re
 from pymongo import MongoClient
 from typing import List
 from pydantic import BaseModel

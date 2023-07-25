@@ -408,36 +408,22 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
     """
     Search for a list of cards and return all prices across the provided websites
     """
-    # CardObject = {
-    #    "cardName": "cardName",
-    #   "variants": []
-    # }
-
-    # For each card in the list, we want to run the single card search
-    # then we want to return an array of cardObjects
     cardNames = request.cardNames
-
-    # We only take the first 5 cards in the list that are non empty
-    cardNames = cardNames[:5]
-
+    cardNames = cardNames[:5] # Max 5 cards for bulk search
     websites = request.websites
-    worstCondition = request.worstCondition
+    worstCondition = request.worstCondition # Not used at the moment,
 
     # List to store results from all threads
     totalResults = []
     results = {}
 
     # Clean card names
-    # Remove any numbers at the start of the card name
-    # Remove any text in brackets, and the brackets themselves
-    cardNames = [re.sub(r"^\d+\s*", "", cardName).strip() for cardName in cardNames]
-    cardNames = [re.sub(r"\s*\([^)]*\)", "", cardName).strip() for cardName in cardNames]
-    # remove any numbers from the end of the card name
-    cardNames = [re.sub(r"\s*\d+$", "", cardName).strip() for cardName in cardNames]
-    # convert to lowercase
-    cardNames = [cardName.lower() for cardName in cardNames]
-    # remove duplicates
-    cardNames = list(set(cardNames))
+    cardNames = [re.sub(r"^\d+\s*", "", cardName).strip() for cardName in cardNames] # remove prefix nums
+    cardNames = [re.sub(r"\s*\([^)]*\)", "", cardName).strip() for cardName in cardNames] # remove brackets
+    cardNames = [re.sub(r"\s*\d+$", "", cardName).strip() for cardName in cardNames] # remove suffix nums
+    cardNames = [cardName.lower() for cardName in cardNames] # lowercase
+    cardNames = list(set(cardNames))    # remove duplicates
+
 
     proxies = os.environ['PROXIES'].split(',')
     
