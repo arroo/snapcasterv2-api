@@ -19,7 +19,18 @@ class TapsScraper(Scraper):
         # make the card name url friendly
         cardName = self.cardName.replace('"', '%22')
         
-        response = requests.post(self.url, 
+        proxy_parts = proxy.split(":")
+        ip_address = proxy_parts[0]
+        port = proxy_parts[1]
+        username = proxy_parts[2]
+        password = proxy_parts[3]
+
+        proxies = {
+            "http" :"http://{}:{}@{}:{}".format(username,password,ip_address,port),
+            "https":"http://{}:{}@{}:{}".format(username,password,ip_address,port),
+        }
+        
+        response = requests.post(self.url, proxies=proxies,
             json={
                 "storeUrl":"taps-games.myshopify.com",
                 "game":"mtg",

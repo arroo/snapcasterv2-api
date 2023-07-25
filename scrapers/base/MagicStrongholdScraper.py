@@ -17,10 +17,22 @@ class MagicStrongholdScraper(Scraper):
         Scraper.__init__(self, cardName)
         self.siteUrl = 'https://www.magicstronghold.com'
         self.url = "https://api.conductcommerce.com/v1/advancedSearch"
+        usesProxies = True
         self.website = 'magicstronghold'
 
-    def scrape(self):
-        response = requests.post(self.url, 
+    def scrape(self, proxy):
+        proxy_parts = proxy.split(":")
+        ip_address = proxy_parts[0]
+        port = proxy_parts[1]
+        username = proxy_parts[2]
+        password = proxy_parts[3]
+
+        proxies = {
+            "http" :"http://{}:{}@{}:{}".format(username,password,ip_address,port),
+            "https":"http://{}:{}@{}:{}".format(username,password,ip_address,port),
+        }
+        
+        response = requests.post(self.url, proxies=proxies,
             json={
                 "productTypeID": 1,
                 "name": self.cardName,

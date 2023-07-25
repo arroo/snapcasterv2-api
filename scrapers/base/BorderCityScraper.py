@@ -36,7 +36,18 @@ class BorderCityScraper(Scraper):
 #   -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36' \
 #   --data-raw '{"storeUrl":"border-city-games-ab.myshopify.com","game":"mtg","strict":"true","sortTypes":[{"type":"title","asc":true,"order":1}],"variants":[],"rarities":[],"types":[],"setNames":[],"monsterTypes":[],"colors":[],"title":"Dockside Extortionist","priceGreaterThan":"","priceLessThan":"","instockOnly":"true"}' \
 #   --compressed
-        response = requests.post(self.url, 
+        proxy_parts = proxy.split(":")
+        ip_address = proxy_parts[0]
+        port = proxy_parts[1]
+        username = proxy_parts[2]
+        password = proxy_parts[3]
+
+        proxies = {
+            "http" :"http://{}:{}@{}:{}".format(username,password,ip_address,port),
+            "https":"http://{}:{}@{}:{}".format(username,password,ip_address,port),
+        }
+        
+        response = requests.post(self.url, proxies=proxies,
             json={
                 "storeUrl": "border-city-games-ab.myshopify.com",
                 "game": "mtg",
