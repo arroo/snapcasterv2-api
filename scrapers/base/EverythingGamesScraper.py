@@ -32,6 +32,7 @@ class EverythingGamesScraper(Scraper):
         port = proxy_parts[1]
         username = proxy_parts[2]
         password = proxy_parts[3]
+        ua = UserAgent()
 
         proxies = {
             "http" :"http://{}:{}@{}:{}".format(username,password,ip_address,port),
@@ -76,7 +77,8 @@ class EverythingGamesScraper(Scraper):
                 "sec-fetch-dest": "empty",
                 "sec-fetch-mode": "cors",
                 "sec-fetch-site": "cross-site",
-                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36"
+                'DNT': '1',
+                'user-agent': ua.random
             })
         if response.status_code == 429: # Too many requests
                 raise TooManyRequestsError(f"{self.website} {ip_address}: HTTP 429 Too many requests...")
