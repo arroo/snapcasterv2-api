@@ -13,9 +13,10 @@ class VortexGamesScraper(Scraper):
         Scraper.__init__(self, cardName)
         self.siteUrl = 'https://www.vortexgames.ca'
         self.url = "https://portal.binderpos.com/external/shopify/products/forStore"
+        self.usesProxies = True
         self.website = 'vortexgames'
 
-    def scrape(self):
+    def scrape(self, proxy):
         # make the card name url friendly
         cardName = self.cardName.replace('"', '%22')
         

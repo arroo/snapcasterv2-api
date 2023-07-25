@@ -18,9 +18,10 @@ class EverythingGamesScraper(Scraper):
         Scraper.__init__(self, cardName)
         self.siteUrl = 'https://www.everythinggames.ca'
         self.url = "https://portal.binderpos.com/external/shopify/products/forStore"
+        self.usesProxies = True
         self.website = 'everythinggames'
 
-    def scrape(self):
+    def scrape(self, proxy):
         # get the json data from this curl request
         # curl 'https://portal.binderpos.com/external/shopify/products/forStore' \
         #   -H 'authority: portal.binderpos.com' \

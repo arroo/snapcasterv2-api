@@ -12,9 +12,10 @@ class SkyfoxScraper(Scraper):
         Scraper.__init__(self, cardName)
         self.siteUrl = 'https://skyfoxgames.com'
         self.url = "https://portal.binderpos.com/external/shopify/products/forStore"
+        self.usesProxies = True
         self.website = 'skyfox'
 
-    def scrape(self):
+    def scrape(self, proxy):
         # make the card name url friendly
         cardName = self.cardName.replace('"', '%22')
         

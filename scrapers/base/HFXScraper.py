@@ -13,9 +13,10 @@ class HFXScraper(Scraper):
         Scraper.__init__(self, cardName)
         self.siteUrl = 'https://www.hfxgames.com'
         self.url = "https://portal.binderpos.com/external/shopify/products/forStore"
+        self.usesProxies = True
         self.website = 'hfx'
 
-    def scrape(self):
+    def scrape(self, proxy):
         # make the card name url friendly
         cardName = self.cardName.replace('"', '%22')
         
