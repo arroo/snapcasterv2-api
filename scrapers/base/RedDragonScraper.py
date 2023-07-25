@@ -1,6 +1,9 @@
 import requests
 import json
 from .Scraper import Scraper
+from utils.customExceptions import TooManyRequestsError
+from fake_useragent import UserAgent
+
 
 class RedDragonScraper(Scraper):
     """
@@ -25,6 +28,7 @@ class RedDragonScraper(Scraper):
         port = proxy_parts[1]
         username = proxy_parts[2]
         password = proxy_parts[3]
+        ua = UserAgent()
 
         proxies = {
             "http" :"http://{}:{}@{}:{}".format(username,password,ip_address,port),
@@ -60,12 +64,13 @@ class RedDragonScraper(Scraper):
                 'sec-fetch-dest': 'empty',
                 'sec-fetch-mode': 'cors',
                 'sec-fetch-site': 'cross-site',
-                'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36'
+                'DNT': '1',
+                'user-agent': ua.random,  # Randomize user agent
+
             }
         )
         if response.status_code == 429: # Too many requests
-            print(f"{self.website}: HTTP 429 Too many requests, skipping...")
-            return
+                raise TooManyRequestsError(f"{self.website} {ip_address}: HTTP 429 Too many requests...")
         
         # Load the response
         data = json.loads(response.text)

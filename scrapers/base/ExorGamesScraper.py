@@ -1,6 +1,9 @@
 import requests
 import json
 from .Scraper import Scraper
+from utils.customExceptions import TooManyRequestsError
+from fake_useragent import UserAgent
+
 
 class ExorGamesScraper(Scraper):
     """
@@ -19,13 +22,12 @@ class ExorGamesScraper(Scraper):
     def scrape(self, proxy):
         # make the card name url friendly
         cardName = self.cardName.replace('"', '%22')
-        print("using proxy")
-
         proxy_parts = proxy.split(":")
         ip_address = proxy_parts[0]
         port = proxy_parts[1]
         username = proxy_parts[2]
         password = proxy_parts[3]
+        ua = UserAgent()
 
         proxies = {
             "http" :"http://{}:{}@{}:{}".format(username,password,ip_address,port),
@@ -68,13 +70,13 @@ class ExorGamesScraper(Scraper):
                 "sec-fetch-dest": "empty",
                 "sec-fetch-mode": "cors",
                 "sec-fetch-site": "cross-site",
-                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36"
+                'DNT': '1',
+                'user-agent': ua.random
             }
         )
 
         if response.status_code == 429: # Too many requests
-            print(f"{self.website}: HTTP 429 Too many requests, skipping...")
-            return
+                raise TooManyRequestsError(f"{self.website} {ip_address}: HTTP 429 Too many requests...")
             
         # Log information about response, status code, and url, number of results
         # print(f"-----------------------------------")

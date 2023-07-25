@@ -1,7 +1,9 @@
-from bs4 import BeautifulSoup
 import requests
 import json
 from .Scraper import Scraper
+from utils.customExceptions import TooManyRequestsError
+from fake_useragent import UserAgent
+
 
 class EverythingGamesScraper(Scraper):
     """
@@ -22,26 +24,6 @@ class EverythingGamesScraper(Scraper):
         self.website = 'everythinggames'
 
     def scrape(self, proxy):
-        # get the json data from this curl request
-        # curl 'https://portal.binderpos.com/external/shopify/products/forStore' \
-        #   -H 'authority: portal.binderpos.com' \
-        #   -H 'accept: application/json' \
-        #   -H 'accept-language: en-US,en;q=0.9' \
-        #   -H 'cache-control: no-cache' \
-        #   -H 'content-type: application/json' \
-        #   -H 'origin: https://www.everythinggames.ca' \
-        #   -H 'pragma: no-cache' \
-        #   -H 'referer: https://www.everythinggames.ca/' \
-        #   -H 'sec-ch-ua: "Chromium";v="106", "Google Chrome";v="106", "Not;A=Brand";v="99"' \
-        #   -H 'sec-ch-ua-mobile: ?0' \
-        #   -H 'sec-ch-ua-platform: "macOS"' \
-        #   -H 'sec-fetch-dest: empty' \
-        #   -H 'sec-fetch-mode: cors' \
-        #   -H 'sec-fetch-site: cross-site' \
-        #   -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36' \
-        #   --data-raw '{"storeUrl":"everything-games-ca.myshopify.com","game":"mtg","strict":null,"sortTypes":[{"type":"price","asc":false,"order":1}],"variants":null,"title":"shock","priceGreaterThan":0,"priceLessThan":null,"instockOnly":true,"limit":18,"offset":0,"setNames":[],"colors":[],"rarities":[],"types":[]}' \
-        #   --compressed
-        
         # make the card name url friendly
         cardName = self.cardName.replace('"', '%22')
         
@@ -50,6 +32,7 @@ class EverythingGamesScraper(Scraper):
         port = proxy_parts[1]
         username = proxy_parts[2]
         password = proxy_parts[3]
+        ua = UserAgent()
 
         proxies = {
             "http" :"http://{}:{}@{}:{}".format(username,password,ip_address,port),
@@ -94,11 +77,11 @@ class EverythingGamesScraper(Scraper):
                 "sec-fetch-dest": "empty",
                 "sec-fetch-mode": "cors",
                 "sec-fetch-site": "cross-site",
-                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36"
+                'DNT': '1',
+                'user-agent': ua.random
             })
         if response.status_code == 429: # Too many requests
-            print(f"{self.website}: HTTP 429 Too many requests, skipping...")
-            return
+                raise TooManyRequestsError(f"{self.website} {ip_address}: HTTP 429 Too many requests...")
         
         # Load the response
         data = json.loads(response.text)
