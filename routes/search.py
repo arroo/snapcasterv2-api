@@ -324,18 +324,23 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
     proxies = os.environ['PROXIES'].split(',')
 
     def transform(scraper):
-        if scraper.usesProxies: 
-            while proxies:  # try as long as there are proxies left
-                proxy = random.choice(proxies)
-                try:
-                    scraper.scrape(proxy)  
-                    scraperResults = scraper.getResults()
-                    for result in scraperResults:
-                        results.append(result)
-                    return
-                except (ProxyError, Timeout, SSLError, RetryError, TooManyRequestsError): 
-                    proxies.remove(proxy)  # remove the failing proxy from the list
-                    print(f"Proxy {proxy} removed.")
+        try:
+            temp_proxies = proxies.copy()
+            if scraper.usesProxies: 
+                while temp_proxies:  # try as long as there are proxies left
+                    proxy = random.choice(temp_proxies)
+                    try:
+                        scraper.scrape(proxy)  
+                        scraperResults = scraper.getResults()
+                        for result in scraperResults:
+                            results.append(result)
+                        return
+                    except (ProxyError, Timeout, SSLError, RetryError, TooManyRequestsError): 
+                        temp_proxies.remove(proxy)  # remove the failing proxy from the list
+                        print(f"Proxy {proxy} removed for {scraper.website}")
+        except Exception as e:
+            print("Error in search_single while trying to scrape")
+            print(e)
         else:
             scraper.scrape()
             scraperResults = scraper.getResults()
@@ -443,9 +448,9 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
                         else:
                             results[tempResultName] = [result]
                     return
-                except (ProxyError, Timeout, SSLError, RetryError):
+                except (ProxyError, Timeout, SSLError, RetryError, TooManyRequestsError):
                     proxies.remove(proxy)
-                    print(f"Proxy {proxy} removed.")
+                    print(f"Proxy {proxy} removed for {scraper.website}")
         else:
             scraper.scrape()
             scraperResults = scraper.getResults()
