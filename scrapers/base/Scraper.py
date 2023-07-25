@@ -4,6 +4,7 @@ class Scraper():
     def __init__(self, cardName):
         self.cardName=cardName
         self.results = []
+        self.usesProxies = False
 
     def getResults(self):
         return self.results

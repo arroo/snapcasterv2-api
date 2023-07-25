@@ -425,13 +425,11 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
     cardNames = [cardName.lower() for cardName in cardNames]
     # remove duplicates
     cardNames = list(set(cardNames))
-    
 
     proxies = os.environ['PROXIES'].split(',')
-    # Scraper function
+    
     def transform(scraper):
         if scraper.usesProxies:
-            # wait between 1-2 seconds before starting the scrape
             time.sleep(random.randint(1, 2))
             while proxies:
                 proxy = random.choice(proxies)
@@ -452,14 +450,8 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
             scraper.scrape()
             scraperResults = scraper.getResults()
             for result in scraperResults:
-                # print(result)
                 # remove any punctuation from the result['name'] and lowercase it,
                 tempResultName = re.sub(r"[^\w\s]", "", result['name']).lower()
-                # then if it is in the results dict, append the result to the list
-                # if result['name'].lower() in results:
-                #     results[result['name'].lower()].append(result)
-                # else:
-                #     results[result['name'].lower()] = [result]
                 if tempResultName in results:
                     results[tempResultName].append(result)
                 else:
