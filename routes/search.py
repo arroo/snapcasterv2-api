@@ -385,7 +385,7 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
         # Only update the cache if websites is "all" so cache hits don't get partial results
         if "all" in request.websites:
             rd.set(request.cardName.lower(), json.dumps(results))
-            rd.expire(request.cardName.lower(), 120)
+            rd.expire(request.cardName.lower(), 420) #blazeit expire in 7 mins
         return results
 
 
