@@ -7,7 +7,6 @@ import dotenv
 from routes.search import router as search_router
 from routes.prices import router as prices_router
 from routes.utils import router as utils_router
-from routes.cron import router as cron_router
 
 # Pydantic Models
 class SingleCardSearch(BaseModel):
@@ -38,7 +37,6 @@ app = FastAPI()
 app.include_router(prices_router, prefix="/prices", tags=["prices"])
 app.include_router(search_router, prefix="/search", tags=["search"])
 app.include_router(utils_router, prefix="/utils", tags=["utils"])
-app.include_router(cron_router, prefix="/cron", tags=["cron"])
 
 origins = [
     "http://127.0.0.1:5173",
@@ -67,4 +65,4 @@ app.add_middleware(
 # Routes
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Welcome to the snapcaster api :)"}
