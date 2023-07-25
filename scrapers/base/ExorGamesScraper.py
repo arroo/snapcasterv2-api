@@ -22,8 +22,6 @@ class ExorGamesScraper(Scraper):
     def scrape(self, proxy):
         # make the card name url friendly
         cardName = self.cardName.replace('"', '%22')
-        print("using proxy")
-
         proxy_parts = proxy.split(":")
         ip_address = proxy_parts[0]
         port = proxy_parts[1]

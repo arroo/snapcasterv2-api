@@ -326,6 +326,7 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
     def transform(scraper):
         try:
             temp_proxies = proxies.copy()
+            num_failed_proxies = 0
             if scraper.usesProxies: 
                 while temp_proxies:  # try as long as there are proxies left
                     proxy = random.choice(temp_proxies)
@@ -337,10 +338,17 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
                         return
                     except (ProxyError, Timeout, SSLError, RetryError, TooManyRequestsError): 
                         temp_proxies.remove(proxy)  # remove the failing proxy from the list
-                        print(f"Proxy {proxy} removed for {scraper.website}")
+                        num_failed_proxies += 1
+                        print(f"{num_failed_proxies} Proxy {proxy} failed for {scraper.website}")
+                
+                if not temp_proxies:
+                    print(f"*** All proxies failed for {scraper.website}")
+                    return
+                
         except Exception as e:
             print("Error in search_single while trying to scrape")
             print(e)
+            
         else:
             scraper.scrape()
             scraperResults = scraper.getResults()
