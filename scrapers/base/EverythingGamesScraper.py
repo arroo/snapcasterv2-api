@@ -2,6 +2,8 @@ import requests
 import json
 from .Scraper import Scraper
 from utils.customExceptions import TooManyRequestsError
+from fake_useragent import UserAgent
+
 
 class EverythingGamesScraper(Scraper):
     """
