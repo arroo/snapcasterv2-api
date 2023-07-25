@@ -18,9 +18,10 @@ class EverythingGamesScraper(Scraper):
         Scraper.__init__(self, cardName)
         self.siteUrl = 'https://www.everythinggames.ca'
         self.url = "https://portal.binderpos.com/external/shopify/products/forStore"
+        self.usesProxies = True
         self.website = 'everythinggames'
 
-    def scrape(self):
+    def scrape(self, proxy):
         # get the json data from this curl request
         # curl 'https://portal.binderpos.com/external/shopify/products/forStore' \
         #   -H 'authority: portal.binderpos.com' \
@@ -44,7 +45,18 @@ class EverythingGamesScraper(Scraper):
         # make the card name url friendly
         cardName = self.cardName.replace('"', '%22')
         
-        response = requests.post(self.url, 
+        proxy_parts = proxy.split(":")
+        ip_address = proxy_parts[0]
+        port = proxy_parts[1]
+        username = proxy_parts[2]
+        password = proxy_parts[3]
+
+        proxies = {
+            "http" :"http://{}:{}@{}:{}".format(username,password,ip_address,port),
+            "https":"http://{}:{}@{}:{}".format(username,password,ip_address,port),
+        }
+        
+        response = requests.post(self.url, proxies=proxies,
             json={
                 "storeUrl": "everything-games-ca.myshopify.com",
                 "game": "mtg",
