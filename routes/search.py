@@ -319,7 +319,8 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
     """
     Search for a single card and return all prices across the provided websites
     """
-    proxies = getProxiesFromFile("proxies.txt")
+    # proxies = getProxiesFromFile("proxies.txt")
+    proxies = os.environ['PROXIES'].split(',')
 
     # Scraper function
     # TODO: Update each scraper with a usesProxies bool
