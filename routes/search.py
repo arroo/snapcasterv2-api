@@ -322,10 +322,6 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
     # proxies = getProxiesFromFile("proxies.txt")
     proxies = os.environ['PROXIES'].split(',')
 
-    # Scraper function
-    # TODO: Update each scraper with a usesProxies bool
-    # TODO: Update each scrape method to take in a proxy
-
     def transform(scraper):
         if scraper.usesProxies: 
             while proxies:  # try as long as there are proxies left
@@ -426,25 +422,42 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
     cardNames = list(set(cardNames))
     
 
-
+    proxies = os.environ['PROXIES'].split(',')
     # Scraper function
     def transform(scraper):
-        scraper.scrape()
-        scraperResults = scraper.getResults()
-        for result in scraperResults:
-            # print(result)
-            # remove any punctuation from the result['name'] and lowercase it,
-            tempResultName = re.sub(r"[^\w\s]", "", result['name']).lower()
-            # then if it is in the results dict, append the result to the list
-            # if result['name'].lower() in results:
-            #     results[result['name'].lower()].append(result)
-            # else:
-            #     results[result['name'].lower()] = [result]
-            if tempResultName in results:
-                results[tempResultName].append(result)
-            else:
-                results[tempResultName] = [result]
-        return
+        if scraper.usesProxies:
+            while proxies:
+                proxy = random.choice(proxies)
+                try:
+                    scraper.scrape(proxy)
+                    scraperResults = scraper.getResults()
+                    for result in scraperResults:
+                        tempResultName = re.sub(r"[^\w\s]", "", result['name']).lower()
+                        if tempResultName in results:
+                            results[tempResultName].append(result)
+                        else:
+                            results[tempResultName] = [result]
+                    return
+                except (ProxyError, Timeout, SSLError, RetryError):
+                    proxies.remove(proxy)
+                    print(f"Proxy {proxy} removed.")
+        else:
+            scraper.scrape()
+            scraperResults = scraper.getResults()
+            for result in scraperResults:
+                # print(result)
+                # remove any punctuation from the result['name'] and lowercase it,
+                tempResultName = re.sub(r"[^\w\s]", "", result['name']).lower()
+                # then if it is in the results dict, append the result to the list
+                # if result['name'].lower() in results:
+                #     results[result['name'].lower()].append(result)
+                # else:
+                #     results[result['name'].lower()] = [result]
+                if tempResultName in results:
+                    results[tempResultName].append(result)
+                else:
+                    results[tempResultName] = [result]
+            return
 
     def executeScrapers(cardName):
         scraperMap = fetchScrapers(cardName)
