@@ -1,11 +1,23 @@
-
+import dotenv
 import requests
 import time
 import pymongo
 import threading
 import re
-# Reads from proxies.txt: 1 proxy per line, no need to add "," at the end of each line
-# - Henry
+import os
+
+"""
+This script scrapes all binderPOS/shopify stores for their entire inventory, and stores it in a MongoDB database.
+
+BinderPOS updates inventory only twice a day as per their TOS - 3am and 3pm EST.
+
+This script is meant to be run at 3:15am and 3:15pm EST, to ensure that the database is up to date.
+
+Reads from scripts/proxies.txt: 1 proxy per line, in the format of ip:port:username:password
+"""
+
+dotenv.load_dotenv()
+MONGO_URI = os.environ["MONGO_URI"]
 
 supportedWebsites = {
     "gamebreakers":{"url":"https://gamebreakers.ca/","collection":"mtgSinglesGamebreakers"},
@@ -49,7 +61,7 @@ supportedWebsites = {
 
 def monitor( website, url,collectionName):
     #Database Connection Info
-    myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+    myclient = pymongo.MongoClient(MONGO_URI)
     mydb = myclient["shopify-inventory"]
     collection = mydb[collectionName]
 
