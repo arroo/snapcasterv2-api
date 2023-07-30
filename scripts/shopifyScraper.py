@@ -95,7 +95,7 @@ def monitor( website, url,collectionName):
 
     #Proxy Info
     proxies=[]
-    with open('proxies.txt') as file:
+    with open('./proxies.txt') as file:
         proxies = file.read().splitlines()
     proxies.insert(0,'')
     proxyCurrentIndex=0
@@ -247,5 +247,11 @@ for key,value in supportedWebsites.items():
 
 for t in threads:
     t.join()
+
+with open("log.txt", "a") as f:
+    f.write(f"Total minutes: {(time.time() - start)/60}\n")
+    f.write("All threads finshed running\n")
+
+    
 print("All threads finshed running")
 print(f"Total minutes: {(time.time() - start)/60}")
