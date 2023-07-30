@@ -55,6 +55,22 @@ supportedWebsites = {
 
 }
 
+
+def checkIfInventoryDiffers(cardList,collection,url):
+    """
+    Debugging function to check if the inventory has changed since the last time the script was run.
+    """
+    # check the number of documents in the collection equal to the number of cards scraped
+    if len(cardList) != collection.count_documents({}):
+        print(f"#### INVENTORY CHANGED FOR {url}")
+        print("Number of documents in the collection does not equal the number of cards scraped")
+        print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        print(f"Cards in collection: {collection.count_documents({})}")
+        print(f"Size of new card list: {len(cardList)}")
+        return
+
+
+
 # Delay Information
 # Upon first rate limitation it will rotated to the next proxy within 5 seconds
 # Subsequent rate liitations will be 35 seconds each up to 6 times until it is terminated to prevent an infintie loop
@@ -199,11 +215,16 @@ def monitor( website, url,collectionName):
             print (url,"page: "+ str(pageNum))
         pageNum+=1
 
+    checkIfInventoryDiffers(cardList,collection,url)
+
     print("Finished Scraping: "+url +" page count: "+str(pageNum) +"document count: "+ str(len(cardList)))
     collection.delete_many({})
     if(len(cardList)>0):
         collection.insert_many(cardList)
 
+
+# start timer
+start = time.time()
 
 #Runs Each Site
 threads = []
@@ -215,3 +236,4 @@ for key,value in supportedWebsites.items():
 for t in threads:
     t.join()
 print("All threads finshed running")
+print(f"Total minutes: {(time.time() - start)/60}")
