@@ -50,8 +50,8 @@ supportedWebsites = {
     "blackknight":{"url":"https://blackknightgames.ca/","collection":"mtgSinglesBlackknightgames"},
     "bordercity":{"url":"https://bordercitygames.ca/","collection":"mtgSinglesBordercitygames"},
     "everythinggames":{"url":"https://everythinggames.ca/","collection":"mtgSinglesEverythinggames"},
-    "enterthebattlefield":{"url":"https://enterthebattlefield.ca/","collection":"mtgEnterthebattlefield"},
-    "fantasyforged":{"url":"https://FantasyForged.ca/","collection":"mtgFantasyForged"}
+    "enterthebattlefield":{"url":"https://enterthebattlefield.ca/","collection":"mtgSinglesEnterthebattlefield"},
+    "fantasyforged":{"url":"https://FantasyForged.ca/","collection":"mtgSinglesFantasyForged"}
 
 }
 
@@ -81,11 +81,12 @@ def monitor( website, url,collectionName):
     eof=False
     cardList=[]
     
-    NMFilter=['Mint','NM','Near']
-    LPFilter=['Light','Slightly','LP','Lightly']
-    MPFilter=['Moderate','Moderately','MP']
-    HPFilter=['Heavy','Heavily','HP']
-    DMGFilter=['Damage','Damaged','DMG']
+    NMFilter=['mint','nm','near']
+    LPFilter=['light','slight','lp','pl','lightly']
+    MPFilter=['moderate','moderately','mp']
+    HPFilter=['heavy','heavily','hp']
+    DMGFilter=['damage','damaged','dmg']
+    SCNFilter=['scanned','scn','scan']
     
     #loop through every page until the end of file
     while eof == False:
@@ -170,16 +171,18 @@ def monitor( website, url,collectionName):
                                 if "Foil" in variant['title'] or "foil" in variant['title'] :
                                     foil = True
 
-                            if condition in NMFilter:
+                            if condition.lower() in NMFilter:
                                 condition = "NM"
-                            elif condition in LPFilter:
+                            elif condition.lower() in LPFilter:
                                 condition = "LP"
-                            elif condition in MPFilter:
+                            elif condition.lower() in MPFilter:
                                 condition = "MP"
-                            elif condition in HPFilter:
+                            elif condition.lower() in HPFilter:
                                 condition = "HP"
-                            elif condition in DMGFilter:
+                            elif condition.lower() in DMGFilter:
                                 condition = "DMG"
+                            elif condition.lower() in SCNFilter:
+                                condition = "SCN"
 
                             dict = {
                                 "title":title,
