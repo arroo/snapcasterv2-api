@@ -60,13 +60,25 @@ def checkIfInventoryDiffers(cardList,collection,url):
     """
     Debugging function to check if the inventory has changed since the last time the script was run.
     """
-    # check the number of documents in the collection equal to the number of cards scraped
     if len(cardList) != collection.count_documents({}):
         print(f"#### INVENTORY CHANGED FOR {url}")
         print("Number of documents in the collection does not equal the number of cards scraped")
         print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         print(f"Cards in collection: {collection.count_documents({})}")
         print(f"Size of new card list: {len(cardList)}")
+
+        # also write to output file log.txt as append
+        with open("log.txt", "a") as f:
+            f.write(f"#### INVENTORY CHANGED FOR {url}\n")
+            f.write("Number of documents in the collection does not equal the number of cards scraped\n")
+            f.write(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + "\n")
+            f.write(f"Cards in collection: {collection.count_documents({})}\n")
+            f.write(f"Size of new card list: {len(cardList)}\n")
+
+    else:
+        print(f"## Success, no changes for {url} at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+
+
         return
 
 
