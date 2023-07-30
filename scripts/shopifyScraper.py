@@ -4,6 +4,7 @@ import time
 import pymongo
 import threading
 import re
+import os
 # Reads from proxies.txt: 1 proxy per line, no need to add "," at the end of each line
 # - Henry
 
