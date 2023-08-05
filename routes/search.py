@@ -459,12 +459,6 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
 
         results = filteredResults
 
-
-
-        # validate all results are of type SingleResult, and coerce them to SingleResult
-        # results = [SingleResult(**result) for result in results]
-
-
         numResults = len(results)
         background_tasks.add_task(
             post_search, request.cardName, request.websites, "single", "", numResults
