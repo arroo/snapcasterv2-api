@@ -55,33 +55,10 @@ supportedWebsites = {
 
 }
 
-
-def checkIfInventoryDiffers(cardList,collection,url):
-    """
-    Debugging function to check if the inventory has changed since the last time the script was run.
-    """
-    if len(cardList) != collection.count_documents({}):
-        print(f"#### INVENTORY CHANGED FOR {url}")
-        print("Number of documents in the collection does not equal the number of cards scraped")
-        print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-        print(f"Cards in collection: {collection.count_documents({})}")
-        print(f"Size of new card list: {len(cardList)}")
-
-        # also write to output file log.txt as append
-        with open("log.txt", "a") as f:
-            f.write(f"#### INVENTORY CHANGED FOR {url}\n")
-            f.write("Number of documents in the collection does not equal the number of cards scraped\n")
-            f.write(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + "\n")
-            f.write(f"Cards in collection: {collection.count_documents({})}\n")
-            f.write(f"Size of new card list: {len(cardList)}\n")
-
-    else:
-        print(f"## Success, no changes for {url} at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
-
-
-        return
-
-
+def formatPrice(price):
+    price = price.replace("$", "")
+    price = price.replace(",", "")
+    return float(price)
 
 # Delay Information
 # Upon first rate limitation it will rotated to the next proxy within 5 seconds
@@ -91,7 +68,8 @@ def monitor( website, url,collectionName):
     #Database Connection Info
     myclient = pymongo.MongoClient(MONGO_URI)
     mydb = myclient["shopify-inventory"]
-    collection = mydb[collectionName]
+    # collection = mydb[collectionName]
+    collection = mydb["mtgSingles"]
 
     #Proxy Info
     proxies=[]
@@ -221,7 +199,7 @@ def monitor( website, url,collectionName):
                                 "set":set,
                                 "variantTitle":condition,
                                 "foil":foil,
-                                "price":price
+                                "price": formatPrice(price)
                             }
                             cardList.append(dict)
             print (url,"page: "+ str(pageNum))
