@@ -197,7 +197,7 @@ def monitor( website, url,collectionName):
                                 "image": image,
                                 "link":f"{url}products/{productHandle}",
                                 "set":set,
-                                "variantTitle":condition,
+                                "condition":condition,
                                 "foil":foil,
                                 "price": formatPrice(price)
                             }
