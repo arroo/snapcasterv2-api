@@ -239,3 +239,7 @@ with open("log.txt", "a") as f:
 print(f"Results length: {len(results)}")
 print("All threads finshed running")
 print(f"Total minutes: {(time.time() - start)/60}")
+
+# close the connection to MongoDB
+myclient.close()
+
