@@ -37,7 +37,7 @@ supportedWebsites = {
     "omg":{"url":"https://omggames.ca/","collection":"mtgSinglesOmggames"},
     "kesselrun":{"url":"https://kesselrungames.ca/","collection":"mtgSinglesKesselrungames"},
     "reddragon":{"url":"https://red-dragon.ca/","collection":"mtgSinglesReddragon"},
-    "houseOfCards":{"url":"https://houseofcards.ca/","collection":"mtgSinglesHouseofcards"},
+    "houseofcards":{"url":"https://houseofcards.ca/","collection":"mtgSinglesHouseofcards"},
     "taps":{"url":"https://tapsgames.com/","collection":"mtgSinglesTapsgames"},
     "pandorasboox":{"url":"https://www.pandorasboox.ca/","collection":"mtgSinglespandorasboox"},
     "timevault":{"url":"https://thetimevault.ca/","collection":"mtgSinglesThetimeVault"},
@@ -50,10 +50,16 @@ supportedWebsites = {
     "blackknight":{"url":"https://blackknightgames.ca/","collection":"mtgSinglesBlackknightgames"},
     "bordercity":{"url":"https://bordercitygames.ca/","collection":"mtgSinglesBordercitygames"},
     "everythinggames":{"url":"https://everythinggames.ca/","collection":"mtgSinglesEverythinggames"},
-    "enterthebattlefield":{"url":"https://enterthebattlefield.ca/","collection":"mtgEnterthebattlefield"},
-    "fantasyforged":{"url":"https://FantasyForged.ca/","collection":"mtgFantasyForged"}
+    "enterthebattlefield":{"url":"https://enterthebattlefield.ca/","collection":"mtgSinglesEnterthebattlefield"},
+    "fantasyforged":{"url":"https://FantasyForged.ca/","collection":"mtgSinglesFantasyForged"},
+    "dragoncards":{"url":"https://tcg.dragoncardsandgames.com/","collection":"mtgSinglesDragoncards"},
 
 }
+
+def formatPrice(price):
+    price = price.replace("$", "")
+    price = price.replace(",", "")
+    return float(price)
 
 # Delay Information
 # Upon first rate limitation it will rotated to the next proxy within 5 seconds
@@ -63,11 +69,12 @@ def monitor( website, url,collectionName):
     #Database Connection Info
     myclient = pymongo.MongoClient(MONGO_URI)
     mydb = myclient["shopify-inventory"]
-    collection = mydb[collectionName]
+    # collection = mydb[collectionName]
+    collection = mydb["mtgSingles"]
 
     #Proxy Info
     proxies=[]
-    with open('proxies.txt') as file:
+    with open('./proxies.txt') as file:
         proxies = file.read().splitlines()
     proxies.insert(0,'')
     proxyCurrentIndex=0
@@ -81,11 +88,12 @@ def monitor( website, url,collectionName):
     eof=False
     cardList=[]
     
-    NMFilter=['Mint','NM','Near']
-    LPFilter=['Light','Slightly','LP','Lightly']
-    MPFilter=['Moderate','Moderately','MP']
-    HPFilter=['Heavy','Heavily','HP']
-    DMGFilter=['Damage','Damaged','DMG']
+    NMFilter=['mint','nm','near']
+    LPFilter=['light','slight','lp','pl','lightly']
+    MPFilter=['moderate','moderately','mp']
+    HPFilter=['heavy','heavily','hp']
+    DMGFilter=['damage','damaged','dmg']
+    SCNFilter=['scanned','scn','scan']
     
     #loop through every page until the end of file
     while eof == False:
@@ -170,27 +178,28 @@ def monitor( website, url,collectionName):
                                 if "Foil" in variant['title'] or "foil" in variant['title'] :
                                     foil = True
 
-                            if condition in NMFilter:
+                            if condition.lower() in NMFilter:
                                 condition = "NM"
-                            elif condition in LPFilter:
+                            elif condition.lower() in LPFilter:
                                 condition = "LP"
-                            elif condition in MPFilter:
+                            elif condition.lower() in MPFilter:
                                 condition = "MP"
-                            elif condition in HPFilter:
+                            elif condition.lower() in HPFilter:
                                 condition = "HP"
-                            elif condition in DMGFilter:
+                            elif condition.lower() in DMGFilter:
                                 condition = "DMG"
+                            elif condition.lower() in SCNFilter:
+                                condition = "SCN"
 
                             dict = {
-                                "title":title,
-                                "handle":productHandle,
+                                "name":title,
                                 "website":website,
                                 "image": image,
                                 "link":f"{url}products/{productHandle}",
                                 "set":set,
-                                "variantTitle":condition,
+                                "condition":condition,
                                 "foil":foil,
-                                "price":price
+                                "price": formatPrice(price)
                             }
                             cardList.append(dict)
             print (url,"page: "+ str(pageNum))
@@ -202,7 +211,9 @@ def monitor( website, url,collectionName):
         collection.insert_many(cardList)
 
 
-#Runs Each Site
+start = time.time()
+
+# Runs Each Site
 threads = []
 for key,value in supportedWebsites.items():
     t = threading.Thread(target=monitor, args=(key,value['url'],value['collection']))
@@ -211,4 +222,11 @@ for key,value in supportedWebsites.items():
 
 for t in threads:
     t.join()
+
+with open("log.txt", "a") as f:
+    f.write(f"Total minutes: {(time.time() - start)/60}\n")
+    f.write("All threads finshed running\n")
+
+    
 print("All threads finshed running")
+print(f"Total minutes: {(time.time() - start)/60}")
