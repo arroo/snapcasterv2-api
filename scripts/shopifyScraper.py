@@ -66,12 +66,6 @@ def formatPrice(price):
 # Subsequent rate liitations will be 35 seconds each up to 6 times until it is terminated to prevent an infintie loop
 
 def monitor( website, url,collectionName):
-    #Database Connection Info
-    myclient = pymongo.MongoClient(MONGO_URI)
-    mydb = myclient["shopify-inventory"]
-    # collection = mydb[collectionName]
-    collection = mydb["mtgSingles"]
-
     #Proxy Info
     proxies=[]
     with open('./proxies.txt') as file:
@@ -134,8 +128,12 @@ def monitor( website, url,collectionName):
             print("Failed to retrieve data in " + str(apiCallAttempts) + " times. Function will not attempt to retrieve any further pages")
             break
         
-
-        if len(data['products'])==0:
+        try:
+            if len(data['products'])==0:
+                eof=True
+                break
+        except: 
+            print(f"Cannot access data['products'] for {url}products.json?limit=250&page={str(pageNum)}")
             eof=True
             break
         else:
@@ -210,10 +208,10 @@ def monitor( website, url,collectionName):
         pageNum+=1
 
     print("Finished Scraping: "+url +" page count: "+str(pageNum) +"document count: "+ str(len(cardList)))
-    collection.delete_many({})
-    if(len(cardList)>0):
-        collection.insert_many(cardList)
+    results.extend(cardList)
 
+# Create a list to save the results from all threads
+results = []
 
 start = time.time()
 
@@ -227,10 +225,17 @@ for key,value in supportedWebsites.items():
 for t in threads:
     t.join()
 
+myclient = pymongo.MongoClient(MONGO_URI)
+mydb = myclient["shopify-inventory"]
+collection = mydb["mtgSingles"]
+collection.delete_many({})
+collection.insert_many(results)
+
 with open("log.txt", "a") as f:
     f.write(f"Total minutes: {(time.time() - start)/60}\n")
     f.write("All threads finshed running\n")
 
     
+print(f"Results length: {len(results)}")
 print("All threads finshed running")
 print(f"Total minutes: {(time.time() - start)/60}")
