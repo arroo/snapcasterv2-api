@@ -130,7 +130,12 @@ rd = redis.Redis(
 )
 mongoClient = MongoClient(os.environ["MONGO_URI"])
 db = mongoClient["snapcaster"]
+shopifyInventoryDb = mongoClient["shopify-inventory"]
 
+def searchShopifyInventory(search_term, db):
+    mtgSinglesCollection = db['mtgSingles']
+    # case insensitive and punctuation insensitive using full text search on index "title"
+    return list(mtgSinglesCollection.find({"$text": {"$search": search_term}}))
 
 def fetchScrapers(cardName):
     # Arrange scrapers
