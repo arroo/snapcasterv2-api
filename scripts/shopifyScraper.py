@@ -37,7 +37,7 @@ supportedWebsites = {
     "omg":{"url":"https://omggames.ca/","collection":"mtgSinglesOmggames"},
     "kesselrun":{"url":"https://kesselrungames.ca/","collection":"mtgSinglesKesselrungames"},
     "reddragon":{"url":"https://red-dragon.ca/","collection":"mtgSinglesReddragon"},
-    "houseOfCards":{"url":"https://houseofcards.ca/","collection":"mtgSinglesHouseofcards"},
+    "houseofcards":{"url":"https://houseofcards.ca/","collection":"mtgSinglesHouseofcards"},
     "taps":{"url":"https://tapsgames.com/","collection":"mtgSinglesTapsgames"},
     "pandorasboox":{"url":"https://www.pandorasboox.ca/","collection":"mtgSinglespandorasboox"},
     "timevault":{"url":"https://thetimevault.ca/","collection":"mtgSinglesThetimeVault"},
@@ -227,18 +227,15 @@ def monitor( website, url,collectionName):
             print (url,"page: "+ str(pageNum))
         pageNum+=1
 
-    checkIfInventoryDiffers(cardList,collection,url)
-
     print("Finished Scraping: "+url +" page count: "+str(pageNum) +"document count: "+ str(len(cardList)))
     collection.delete_many({})
     if(len(cardList)>0):
         collection.insert_many(cardList)
 
 
-# start timer
 start = time.time()
 
-#Runs Each Site
+# Runs Each Site
 threads = []
 for key,value in supportedWebsites.items():
     t = threading.Thread(target=monitor, args=(key,value['url'],value['collection']))
