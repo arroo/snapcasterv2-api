@@ -160,6 +160,10 @@ def monitor( website, url,collectionName):
                         except:
                             set="Other"
                             print("strip error for: "+ website + " page: "+str(pageNum)+ " title: "+product['title'] +" handle: "+product['handle'])
+
+                        if 'foil' in title.lower():
+                            foil = True
+
                         title=product['title'].split("[")[0].strip()
                         title.split("(")[0].strip()
                     
