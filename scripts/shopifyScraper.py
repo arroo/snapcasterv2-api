@@ -51,7 +51,8 @@ supportedWebsites = {
     "bordercity":{"url":"https://bordercitygames.ca/","collection":"mtgSinglesBordercitygames"},
     "everythinggames":{"url":"https://everythinggames.ca/","collection":"mtgSinglesEverythinggames"},
     "enterthebattlefield":{"url":"https://enterthebattlefield.ca/","collection":"mtgSinglesEnterthebattlefield"},
-    "fantasyforged":{"url":"https://FantasyForged.ca/","collection":"mtgSinglesFantasyForged"}
+    "fantasyforged":{"url":"https://FantasyForged.ca/","collection":"mtgSinglesFantasyForged"},
+    "dragoncards":{"url":"https://tcg.dragoncardsandgames.com/","collection":"mtgSinglesDragoncards"},
 
 }
 
@@ -191,8 +192,7 @@ def monitor( website, url,collectionName):
                                 condition = "SCN"
 
                             dict = {
-                                "title":title,
-                                "handle":productHandle,
+                                "name":title,
                                 "website":website,
                                 "image": image,
                                 "link":f"{url}products/{productHandle}",
