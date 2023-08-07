@@ -18,6 +18,7 @@ Reads from scripts/proxies.txt: 1 proxy per line, in the format of ip:port:usern
 
 dotenv.load_dotenv()
 MONGO_URI = os.environ["MONGO_URI"]
+# MONGO_URI = "mongodb://docker:mongopw@localhost:55000"
 
 supportedWebsites = {
     "gamebreakers":{"url":"https://gamebreakers.ca/","collection":"mtgSinglesGamebreakers"},
@@ -51,7 +52,7 @@ supportedWebsites = {
     "bordercity":{"url":"https://bordercitygames.ca/","collection":"mtgSinglesBordercitygames"},
     "everythinggames":{"url":"https://everythinggames.ca/","collection":"mtgSinglesEverythinggames"},
     "enterthebattlefield":{"url":"https://enterthebattlefield.ca/","collection":"mtgSinglesEnterthebattlefield"},
-    "fantasyforged":{"url":"https://FantasyForged.ca/","collection":"mtgSinglesFantasyForged"},
+    "fantasyforged":{"url":"https://fantasyforged.ca/","collection":"mtgSinglesFantasyForged"},
     "dragoncards":{"url":"https://tcg.dragoncardsandgames.com/","collection":"mtgSinglesDragoncards"},
 
 }
@@ -63,7 +64,7 @@ def formatPrice(price):
 
 # Delay Information
 # Upon first rate limitation it will rotated to the next proxy within 5 seconds
-# Subsequent rate liitations will be 35 seconds each up to 6 times until it is terminated to prevent an infintie loop
+# Subsequent rate liitations will be 120 seconds each up to 6 times until it is terminated to prevent an infintie loop
 
 def monitor( website, url,collectionName):
     #Proxy Info
@@ -116,7 +117,7 @@ def monitor( website, url,collectionName):
                 apiCallAttempts+=1
 
                 if apiCallAttempts >=3:
-                    rateLimitedTimer=35
+                    rateLimitedTimer=120
                 else:
                     rateLimitedTimer=5
                 if proxyCurrentIndex == len(proxies)-1:
@@ -138,7 +139,7 @@ def monitor( website, url,collectionName):
             break
         else:
             for product in data['products']:
-                if product['product_type']==productTypeIdentifier:
+                if product['product_type']==productTypeIdentifier or (url=="https://fantasyforged.ca/" and product['product_type']==""):
                     # Need to figure something out for title and set
                     foil = False
                     title=product['title']
