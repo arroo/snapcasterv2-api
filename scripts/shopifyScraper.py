@@ -18,8 +18,10 @@ Reads from scripts/proxies.txt: 1 proxy per line, in the format of ip:port:usern
 
 dotenv.load_dotenv()
 MONGO_URI = os.environ["MONGO_URI"]
+# MONGO_URI = "mongodb://docker:mongopw@localhost:55000"
 
 supportedWebsites = {
+    "levelup":{"url":"https://levelupgames.ca/","collection":"mtgSinglesLevelupgames"},
     "gamebreakers":{"url":"https://gamebreakers.ca/","collection":"mtgSinglesGamebreakers"},
     "gameknight":{"url":"https://gameknight.ca/","collection":"mtgSinglesGameknight"},
     "mythicstore":{"url":"https://themythicstore.com/","collection":"mtgSinglesThemythicstore"},
@@ -51,7 +53,7 @@ supportedWebsites = {
     "bordercity":{"url":"https://bordercitygames.ca/","collection":"mtgSinglesBordercitygames"},
     "everythinggames":{"url":"https://everythinggames.ca/","collection":"mtgSinglesEverythinggames"},
     "enterthebattlefield":{"url":"https://enterthebattlefield.ca/","collection":"mtgSinglesEnterthebattlefield"},
-    "fantasyforged":{"url":"https://FantasyForged.ca/","collection":"mtgSinglesFantasyForged"},
+    "fantasyforged":{"url":"https://fantasyforged.ca/","collection":"mtgSinglesFantasyForged"},
     "dragoncards":{"url":"https://tcg.dragoncardsandgames.com/","collection":"mtgSinglesDragoncards"},
 
 }
@@ -63,15 +65,9 @@ def formatPrice(price):
 
 # Delay Information
 # Upon first rate limitation it will rotated to the next proxy within 5 seconds
-# Subsequent rate liitations will be 35 seconds each up to 6 times until it is terminated to prevent an infintie loop
+# Subsequent rate liitations will be 120 seconds each up to 6 times until it is terminated to prevent an infintie loop
 
 def monitor( website, url,collectionName):
-    #Database Connection Info
-    myclient = pymongo.MongoClient(MONGO_URI)
-    mydb = myclient["shopify-inventory"]
-    # collection = mydb[collectionName]
-    collection = mydb["mtgSingles"]
-
     #Proxy Info
     proxies=[]
     with open('./proxies.txt') as file:
@@ -122,7 +118,7 @@ def monitor( website, url,collectionName):
                 apiCallAttempts+=1
 
                 if apiCallAttempts >=3:
-                    rateLimitedTimer=35
+                    rateLimitedTimer=120
                 else:
                     rateLimitedTimer=5
                 if proxyCurrentIndex == len(proxies)-1:
@@ -134,13 +130,17 @@ def monitor( website, url,collectionName):
             print("Failed to retrieve data in " + str(apiCallAttempts) + " times. Function will not attempt to retrieve any further pages")
             break
         
-
-        if len(data['products'])==0:
+        try:
+            if len(data['products'])==0:
+                eof=True
+                break
+        except: 
+            print(f"Cannot access data['products'] for {url}products.json?limit=250&page={str(pageNum)}")
             eof=True
             break
         else:
             for product in data['products']:
-                if product['product_type']==productTypeIdentifier:
+                if product['product_type']==productTypeIdentifier or (url=="https://fantasyforged.ca/" and product['product_type']==""):
                     # Need to figure something out for title and set
                     foil = False
                     title=product['title']
@@ -160,6 +160,10 @@ def monitor( website, url,collectionName):
                         except:
                             set="Other"
                             print("strip error for: "+ website + " page: "+str(pageNum)+ " title: "+product['title'] +" handle: "+product['handle'])
+
+                        if 'foil' in title.lower():
+                            foil = True
+
                         title=product['title'].split("[")[0].strip()
                         title.split("(")[0].strip()
                     
@@ -206,10 +210,10 @@ def monitor( website, url,collectionName):
         pageNum+=1
 
     print("Finished Scraping: "+url +" page count: "+str(pageNum) +"document count: "+ str(len(cardList)))
-    collection.delete_many({})
-    if(len(cardList)>0):
-        collection.insert_many(cardList)
+    results.extend(cardList)
 
+# Create a list to save the results from all threads
+results = []
 
 start = time.time()
 
@@ -223,10 +227,21 @@ for key,value in supportedWebsites.items():
 for t in threads:
     t.join()
 
+myclient = pymongo.MongoClient(MONGO_URI)
+mydb = myclient["shopify-inventory"]
+collection = mydb["mtgSingles"]
+collection.delete_many({})
+collection.insert_many(results)
+
 with open("log.txt", "a") as f:
     f.write(f"Total minutes: {(time.time() - start)/60}\n")
     f.write("All threads finshed running\n")
 
     
+print(f"Results length: {len(results)}")
 print("All threads finshed running")
 print(f"Total minutes: {(time.time() - start)/60}")
+
+# close the connection to MongoDB
+myclient.close()
+

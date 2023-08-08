@@ -106,6 +106,7 @@ rd = redis.Redis(
     password=os.environ["RD_PASSWORD"],
     db=0,
 )
+
 mongoClient = MongoClient(os.environ["MONGO_URI"])
 db = mongoClient["snapcaster"]
 shopifyInventoryDb = mongoClient["shopify-inventory"]
@@ -169,10 +170,6 @@ def post_search(query, websites, query_type, results, num_results):
     )
     cur = conn.cursor()
 
-    # We want to add this search to the search table
-    # If the table doesn't exist, create it
-    #  We also need to protect against SQL injection for the query field
-
     cur.execute(
         "CREATE TABLE IF NOT EXISTS search (id SERIAL PRIMARY KEY, query VARCHAR, websites VARCHAR(512), query_type VARCHAR(60), results VARCHAR(255), num_results INT, timestamp TIMESTAMP);"
     )
@@ -199,7 +196,6 @@ def post_search(query, websites, query_type, results, num_results):
 
 def post_price_entry(query, price_list):
     # We need to find the card with the best match for the query, ignore punctuation,
-    # ignore case, and ignore whitespace
     try:
         if len(price_list) == 0:
             return
@@ -370,7 +366,6 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
             temp_proxies = proxies.copy()
             num_failed_proxies = 0
             if scraper.usesProxies:
-                print(f"SHOULD NOT BE USING PROXIES HERE, ALTER {scraper.website}")
                 while temp_proxies:  # try as long as there are proxies left
                     proxy = random.choice(temp_proxies)
                     try:
