@@ -21,6 +21,7 @@ MONGO_URI = os.environ["MONGO_URI"]
 # MONGO_URI = "mongodb://docker:mongopw@localhost:55000"
 
 supportedWebsites = {
+    "levelup":{"url":"https://levelupgames.ca/","collection":"mtgSinglesLevelupgames"},
     "gamebreakers":{"url":"https://gamebreakers.ca/","collection":"mtgSinglesGamebreakers"},
     "gameknight":{"url":"https://gameknight.ca/","collection":"mtgSinglesGameknight"},
     "mythicstore":{"url":"https://themythicstore.com/","collection":"mtgSinglesThemythicstore"},
