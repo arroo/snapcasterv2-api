@@ -1,9 +1,6 @@
 from scrapers.base.GauntletScraper import GauntletScraper
-from scrapers.base.Four01Scraper import Four01Scraper
 from scrapers.base.FusionScraper import FusionScraper
 from scrapers.base.KanatacgScraper import KanatacgScraper
-from scrapers.base.HouseOfCardsScraper import HouseOfCardsScraper
-from scrapers.base.EverythingGamesScraper import EverythingGamesScraper
 from scrapers.base.MagicStrongholdScraper import MagicStrongholdScraper
 from scrapers.base.FaceToFaceScraper import FaceToFaceScraper
 from scrapers.base.ConnectionGamesScraper import ConnectionGamesScraper
@@ -11,41 +8,11 @@ from scrapers.base.SequenceScraper import SequenceScraper
 from scrapers.base.TopDeckHeroScraper import TopDeckHeroScraper
 from scrapers.base.Jeux3DragonsScraper import Jeux3DragonsScraper
 from scrapers.base.AtlasScraper import AtlasScraper
-from scrapers.base.GamezillaScraper import GamezillaScraper
-from scrapers.base.HairyTScraper import HairyTScraper
-from scrapers.base.ExorGamesScraper import ExorGamesScraper
-from scrapers.base.GameKnightScraper import GameKnightScraper
-from scrapers.base.EnterTheBattlefieldScraper import EnterTheBattlefieldScraper
 from scrapers.base.ManaforceScraper import ManaforceScraper
 from scrapers.base.FirstPlayerScraper import FirstPlayerScraper
 from scrapers.base.OrchardCityScraper import OrchardCityScraper
-from scrapers.base.BorderCityScraper import BorderCityScraper
-from scrapers.base.SilverGoblinScraper import SilverGoblinScraper
-from scrapers.base.BlackKnightScraper import BlackKnightScraper
-from scrapers.base.HFXScraper import HFXScraper
 from scrapers.base.AetherVaultScraper import AetherVaultScraper
-from scrapers.base.AbyssScraper import AbyssScraper
-from scrapers.base.OMGScraper import OMGScraper
-from scrapers.base.KesselRunScraper import KesselRunScraper
-from scrapers.base.NorthOfExileScraper import NorthOfExileScraper
-from scrapers.base.RedDragonScraper import RedDragonScraper
-from scrapers.base.FantasyForgedScraper import FantasyForgedScraper
 from scrapers.base.TheComicHunterScraper import TheComicHunterScraper
-from scrapers.base.NerdzCafeScraper import NerdzCafeScraper
-from scrapers.base.ChimeraScraper import ChimeraScraper
-from scrapers.base.GameBreakersScraper import GameBreakersScraper
-from scrapers.base.TimeVaultScraper import TimeVaultScraper
-from scrapers.base.TapsScraper import TapsScraper
-from scrapers.base.EastRidgeScraper import EastRidgeScraper
-from scrapers.base.CryptScraper import CryptScraper
-from scrapers.base.DragonCardsScraper import DragonCardsScraper
-from scrapers.base.UpNorthScraper import UpNorthScraper
-from scrapers.base.MythicStoreScraper import MythicStoreScraper
-from scrapers.base.VortexGamesScraper import VortexGamesScraper
-from scrapers.base.WaypointScraper import WaypointScraper
-from scrapers.base.SkyfoxScraper import SkyfoxScraper
-from scrapers.base.OutOfTheBoxScraper import OutOfTheBoxScraper
-from scrapers.base.PandorasBooxScraper import PandorasBooxScraper
 from scrapers.sealed.AtlasSealedScraper import AtlasSealedScraper
 from scrapers.sealed.BorderCitySealedScraper import BorderCitySealedScraper
 from scrapers.sealed.ChimeraSealedScraper import ChimeraSealedScraper
@@ -115,6 +82,17 @@ class PriceEntry(BaseModel):
     priceList: str
     date: str
 
+class SingleResult(BaseModel):
+    name: str
+    website: str
+    image: str
+    link: str
+    set: str
+    condition: str
+    foil: bool
+    price: float
+
+
 
 def getProxiesFromFile(filename):
     with open(filename, "r") as f:
@@ -128,18 +106,25 @@ rd = redis.Redis(
     password=os.environ["RD_PASSWORD"],
     db=0,
 )
+
 mongoClient = MongoClient(os.environ["MONGO_URI"])
 db = mongoClient["snapcaster"]
+shopifyInventoryDb = mongoClient["shopify-inventory"]
 
+def searchShopifyInventory(search_term, db):
+    mtgSinglesCollection = db['mtgSingles']
+    # case insensitive and punctuation insensitive using full text search on index "title"
+    result = list(mtgSinglesCollection.find({"$text": {"$search": search_term}}))
+    # drop the _id field from the result
+    for item in result:
+        item.pop('_id')
+    return result
 
 def fetchScrapers(cardName):
     # Arrange scrapers
-    houseOfCardsScraper = HouseOfCardsScraper(cardName)
     gauntletScraper = GauntletScraper(cardName)
     kanatacgScraper = KanatacgScraper(cardName)
     fusionScraper = FusionScraper(cardName)
-    four01Scraper = Four01Scraper(cardName)
-    everythingGamesScraper = EverythingGamesScraper(cardName)
     magicStrongholdScraper = MagicStrongholdScraper(cardName)
     faceToFaceScraper = FaceToFaceScraper(cardName)
     connectionGamesScraper = ConnectionGamesScraper(cardName)
@@ -147,49 +132,17 @@ def fetchScrapers(cardName):
     jeux3DragonsScraper = Jeux3DragonsScraper(cardName)
     sequenceScraper = SequenceScraper(cardName)
     atlasScraper = AtlasScraper(cardName)
-    hairyTScraper = HairyTScraper(cardName)
-    gamezillaScraper = GamezillaScraper(cardName)
-    exorGamesScraper = ExorGamesScraper(cardName)
-    gameKnightScraper = GameKnightScraper(cardName)
-    enterTheBattlefieldScraper = EnterTheBattlefieldScraper(cardName)
     manaforceScraper = ManaforceScraper(cardName)
     firstPlayerScraper = FirstPlayerScraper(cardName)
     orchardCityScraper = OrchardCityScraper(cardName)
-    borderCityScraper = BorderCityScraper(cardName)
     aetherVaultScraper = AetherVaultScraper(cardName)
-    fantasyForgedScraper = FantasyForgedScraper(cardName)
     theComicHunterScraper = TheComicHunterScraper(cardName)
-    chimeraScraper = ChimeraScraper(cardName)
-    dragonCardsScraper = DragonCardsScraper(cardName)
-    gameBreakersScraper = GameBreakersScraper(cardName)
-    mythicStoreScraper = MythicStoreScraper(cardName)
-    vortexGamesScraper = VortexGamesScraper(cardName)
-    abyssScraper = AbyssScraper(cardName)
-    cryptScraper = CryptScraper(cardName)
-    silverGoblinScraper = SilverGoblinScraper(cardName)
-    northOfExileScraper = NorthOfExileScraper(cardName)
-    hfxScraper = HFXScraper(cardName)
-    omgScraper = OMGScraper(cardName)
-    kesselRunScraper = KesselRunScraper(cardName)
-    redDragonScraper = RedDragonScraper(cardName)
-    tapsScraper = TapsScraper(cardName)
-    blackKnightScraper = BlackKnightScraper(cardName)
-    outOfTheBoxScraper = OutOfTheBoxScraper(cardName)
-    timeVaultScraper = TimeVaultScraper(cardName)
-    eastRidgeScraper = EastRidgeScraper(cardName)
-    upNorthScraper = UpNorthScraper(cardName)
-    pandorasBooxScraper = PandorasBooxScraper(cardName)
-    waypointScraper = WaypointScraper(cardName)
-    skyfoxScraper = SkyfoxScraper(cardName)
-    nerdzCafeScraper = NerdzCafeScraper(cardName)
+
     # Map scrapers to an identifier keyword
     return {
-        "houseofcards": houseOfCardsScraper,
         "gauntlet": gauntletScraper,
         "kanatacg": kanatacgScraper,
         "fusion": fusionScraper,
-        "four01": four01Scraper,
-        "everythinggames": everythingGamesScraper,
         "magicstronghold": magicStrongholdScraper,
         "facetoface": faceToFaceScraper,
         "connectiongames": connectionGamesScraper,
@@ -197,41 +150,11 @@ def fetchScrapers(cardName):
         "jeux3dragons": jeux3DragonsScraper,
         "sequencegaming": sequenceScraper,
         "atlas": atlasScraper,
-        "hairyt": hairyTScraper,
-        "gamezilla": gamezillaScraper,
-        "exorgames": exorGamesScraper,
-        "gameknight": gameKnightScraper,
-        "enterthebattlefield": enterTheBattlefieldScraper,
         "firstplayer": firstPlayerScraper,
         "manaforce": manaforceScraper,
         "orchardcity": orchardCityScraper,
-        "bordercity": borderCityScraper,
         "aethervault": aetherVaultScraper,
-        "fantasyforged": fantasyForgedScraper,
         "thecomichunter": theComicHunterScraper,
-        "chimera": chimeraScraper,
-        "dragoncards": dragonCardsScraper,
-        "gamebreakers": gameBreakersScraper,
-        "mythicstore": mythicStoreScraper,
-        "vortexgames": vortexGamesScraper,
-        "abyss": abyssScraper,
-        "silvergoblin": silverGoblinScraper,
-        "crypt": cryptScraper,
-        "northofexile": northOfExileScraper,
-        "hfx": hfxScraper,
-        "omg": omgScraper,
-        "kesselrun": kesselRunScraper,
-        "reddragon": redDragonScraper,
-        "taps": tapsScraper,
-        "blackknight": blackKnightScraper,
-        "outofthebox": outOfTheBoxScraper,
-        "pandorasboox": pandorasBooxScraper,
-        "timevault": timeVaultScraper,
-        "eastridge": eastRidgeScraper,
-        "upnorth": upNorthScraper,
-        "waypoint": waypointScraper,
-        "skyfox": skyfoxScraper,
-        "nerdzcafe": nerdzCafeScraper,
     }
 
 
@@ -246,10 +169,6 @@ def post_search(query, websites, query_type, results, num_results):
         port=os.environ["PG_PORT"],
     )
     cur = conn.cursor()
-
-    # We want to add this search to the search table
-    # If the table doesn't exist, create it
-    #  We also need to protect against SQL injection for the query field
 
     cur.execute(
         "CREATE TABLE IF NOT EXISTS search (id SERIAL PRIMARY KEY, query VARCHAR, websites VARCHAR(512), query_type VARCHAR(60), results VARCHAR(255), num_results INT, timestamp TIMESTAMP);"
@@ -277,7 +196,6 @@ def post_search(query, websites, query_type, results, num_results):
 
 def post_price_entry(query, price_list):
     # We need to find the card with the best match for the query, ignore punctuation,
-    # ignore case, and ignore whitespace
     try:
         if len(price_list) == 0:
             return
@@ -504,6 +422,12 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
             threadResults = executor.map(transform, scrapers)
 
+        # get results from shopify inventory
+        shopify_results = searchShopifyInventory(request.cardName, shopifyInventoryDb)
+        # append shopify results to results
+        print(f"Found {len(shopify_results)} shopify results")
+
+        results.extend(shopify_results)
         # Filter the results
         # Check if result name contains the card name
         # Check if the result contains "Token" or "Emblem" and the request.cardName does not contain "Token" or "Emblem", remove result
@@ -574,6 +498,7 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
 
     def transform(scraper):
         if scraper.usesProxies:
+            print(f"Using proxies for {scraper.website}")
             time.sleep(random.randint(1, 2))
             while proxies:
                 proxy = random.choice(proxies)
@@ -734,3 +659,4 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
     )
 
     return results
+

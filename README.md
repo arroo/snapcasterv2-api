@@ -25,6 +25,12 @@ The application comes with a script to update the available card sets. To update
 1. Download SetList.json from MtgJson and place it in scripts/.
 2. Run python updateSets.py 
 
+## Shopify Inventory
+Sites using binderPOS or Shopify are scraped by fetching and parsing the products.json file.
+The entire MTG singles inventory for each store is stored in it's own mongoDB collection.
+The `scripts/shopifyScraper.py` runs on a schedule to keep the mongoDB instance up to date.
+The `/search/` endpoint queries mongodb for the shopify stores, and scrapes the rest in real time.
+
 ## Database schema
 The database is primarily used to log search history for the application for debugging, and is only essential for sealed searches. 
 
