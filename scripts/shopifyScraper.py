@@ -120,7 +120,7 @@ def monitor( website, url,collectionName):
                 if apiCallAttempts >=3:
                     rateLimitedTimer=120
                 else:
-                    rateLimitedTimer=5
+                    rateLimitedTimer=30
                 if proxyCurrentIndex == len(proxies)-1:
                     proxyCurrentIndex=0
                 else:
