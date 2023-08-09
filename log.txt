@@ -1,0 +1,2 @@
+Total minutes: 27.767516084512074
+All threads finshed running

@@ -233,10 +233,6 @@ collection = mydb["mtgSingles"]
 collection.delete_many({})
 collection.insert_many(results)
 
-with open("log.txt", "a") as f:
-    f.write(f"Total minutes: {(time.time() - start)/60}\n")
-    f.write("All threads finshed running\n")
-
     
 print(f"Results length: {len(results)}")
 print("All threads finshed running")
