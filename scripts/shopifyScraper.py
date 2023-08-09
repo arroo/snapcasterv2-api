@@ -120,7 +120,7 @@ def monitor( website, url,collectionName):
                 if apiCallAttempts >=3:
                     rateLimitedTimer=120
                 else:
-                    rateLimitedTimer=5
+                    rateLimitedTimer=30
                 if proxyCurrentIndex == len(proxies)-1:
                     proxyCurrentIndex=0
                 else:
@@ -232,10 +232,6 @@ mydb = myclient["shopify-inventory"]
 collection = mydb["mtgSingles"]
 collection.delete_many({})
 collection.insert_many(results)
-
-with open("log.txt", "a") as f:
-    f.write(f"Total minutes: {(time.time() - start)/60}\n")
-    f.write("All threads finshed running\n")
 
     
 print(f"Results length: {len(results)}")
