@@ -216,13 +216,14 @@ def monitor( website, url, collectionName):
             tempCollection.insert_many(cardList)
             cardList.clear()
 
+    print("Finished Scraping: "+url +" page count: "+str(pageNum) +"document count: "+ str(tempCollection.count_documents({})))
 
     collection = mydb['mtgSingles']
     collection.delete_many({"website":website})
-    collection.insert_many(tempCollection.find())
+    if tempCollection.count_documents({}) > 0:
+        collection.insert_many(tempCollection.find())
     tempCollection.drop()
 
-    print("Finished Scraping: "+url +" page count: "+str(pageNum) +"document count: "+ str(len(cardList)))
     # instead of extending the list, we can just insert the list into the database
     #
     # first, delete all entries with the same website
