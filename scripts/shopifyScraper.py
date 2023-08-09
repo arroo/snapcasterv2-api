@@ -19,6 +19,9 @@ Reads from scripts/proxies.txt: 1 proxy per line, in the format of ip:port:usern
 dotenv.load_dotenv()
 MONGO_URI = os.environ["MONGO_URI"]
 # MONGO_URI = "mongodb://docker:mongopw@localhost:55000"
+myclient = pymongo.MongoClient(MONGO_URI)
+mydb = myclient["shopify-inventory"]
+
 
 supportedWebsites = {
     "levelup":{"url":"https://levelupgames.ca/","collection":"mtgSinglesLevelupgames"},
@@ -67,7 +70,7 @@ def formatPrice(price):
 # Upon first rate limitation it will rotated to the next proxy within 5 seconds
 # Subsequent rate liitations will be 120 seconds each up to 6 times until it is terminated to prevent an infintie loop
 
-def monitor( website, url,collectionName):
+def monitor( website, url):
     #Proxy Info
     proxies=[]
     with open('./proxies.txt') as file:
@@ -92,7 +95,7 @@ def monitor( website, url,collectionName):
     SCNFilter=['scanned','scn','scan']
     
     #loop through every page until the end of file
-    while eof == False:
+    while eof == False and pageNum<15:
         apiCallAttempts=0
         maxAPIAttempts=6
         r=None
@@ -211,31 +214,29 @@ def monitor( website, url,collectionName):
         pageNum+=1
 
     print("Finished Scraping: "+url +" page count: "+str(pageNum) +"document count: "+ str(len(cardList)))
-    results.extend(cardList)
+    # instead of extending the list, we can just insert the list into the database
+    #
+    # first, delete all entries with the same website
+    collection = mydb['mtgSingles']
+    collection.delete_many({"website":website})
+    # then, insert the new list
+    if len(cardList) > 0:
+        collection.insert_many(cardList)
+    
 
 # Create a list to save the results from all threads
-results = []
-
 start = time.time()
 
 # Runs Each Site
 threads = []
 for key,value in supportedWebsites.items():
-    t = threading.Thread(target=monitor, args=(key,value['url'],value['collection']))
+    t = threading.Thread(target=monitor, args=(key,value['url']))
     t.start()
     threads.append(t)
 
 for t in threads:
     t.join()
 
-myclient = pymongo.MongoClient(MONGO_URI)
-mydb = myclient["shopify-inventory"]
-collection = mydb["mtgSingles"]
-collection.delete_many({})
-collection.insert_many(results)
-
-    
-print(f"Results length: {len(results)}")
 print("All threads finshed running")
 print(f"Total minutes: {(time.time() - start)/60}")
 
