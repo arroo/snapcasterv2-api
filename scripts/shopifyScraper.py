@@ -213,7 +213,11 @@ def monitor( website, url, collectionName):
             print (url,"page: "+ str(pageNum))
         pageNum+=1
         if len(cardList) > 0:
-            tempCollection.insert_many(cardList)
+            try:
+                tempCollection.insert_many(cardList)
+            except Exception as e:
+                print("Error inserting into tempCollection: "+str(e))
+                print(f"Details of exception: {e.args}")
             cardList.clear()
 
     print("Finished Scraping: "+url +" page count: "+str(pageNum) +"document count: "+ str(tempCollection.count_documents({})))
