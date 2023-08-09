@@ -18,7 +18,6 @@ Reads from scripts/proxies.txt: 1 proxy per line, in the format of ip:port:usern
 
 dotenv.load_dotenv()
 MONGO_URI = os.environ["MONGO_URI"]
-# MONGO_URI = "mongodb://docker:mongopw@localhost:55000"
 myclient = pymongo.MongoClient(MONGO_URI)
 mydb = myclient["shopify-inventory"]
 
@@ -70,13 +69,14 @@ def formatPrice(price):
 # Upon first rate limitation it will rotated to the next proxy within 5 seconds
 # Subsequent rate liitations will be 120 seconds each up to 6 times until it is terminated to prevent an infintie loop
 
-def monitor( website, url):
+def monitor( website, url, collectionName):
     #Proxy Info
     proxies=[]
     with open('./proxies.txt') as file:
         proxies = file.read().splitlines()
     proxies.insert(0,'')
     proxyCurrentIndex=0
+    tempCollection = mydb[collectionName]
 
     #Webscrape Info    
     productTypeIdentifier="MTG Single"
@@ -212,16 +212,25 @@ def monitor( website, url):
                             cardList.append(dict)
             print (url,"page: "+ str(pageNum))
         pageNum+=1
+        if len(cardList) > 0:
+            tempCollection.insert_many(cardList)
+            cardList.clear()
+
+
+    collection = mydb['mtgSingles']
+    collection.delete_many({"website":website})
+    collection.insert_many(tempCollection.find())
+    tempCollection.drop()
 
     print("Finished Scraping: "+url +" page count: "+str(pageNum) +"document count: "+ str(len(cardList)))
     # instead of extending the list, we can just insert the list into the database
     #
     # first, delete all entries with the same website
-    collection = mydb['mtgSingles']
-    collection.delete_many({"website":website})
+    # collection = mydb['mtgSingles']
+    # collection.delete_many({"website":website})
     # then, insert the new list
-    if len(cardList) > 0:
-        collection.insert_many(cardList)
+    # if len(cardList) > 0:
+        # collection.insert_many(cardList)
     
 
 # Create a list to save the results from all threads
@@ -230,7 +239,7 @@ start = time.time()
 # Runs Each Site
 threads = []
 for key,value in supportedWebsites.items():
-    t = threading.Thread(target=monitor, args=(key,value['url']))
+    t = threading.Thread(target=monitor, args=(key,value['url'],value['collection']))
     t.start()
     threads.append(t)
 
