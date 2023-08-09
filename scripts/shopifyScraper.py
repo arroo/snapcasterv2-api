@@ -95,7 +95,7 @@ def monitor( website, url):
     SCNFilter=['scanned','scn','scan']
     
     #loop through every page until the end of file
-    while eof == False and pageNum<15:
+    while eof == False:
         apiCallAttempts=0
         maxAPIAttempts=6
         r=None
