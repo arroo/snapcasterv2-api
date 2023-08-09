@@ -118,6 +118,7 @@ def searchShopifyInventory(search_term, db):
     # drop the _id field from the result
     for item in result:
         item.pop('_id')
+        item.pop('timestamp')
     return result
 
 def fetchScrapers(cardName):

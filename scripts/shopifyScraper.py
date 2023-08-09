@@ -203,7 +203,8 @@ def monitor( website, url,collectionName):
                                 "set":set,
                                 "condition":condition,
                                 "foil":foil,
-                                "price": formatPrice(price)
+                                "price": formatPrice(price),
+                                "timestamp": time.time()
                             }
                             cardList.append(dict)
             print (url,"page: "+ str(pageNum))
