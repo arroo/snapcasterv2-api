@@ -23,6 +23,8 @@ mydb = myclient["shopify-inventory"]
 
 
 supportedWebsites = {
+    "kingdomtitans":{"url":"https://kingdomtitans.cards/","collection":"mtgSinglesKingdomTitans"},
+    "fanofthesport":{"url":"https://fanofthesport.com/","collection":"mtgSinglesFanOfTheSport"},
     "levelup":{"url":"https://levelupgames.ca/","collection":"mtgSinglesLevelupgames"},
     "gamebreakers":{"url":"https://gamebreakers.ca/","collection":"mtgSinglesGamebreakers"},
     "gameknight":{"url":"https://gameknight.ca/","collection":"mtgSinglesGameknight"},
