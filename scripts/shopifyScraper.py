@@ -23,42 +23,42 @@ mydb = myclient["shopify-inventory"]
 
 
 supportedWebsites = {
-    "kingdomtitans":{"url":"https://kingdomtitans.cards/","collection":"mtgSinglesKingdomTitans"},
-    "fanofthesport":{"url":"https://fanofthesport.com/","collection":"mtgSinglesFanOfTheSport"},
-    "levelup":{"url":"https://levelupgames.ca/","collection":"mtgSinglesLevelupgames"},
-    "gamebreakers":{"url":"https://gamebreakers.ca/","collection":"mtgSinglesGamebreakers"},
-    "gameknight":{"url":"https://gameknight.ca/","collection":"mtgSinglesGameknight"},
-    "mythicstore":{"url":"https://themythicstore.com/","collection":"mtgSinglesThemythicstore"},
-    "hfx":{"url":"https://hfxgames.com/","collection":"mtgSinglesHfxgames"},
-    "vortexgames":{"url":"https://vortexgames.ca/","collection":"mtgSinglesVortexGames"},
-    "gamezilla":{"url":"https://gamezilla.ca/","collection":"mtgSinglesGamezilla"},
-    "exorgames":{"url":"https://exorgames.com/","collection":"mtgSinglesExorgames"},
-    "chimera":{"url":"https://chimeragamingonline.com/","collection":"mtgSinglesChimeragamingonline"},
-    "abyss":{"url":"https://www.abyssgamestore.com/","collection":"mtgSinglesAbyssgamestore"},
-    "silvergoblin":{"url":"https://silvergoblin.cards/","collection":"mtgSinglesSilvergoblin"},
-    "crypt":{"url":"https://cryptmtg.com/","collection":"mtgSinglesCryptmtg"},
-    "northofexile":{"url":"https://northofexilegames.com/","collection":"mtgSinglesNorthofexilegames"},
-    "four01":{"url":"https://store.401games.ca/","collection":"mtgSingles401games"},
-    "hairyt":{"url":"https://hairyt.com/","collection":"mtgSinglesHairyt"},
-    "omg":{"url":"https://omggames.ca/","collection":"mtgSinglesOmggames"},
-    "kesselrun":{"url":"https://kesselrungames.ca/","collection":"mtgSinglesKesselrungames"},
-    "reddragon":{"url":"https://red-dragon.ca/","collection":"mtgSinglesReddragon"},
-    "houseofcards":{"url":"https://houseofcards.ca/","collection":"mtgSinglesHouseofcards"},
-    "taps":{"url":"https://tapsgames.com/","collection":"mtgSinglesTapsgames"},
-    "pandorasboox":{"url":"https://www.pandorasboox.ca/","collection":"mtgSinglespandorasboox"},
-    "timevault":{"url":"https://thetimevault.ca/","collection":"mtgSinglesThetimeVault"},
-    "eastridge":{"url":"https://ergames.ca/","collection":"mtgSinglesErgames"},
-    "upnorth":{"url":"https://www.upnorthgames.ca/","collection":"mtgSinglesUpnorthgames"},
-    "waypoint":{"url":"https://waypointgames.ca/","collection":"mtgSinglesWaypointgames"},
-    "skyfox":{"url":"https://skyfoxgames.com/","collection":"mtgSinglesSkyfoxgames"},
-    "nerdzcafe":{"url":"https://www.nerdzcafe.com/","collection":"mtgSinglesNerdzcafe"},
-    "outofthebox":{"url":"https://outoftheboxtcg.com/","collection":"mtgSinglesOutoftheboxtcg"},
-    "blackknight":{"url":"https://blackknightgames.ca/","collection":"mtgSinglesBlackknightgames"},
-    "bordercity":{"url":"https://bordercitygames.ca/","collection":"mtgSinglesBordercitygames"},
-    "everythinggames":{"url":"https://everythinggames.ca/","collection":"mtgSinglesEverythinggames"},
-    "enterthebattlefield":{"url":"https://enterthebattlefield.ca/","collection":"mtgSinglesEnterthebattlefield"},
-    "fantasyforged":{"url":"https://fantasyforged.ca/","collection":"mtgSinglesFantasyForged"},
-    "dragoncards":{"url":"https://tcg.dragoncardsandgames.com/","collection":"mtgSinglesDragoncards"},
+    # "kingdomtitans":{"url":"https://kingdomtitans.cards/","collection":"mtgSinglesKingdomTitans"},
+    # "fanofthesport":{"url":"https://fanofthesport.com/","collection":"mtgSinglesFanOfTheSport"},
+    # "levelup":{"url":"https://levelupgames.ca/","collection":"mtgSinglesLevelupgames"},
+    # "gamebreakers":{"url":"https://gamebreakers.ca/","collection":"mtgSinglesGamebreakers"},
+    # "gameknight":{"url":"https://gameknight.ca/","collection":"mtgSinglesGameknight"},
+    # "mythicstore":{"url":"https://themythicstore.com/","collection":"mtgSinglesThemythicstore"},
+    # "hfx":{"url":"https://hfxgames.com/","collection":"mtgSinglesHfxgames"},
+    # "vortexgames":{"url":"https://vortexgames.ca/","collection":"mtgSinglesVortexGames"},
+    # "gamezilla":{"url":"https://gamezilla.ca/","collection":"mtgSinglesGamezilla"},
+    # "exorgames":{"url":"https://exorgames.com/","collection":"mtgSinglesExorgames"},
+    # "chimera":{"url":"https://chimeragamingonline.com/","collection":"mtgSinglesChimeragamingonline"},
+    # "abyss":{"url":"https://www.abyssgamestore.com/","collection":"mtgSinglesAbyssgamestore"},
+    # "silvergoblin":{"url":"https://silvergoblin.cards/","collection":"mtgSinglesSilvergoblin"},
+    # "crypt":{"url":"https://cryptmtg.com/","collection":"mtgSinglesCryptmtg"},
+    # "northofexile":{"url":"https://northofexilegames.com/","collection":"mtgSinglesNorthofexilegames"},
+    # "four01":{"url":"https://store.401games.ca/","collection":"mtgSingles401games"},
+    # "hairyt":{"url":"https://hairyt.com/","collection":"mtgSinglesHairyt"},
+    # "omg":{"url":"https://omggames.ca/","collection":"mtgSinglesOmggames"},
+    # "kesselrun":{"url":"https://kesselrungames.ca/","collection":"mtgSinglesKesselrungames"},
+    # "reddragon":{"url":"https://red-dragon.ca/","collection":"mtgSinglesReddragon"},
+    # "houseofcards":{"url":"https://houseofcards.ca/","collection":"mtgSinglesHouseofcards"},
+    # "taps":{"url":"https://tapsgames.com/","collection":"mtgSinglesTapsgames"},
+    # "pandorasboox":{"url":"https://www.pandorasboox.ca/","collection":"mtgSinglespandorasboox"},
+    # "timevault":{"url":"https://thetimevault.ca/","collection":"mtgSinglesThetimeVault"},
+    # "eastridge":{"url":"https://ergames.ca/","collection":"mtgSinglesErgames"},
+    # "upnorth":{"url":"https://www.upnorthgames.ca/","collection":"mtgSinglesUpnorthgames"},
+    # "waypoint":{"url":"https://waypointgames.ca/","collection":"mtgSinglesWaypointgames"},
+    # "skyfox":{"url":"https://skyfoxgames.com/","collection":"mtgSinglesSkyfoxgames"},
+    # "nerdzcafe":{"url":"https://www.nerdzcafe.com/","collection":"mtgSinglesNerdzcafe"},
+    # "outofthebox":{"url":"https://outoftheboxtcg.com/","collection":"mtgSinglesOutoftheboxtcg"},
+    # "blackknight":{"url":"https://blackknightgames.ca/","collection":"mtgSinglesBlackknightgames"},
+    # "bordercity":{"url":"https://bordercitygames.ca/","collection":"mtgSinglesBordercitygames"},
+    # "everythinggames":{"url":"https://everythinggames.ca/","collection":"mtgSinglesEverythinggames"},
+    # "enterthebattlefield":{"url":"https://enterthebattlefield.ca/","collection":"mtgSinglesEnterthebattlefield"},
+    # "fantasyforged":{"url":"https://fantasyforged.ca/","collection":"mtgSinglesFantasyForged"},
+    # "dragoncards":{"url":"https://tcg.dragoncardsandgames.com/","collection":"mtgSinglesDragoncards"},
     "untouchables":{"url":"https://untouchables.ca/", "collection":"mtgSinglesUntouchables"},
 
 }
@@ -85,6 +85,8 @@ def monitor( website, url, collectionName):
     productTypeIdentifier="MTG Single"
     if url=="https://store.401games.ca/":
         productTypeIdentifier="Magic: The Gathering Singles"
+    elif url=="https://untouchables.ca/":
+        productTypeIdentifier="Singles"
     rateLimitedTimer=5
     pageNum=1
     eof=False
@@ -160,6 +162,15 @@ def monitor( website, url, collectionName):
                         title = title.split('(')[0].rstrip()
                         if ' - Borderless' in title:
                             title = title.split(' - Borderless')[0].rstrip()
+                    elif website == "untouchables":
+                        set = title.split("-")[0].strip()
+                        if 'Foil' in title and 'Non Foil' not in title:
+                            foil = True
+                            title = title.replace('Foil', '')
+                        
+
+                        
+                        
                     else:
                         try:
                             set= product['title'].split("[")[1].split("]")[0].strip()
@@ -180,7 +191,23 @@ def monitor( website, url, collectionName):
                         image=images['src']
                     for variant in product['variants']:
                         if variant['available']==True:
-                            condition = re.split('-| ', variant['title'])[0].strip('+')
+                            try:
+                                
+                                if website == "untouchables":
+                                    try:
+                                        condition = title.split('-')[4].strip()
+                                    except:
+                                        # in the event there is an issue with their manual input.
+                                        condition = "N/A"
+                                    title = title.split("-")[2].strip()
+
+                                else:
+                                    condition = re.split('-| ', variant['title'])[0].strip('+')
+                                
+                            except:
+                                print("Error stripping condition.")
+                                print(title)
+                                condition = ""
                             price =variant['price']
 
                             #variant title usually contains foil information
