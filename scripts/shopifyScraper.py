@@ -59,6 +59,7 @@ supportedWebsites = {
     "enterthebattlefield":{"url":"https://enterthebattlefield.ca/","collection":"mtgSinglesEnterthebattlefield"},
     "fantasyforged":{"url":"https://fantasyforged.ca/","collection":"mtgSinglesFantasyForged"},
     "dragoncards":{"url":"https://tcg.dragoncardsandgames.com/","collection":"mtgSinglesDragoncards"},
+    "untouchables":{"url":"https://untouchables.ca/", "collection":"mtgSinglesUntouchables"},
 
 }
 
@@ -84,6 +85,8 @@ def monitor( website, url, collectionName):
     productTypeIdentifier="MTG Single"
     if url=="https://store.401games.ca/":
         productTypeIdentifier="Magic: The Gathering Singles"
+    elif url=="https://untouchables.ca/":
+        productTypeIdentifier="Singles"
     rateLimitedTimer=5
     pageNum=1
     eof=False
@@ -159,6 +162,15 @@ def monitor( website, url, collectionName):
                         title = title.split('(')[0].rstrip()
                         if ' - Borderless' in title:
                             title = title.split(' - Borderless')[0].rstrip()
+                    elif website == "untouchables":
+                        set = title.split("-")[0].strip()
+                        if 'Foil' in title and 'Non Foil' not in title:
+                            foil = True
+                            title = title.replace('Foil', '')
+                        
+
+                        
+                        
                     else:
                         try:
                             set= product['title'].split("[")[1].split("]")[0].strip()
@@ -179,7 +191,23 @@ def monitor( website, url, collectionName):
                         image=images['src']
                     for variant in product['variants']:
                         if variant['available']==True:
-                            condition = re.split('-| ', variant['title'])[0].strip('+')
+                            try:
+                                
+                                if website == "untouchables":
+                                    try:
+                                        condition = title.split('-')[4].strip()
+                                    except:
+                                        # in the event there is an issue with their manual input.
+                                        condition = "N/A"
+                                    title = title.split("-")[2].strip()
+
+                                else:
+                                    condition = re.split('-| ', variant['title'])[0].strip('+')
+                                
+                            except:
+                                print("Error stripping condition.")
+                                print(title)
+                                condition = ""
                             price =variant['price']
 
                             #variant title usually contains foil information
