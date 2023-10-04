@@ -60,6 +60,7 @@ supportedWebsites = {
     "fantasyforged":{"url":"https://fantasyforged.ca/","collection":"mtgSinglesFantasyForged"},
     "dragoncards":{"url":"https://tcg.dragoncardsandgames.com/","collection":"mtgSinglesDragoncards"},
     "untouchables":{"url":"https://untouchables.ca/", "collection":"mtgSinglesUntouchables"},
+    "darkfoxtcg":{"url":"https://www.darkfoxtcg.com/","collection":"mtgSinglesDarkfoxtcg"},
 
 }
 
