@@ -18,9 +18,13 @@ Reads from scripts/proxies.txt: 1 proxy per line, in the format of ip:port:usern
 
 dotenv.load_dotenv()
 MONGO_URI = os.environ["MONGO_URI"]
-# MONGO_URI = "mongodb://docker:mongopw@localhost:55000"
+myclient = pymongo.MongoClient(MONGO_URI)
+mydb = myclient["shopify-inventory"]
+
 
 supportedWebsites = {
+    "kingdomtitans":{"url":"https://kingdomtitans.cards/","collection":"mtgSinglesKingdomTitans"},
+    "fanofthesport":{"url":"https://fanofthesport.com/","collection":"mtgSinglesFanOfTheSport"},
     "levelup":{"url":"https://levelupgames.ca/","collection":"mtgSinglesLevelupgames"},
     "gamebreakers":{"url":"https://gamebreakers.ca/","collection":"mtgSinglesGamebreakers"},
     "gameknight":{"url":"https://gameknight.ca/","collection":"mtgSinglesGameknight"},
@@ -55,6 +59,7 @@ supportedWebsites = {
     "enterthebattlefield":{"url":"https://enterthebattlefield.ca/","collection":"mtgSinglesEnterthebattlefield"},
     "fantasyforged":{"url":"https://fantasyforged.ca/","collection":"mtgSinglesFantasyForged"},
     "dragoncards":{"url":"https://tcg.dragoncardsandgames.com/","collection":"mtgSinglesDragoncards"},
+    "untouchables":{"url":"https://untouchables.ca/", "collection":"mtgSinglesUntouchables"},
 
 }
 
@@ -67,18 +72,21 @@ def formatPrice(price):
 # Upon first rate limitation it will rotated to the next proxy within 5 seconds
 # Subsequent rate liitations will be 120 seconds each up to 6 times until it is terminated to prevent an infintie loop
 
-def monitor( website, url,collectionName):
+def monitor( website, url, collectionName):
     #Proxy Info
     proxies=[]
     with open('./proxies.txt') as file:
         proxies = file.read().splitlines()
     proxies.insert(0,'')
     proxyCurrentIndex=0
+    tempCollection = mydb[collectionName]
 
     #Webscrape Info    
     productTypeIdentifier="MTG Single"
     if url=="https://store.401games.ca/":
         productTypeIdentifier="Magic: The Gathering Singles"
+    elif url=="https://untouchables.ca/":
+        productTypeIdentifier="Singles"
     rateLimitedTimer=5
     pageNum=1
     eof=False
@@ -120,7 +128,7 @@ def monitor( website, url,collectionName):
                 if apiCallAttempts >=3:
                     rateLimitedTimer=120
                 else:
-                    rateLimitedTimer=5
+                    rateLimitedTimer=30
                 if proxyCurrentIndex == len(proxies)-1:
                     proxyCurrentIndex=0
                 else:
@@ -154,6 +162,15 @@ def monitor( website, url,collectionName):
                         title = title.split('(')[0].rstrip()
                         if ' - Borderless' in title:
                             title = title.split(' - Borderless')[0].rstrip()
+                    elif website == "untouchables":
+                        set = title.split("-")[0].strip()
+                        if 'Foil' in title and 'Non Foil' not in title:
+                            foil = True
+                            title = title.replace('Foil', '')
+                        
+
+                        
+                        
                     else:
                         try:
                             set= product['title'].split("[")[1].split("]")[0].strip()
@@ -174,7 +191,23 @@ def monitor( website, url,collectionName):
                         image=images['src']
                     for variant in product['variants']:
                         if variant['available']==True:
-                            condition = re.split('-| ', variant['title'])[0].strip('+')
+                            try:
+                                
+                                if website == "untouchables":
+                                    try:
+                                        condition = title.split('-')[4].strip()
+                                    except:
+                                        # in the event there is an issue with their manual input.
+                                        condition = "N/A"
+                                    title = title.split("-")[2].strip()
+
+                                else:
+                                    condition = re.split('-| ', variant['title'])[0].strip('+')
+                                
+                            except:
+                                print("Error stripping condition.")
+                                print(title)
+                                condition = ""
                             price =variant['price']
 
                             #variant title usually contains foil information
@@ -203,18 +236,39 @@ def monitor( website, url,collectionName):
                                 "set":set,
                                 "condition":condition,
                                 "foil":foil,
-                                "price": formatPrice(price)
+                                "price": formatPrice(price),
+                                "timestamp": time.time()
                             }
                             cardList.append(dict)
             print (url,"page: "+ str(pageNum))
         pageNum+=1
+        if len(cardList) > 0:
+            try:
+                tempCollection.insert_many(cardList)
+            except Exception as e:
+                print("Error inserting into tempCollection: "+str(e))
+                print(f"Details of exception: {e.args}")
+            cardList.clear()
 
-    print("Finished Scraping: "+url +" page count: "+str(pageNum) +"document count: "+ str(len(cardList)))
-    results.extend(cardList)
+    print("Finished Scraping: "+url +" page count: "+str(pageNum) +"document count: "+ str(tempCollection.count_documents({})))
+
+    collection = mydb['mtgSingles']
+    collection.delete_many({"website":website})
+    if tempCollection.count_documents({}) > 0:
+        collection.insert_many(tempCollection.find())
+    tempCollection.drop()
+
+    # instead of extending the list, we can just insert the list into the database
+    #
+    # first, delete all entries with the same website
+    # collection = mydb['mtgSingles']
+    # collection.delete_many({"website":website})
+    # then, insert the new list
+    # if len(cardList) > 0:
+        # collection.insert_many(cardList)
+    
 
 # Create a list to save the results from all threads
-results = []
-
 start = time.time()
 
 # Runs Each Site
@@ -227,18 +281,6 @@ for key,value in supportedWebsites.items():
 for t in threads:
     t.join()
 
-myclient = pymongo.MongoClient(MONGO_URI)
-mydb = myclient["shopify-inventory"]
-collection = mydb["mtgSingles"]
-collection.delete_many({})
-collection.insert_many(results)
-
-with open("log.txt", "a") as f:
-    f.write(f"Total minutes: {(time.time() - start)/60}\n")
-    f.write("All threads finshed running\n")
-
-    
-print(f"Results length: {len(results)}")
 print("All threads finshed running")
 print(f"Total minutes: {(time.time() - start)/60}")
 
