@@ -5,6 +5,8 @@ import pymongo
 import threading
 import re
 import os
+from pymongo.errors import PyMongoError
+
 
 """
 This script scrapes all binderPOS/shopify stores for their entire inventory, and stores it in a MongoDB database.
@@ -23,44 +25,44 @@ mydb = myclient["shopify-inventory"]
 
 
 supportedWebsites = {
-    "kingdomtitans":{"url":"https://kingdomtitans.cards/","collection":"mtgSinglesKingdomTitans"},
-    "fanofthesport":{"url":"https://fanofthesport.com/","collection":"mtgSinglesFanOfTheSport"},
-    "levelup":{"url":"https://levelupgames.ca/","collection":"mtgSinglesLevelupgames"},
-    "gamebreakers":{"url":"https://gamebreakers.ca/","collection":"mtgSinglesGamebreakers"},
-    "gameknight":{"url":"https://gameknight.ca/","collection":"mtgSinglesGameknight"},
-    "mythicstore":{"url":"https://themythicstore.com/","collection":"mtgSinglesThemythicstore"},
-    "hfx":{"url":"https://hfxgames.com/","collection":"mtgSinglesHfxgames"},
-    "vortexgames":{"url":"https://vortexgames.ca/","collection":"mtgSinglesVortexGames"},
-    "gamezilla":{"url":"https://gamezilla.ca/","collection":"mtgSinglesGamezilla"},
-    "exorgames":{"url":"https://exorgames.com/","collection":"mtgSinglesExorgames"},
-    "chimera":{"url":"https://chimeragamingonline.com/","collection":"mtgSinglesChimeragamingonline"},
-    "abyss":{"url":"https://www.abyssgamestore.com/","collection":"mtgSinglesAbyssgamestore"},
-    "silvergoblin":{"url":"https://silvergoblin.cards/","collection":"mtgSinglesSilvergoblin"},
-    "crypt":{"url":"https://cryptmtg.com/","collection":"mtgSinglesCryptmtg"},
-    "northofexile":{"url":"https://northofexilegames.com/","collection":"mtgSinglesNorthofexilegames"},
-    "four01":{"url":"https://store.401games.ca/","collection":"mtgSingles401games"},
-    "hairyt":{"url":"https://hairyt.com/","collection":"mtgSinglesHairyt"},
-    "omg":{"url":"https://omggames.ca/","collection":"mtgSinglesOmggames"},
-    "kesselrun":{"url":"https://kesselrungames.ca/","collection":"mtgSinglesKesselrungames"},
-    "reddragon":{"url":"https://red-dragon.ca/","collection":"mtgSinglesReddragon"},
-    "houseofcards":{"url":"https://houseofcards.ca/","collection":"mtgSinglesHouseofcards"},
-    "taps":{"url":"https://tapsgames.com/","collection":"mtgSinglesTapsgames"},
-    "pandorasboox":{"url":"https://www.pandorasboox.ca/","collection":"mtgSinglespandorasboox"},
-    "timevault":{"url":"https://thetimevault.ca/","collection":"mtgSinglesThetimeVault"},
-    "eastridge":{"url":"https://ergames.ca/","collection":"mtgSinglesErgames"},
-    "upnorth":{"url":"https://www.upnorthgames.ca/","collection":"mtgSinglesUpnorthgames"},
-    "waypoint":{"url":"https://waypointgames.ca/","collection":"mtgSinglesWaypointgames"},
-    "skyfox":{"url":"https://skyfoxgames.com/","collection":"mtgSinglesSkyfoxgames"},
-    "nerdzcafe":{"url":"https://www.nerdzcafe.com/","collection":"mtgSinglesNerdzcafe"},
-    "outofthebox":{"url":"https://outoftheboxtcg.com/","collection":"mtgSinglesOutoftheboxtcg"},
-    "blackknight":{"url":"https://blackknightgames.ca/","collection":"mtgSinglesBlackknightgames"},
-    "bordercity":{"url":"https://bordercitygames.ca/","collection":"mtgSinglesBordercitygames"},
-    "everythinggames":{"url":"https://everythinggames.ca/","collection":"mtgSinglesEverythinggames"},
-    "enterthebattlefield":{"url":"https://enterthebattlefield.ca/","collection":"mtgSinglesEnterthebattlefield"},
-    "fantasyforged":{"url":"https://fantasyforged.ca/","collection":"mtgSinglesFantasyForged"},
-    "dragoncards":{"url":"https://tcg.dragoncardsandgames.com/","collection":"mtgSinglesDragoncards"},
-    "untouchables":{"url":"https://untouchables.ca/", "collection":"mtgSinglesUntouchables"},
-    "darkfoxtcg":{"url":"https://www.darkfoxtcg.com/","collection":"mtgSinglesDarkfoxtcg"},
+    "kingdomtitans":{"url":"https://kingdomtitans.cards/"},
+    "fanofthesport":{"url":"https://fanofthesport.com/"},
+    "levelup":{"url":"https://levelupgames.ca/"},
+    "gamebreakers":{"url":"https://gamebreakers.ca/"},
+    "gameknight":{"url":"https://gameknight.ca/"},
+    "mythicstore":{"url":"https://themythicstore.com/"},
+    "hfx":{"url":"https://hfxgames.com/"},
+    "vortexgames":{"url":"https://vortexgames.ca/"},
+    "gamezilla":{"url":"https://gamezilla.ca/"},
+    "exorgames":{"url":"https://exorgames.com/"},
+    "chimera":{"url":"https://chimeragamingonline.com/"},
+    "abyss":{"url":"https://www.abyssgamestore.com/"},
+    "silvergoblin":{"url":"https://silvergoblin.cards/"},
+    "crypt":{"url":"https://cryptmtg.com/"},
+    "northofexile":{"url":"https://northofexilegames.com/"},
+    "four01":{"url":"https://store.401games.ca/"},
+    "hairyt":{"url":"https://hairyt.com/"},
+    "omg":{"url":"https://omggames.ca/"},
+    "kesselrun":{"url":"https://kesselrungames.ca/"},
+    "reddragon":{"url":"https://red-dragon.ca/"},
+    "houseofcards":{"url":"https://houseofcards.ca/"},
+    "taps":{"url":"https://tapsgames.com/"},
+    "pandorasboox":{"url":"https://www.pandorasboox.ca/"},
+    "timevault":{"url":"https://thetimevault.ca/"},
+    "eastridge":{"url":"https://ergames.ca/"},
+    "upnorth":{"url":"https://www.upnorthgames.ca/"},
+    "waypoint":{"url":"https://waypointgames.ca/"},
+    "skyfox":{"url":"https://skyfoxgames.com/"},
+    "nerdzcafe":{"url":"https://www.nerdzcafe.com/"},
+    "outofthebox":{"url":"https://outoftheboxtcg.com/"},
+    "blackknight":{"url":"https://blackknightgames.ca/"},
+    "bordercity":{"url":"https://bordercitygames.ca/"},
+    "everythinggames":{"url":"https://everythinggames.ca/"},
+    "enterthebattlefield":{"url":"https://enterthebattlefield.ca/"},
+    "fantasyforged":{"url":"https://fantasyforged.ca/"},
+    "dragoncards":{"url":"https://tcg.dragoncardsandgames.com/"},
+    "untouchables":{"url":"https://untouchables.ca/"},
+    "darkfoxtcg":{"url":"https://www.darkfoxtcg.com/"},
 
 }
 
@@ -73,14 +75,14 @@ def formatPrice(price):
 # Upon first rate limitation it will rotated to the next proxy within 5 seconds
 # Subsequent rate liitations will be 120 seconds each up to 6 times until it is terminated to prevent an infintie loop
 
-def monitor( website, url, collectionName):
+def monitor( website, url):
     #Proxy Info
     proxies=[]
     with open('./proxies.txt') as file:
         proxies = file.read().splitlines()
     proxies.insert(0,'')
     proxyCurrentIndex=0
-    tempCollection = mydb[collectionName]
+    tempCollection = mydb["mtgSinglesTemp"]
 
     #Webscrape Info    
     productTypeIdentifier="MTG Single"
@@ -253,12 +255,6 @@ def monitor( website, url, collectionName):
 
     print("Finished Scraping: "+url +" page count: "+str(pageNum) +"document count: "+ str(tempCollection.count_documents({})))
 
-    collection = mydb['mtgSingles']
-    collection.delete_many({"website":website})
-    if tempCollection.count_documents({}) > 0:
-        collection.insert_many(tempCollection.find())
-    tempCollection.drop()
-
     # instead of extending the list, we can just insert the list into the database
     #
     # first, delete all entries with the same website
@@ -275,12 +271,19 @@ start = time.time()
 # Runs Each Site
 threads = []
 for key,value in supportedWebsites.items():
-    t = threading.Thread(target=monitor, args=(key,value['url'],value['collection']))
+    t = threading.Thread(target=monitor, args=(key,value['url']))
     t.start()
     threads.append(t)
 
 for t in threads:
     t.join()
+
+try:
+    mydb["mtgSinglesTemp"].rename("mtgSingles", dropTarget=True)
+except PyMongoError as e:
+    print(f"An error occurred while renaming the collection: {e}")
+else:
+    print("Collection renamed successfully.")
 
 print("All threads finshed running")
 print(f"Total minutes: {(time.time() - start)/60}")
