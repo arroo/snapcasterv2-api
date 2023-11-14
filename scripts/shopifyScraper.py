@@ -276,7 +276,7 @@ for key,value in supportedWebsites.items():
 for t in threads:
     t.join()
 
-database["mtgSinglesTemp"].rename("mtgSingles", dropTarget = True) # error handling?
+mydb["mtgSinglesTemp"].rename("mtgSingles", dropTarget = True) # error handling?
 
 print("All threads finshed running")
 print(f"Total minutes: {(time.time() - start)/60}")
