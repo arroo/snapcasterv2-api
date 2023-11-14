@@ -5,6 +5,8 @@ import pymongo
 import threading
 import re
 import os
+from pymongo.errors import PyMongoError
+
 
 """
 This script scrapes all binderPOS/shopify stores for their entire inventory, and stores it in a MongoDB database.
@@ -276,7 +278,12 @@ for key,value in supportedWebsites.items():
 for t in threads:
     t.join()
 
-mydb["mtgSinglesTemp"].rename("mtgSingles", dropTarget = True) # error handling?
+try:
+    mydb["mtgSinglesTemp"].rename("mtgSingles", dropTarget=True)
+except PyMongoError as e:
+    print(f"An error occurred while renaming the collection: {e}")
+else:
+    print("Collection renamed successfully.")
 
 print("All threads finshed running")
 print(f"Total minutes: {(time.time() - start)/60}")
