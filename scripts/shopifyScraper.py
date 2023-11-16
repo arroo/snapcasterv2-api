@@ -78,7 +78,7 @@ def formatPrice(price):
 def monitor( website, url):
     #Proxy Info
     proxies=[]
-    with open('./proxies.txt') as file:
+    with open('/home/hydrogen/snapcasterv2-api/proxies.txt') as file:
         proxies = file.read().splitlines()
     proxies.insert(0,'')
     proxyCurrentIndex=0
@@ -279,7 +279,9 @@ for t in threads:
     t.join()
 
 try:
+    mydb["mtgSinglesTemp"].create_index([("name", pymongo.TEXT)])
     mydb["mtgSinglesTemp"].rename("mtgSingles", dropTarget=True)
+    print("rename")
 except PyMongoError as e:
     print(f"An error occurred while renaming the collection: {e}")
 else:
