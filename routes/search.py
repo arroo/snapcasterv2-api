@@ -123,7 +123,6 @@ def searchShopifyInventory(search_term, db):
 
 def searchShopifyInventoryBulk(search_term, db, websites):
     mtgSinglesCollection = db['mtgSingles']
-    print(websites)
     if "all" in websites:
         # case insensitive and punctuation insensitive using full text search on index "title"
         result = list(mtgSinglesCollection.find({"$text": {"$search": search_term}}))
@@ -602,9 +601,9 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
     
     print(f"Found {numResults} results")
 
-    background_tasks.add_task(
-        post_search, request.cardNames, request.websites, "multi", "", numResults
-    )
+    # background_tasks.add_task(
+    #     post_search, request.cardNames, request.websites, "multi", "", numResults
+    # )
 
     return totalResults
 
