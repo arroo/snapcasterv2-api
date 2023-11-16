@@ -121,6 +121,21 @@ def searchShopifyInventory(search_term, db):
         item.pop('timestamp')
     return result
 
+def searchShopifyInventoryBulk(search_term, db, websites):
+    mtgSinglesCollection = db['mtgSingles']
+    print(websites)
+    if "all" in websites:
+        # case insensitive and punctuation insensitive using full text search on index "title"
+        result = list(mtgSinglesCollection.find({"$text": {"$search": search_term}}))
+    else:
+        # case insensitive and punctuation insensitive using full text search on index "title", where website is in websites
+        result = list(mtgSinglesCollection.find({"$text": {"$search": search_term}, "website": {"$in": websites}}))
+    # drop the _id field from the result
+    for item in result:
+        item.pop('_id')
+        item.pop('timestamp')
+    return result
+
 def fetchScrapers(cardName):
     # Arrange scrapers
     gauntletScraper = GauntletScraper(cardName)
@@ -427,31 +442,14 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
         shopify_results = searchShopifyInventory(request.cardName, shopifyInventoryDb)
         # append shopify results to results
         print(f"Found {len(shopify_results)} shopify results")
+        print(f"Found {len(results)} crystal commerce results")
 
         results.extend(shopify_results)
         # Filter the results
         # Check if result name contains the card name
         # Check if the result contains "Token" or "Emblem" and the request.cardName does not contain "Token" or "Emblem", remove result
 
-        filteredResults = []
-        for result in results:
-            if request.cardName.lower() in result["name"].lower():
-                if (
-                    "token" in result["name"].lower()
-                    and "token" not in request.cardName.lower()
-                    and "emblem" not in request.cardName.lower()
-                ):
-                    continue
-                elif (
-                    "emblem" in result["name"].lower()
-                    and "emblem" not in request.cardName.lower()
-                    and "token" not in request.cardName.lower()
-                ):
-                    continue
-                else:
-                    filteredResults.append(result)
-            else:
-                continue
+        filteredResults = filter_card_names(request.cardName, results)
 
         results = filteredResults
 
@@ -466,6 +464,32 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
             rd.set(request.cardName.lower(), json.dumps(results))
             rd.expire(request.cardName.lower(), 420)  # blazeit expire in 7 mins
         return results
+
+def filter_card_names(cardName, results):
+    filteredResults = []
+    for result in results:
+        if cardName.lower() in result["name"].lower():
+            if (
+                    "token" in result["name"].lower()
+                    and "token" not in cardName.lower()
+                    and "emblem" not in cardName.lower()
+                ):
+                continue
+            elif (
+                    "emblem" in result["name"].lower()
+                    and "emblem" not in cardName.lower()
+                    and "token" not in cardName.lower()
+                ):
+                continue
+            elif (
+                "art series" in result["name"].lower() or "artist series" in result["name"].lower()
+            ):
+                continue
+            else:
+                filteredResults.append(result)
+        else:
+            continue
+    return filteredResults
 
 
 @router.post("/bulk/")
@@ -535,14 +559,14 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
             return
 
     def executeScrapers(cardName):
+        print(f"Searching for {cardName}")
         scraperMap = fetchScrapers(cardName)
-        try:
-            if "all" in websites:
-                scrapers = scraperMap.values()
-            else:
-                scrapers = [scraperMap[website] for website in websites]
-        except KeyError:
-            return {"error": "Invalid website provided"}
+
+        if "all" in websites:
+            scrapers = scraperMap.values()
+        else:
+            scrapers = [scraperMap[website] for website in websites if website in scraperMap]
+
 
         # Run scrapers
         with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
@@ -552,15 +576,31 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
             "cardName": cardName.lower(),
             "variants": results[re.sub(r"[^\w\s]", "", cardName).lower()],
         }
+
+        # now we need to find all cards that have the same name in the shpoify inventory in mongodb
+        # and join them with the variants
+
+        shopify_results = searchShopifyInventoryBulk(cardName, shopifyInventoryDb, websites)
+        shopify_results = filter_card_names(cardName, shopify_results)
+        print(f"Found {len(shopify_results)} shopify results")
+        print(f"Found {len(cardObject['variants'])} crystal commerce results")
+        # print the keys for the shopify results
+        cardObject["variants"].extend(shopify_results)
         totalResults.append(cardObject)
+
+
         return
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         threadResults = executor.map(executeScrapers, cardNames)
 
+
+
     numResults = 0
     for card in totalResults:
         numResults += len(card["variants"])
+    
+    print(f"Found {numResults} results")
 
     background_tasks.add_task(
         post_search, request.cardNames, request.websites, "multi", "", numResults
