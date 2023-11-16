@@ -51,6 +51,7 @@ origins = [
     "https://snapcaster-nextjs.vercel.app",
     "https://snapcaster-nextjs-supabase.vercel.app",
     "https://snapcaster-t3.vercel.app",
+    "*.vercel.app",
     "https://snapcaster-t3*.vercel.app",
 ]
 
