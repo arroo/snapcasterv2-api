@@ -15,24 +15,11 @@ from scrapers.base.TheComicHunterScraper import TheComicHunterScraper
 from scrapers.base.TopDeckHeroScraper import TopDeckHeroScraper
 
 from scrapers.sealed.AtlasSealedScraper import AtlasSealedScraper
-from scrapers.sealed.BorderCitySealedScraper import BorderCitySealedScraper
-from scrapers.sealed.ChimeraSealedScraper import ChimeraSealedScraper
 from scrapers.sealed.ComicHunterSealedScraper import ComicHunterSealedScraper
-from scrapers.sealed.EnterTheBattlefieldSealedScraper import (
-    EnterTheBattlefieldSealedScraper,
-)
-from scrapers.sealed.EverythingGamesSealedScraper import EverythingGamesSealedScraper
-from scrapers.sealed.ExorGamesSealedScraper import ExorGamesSealedScraper
 from scrapers.sealed.FaceToFaceSealedScraper import FaceToFaceSealedScraper
-from scrapers.sealed.FantasyForgedSealedScraper import FantasyForgedSealedScraper
 from scrapers.sealed.FirstPlayerSealedScraper import FirstPlayerSealedScraper
-from scrapers.sealed.GameKnightSealedScraper import GameKnightSealedScraper
-from scrapers.sealed.GamezillaSealedScraper import GamezillaSealedScraper
 from scrapers.sealed.GauntletSealedScraper import GauntletSealedScraper
-from scrapers.sealed.Four01SealedScraper import Four01SealedScraper
 from scrapers.sealed.FusionSealedScraper import FusionSealedScraper
-from scrapers.sealed.HairyTSealedScraper import HairyTSealedScraper
-from scrapers.sealed.HouseOfCardsSealedScraper import HouseOfCardsSealedScraper
 from scrapers.sealed.MagicStrongholdSealedScraper import MagicStrongholdSealedScraper
 from scrapers.sealed.OrchardCitySealedScraper import OrchardCitySealedScraper
 from scrapers.sealed.ConnectionGamesSealedScraper import ConnectionGamesSealedScraper
@@ -374,7 +361,6 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
     """
     Search for a single card and return all prices across the provided websites
     """
-    # proxies = getProxiesFromFile("proxies.txt")
     proxies = os.environ["PROXIES"].split(",")
 
     def transform(scraper):
@@ -438,21 +424,11 @@ async def search_single(request: SingleCardSearch, background_tasks: BackgroundT
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
             threadResults = executor.map(transform, scrapers)
 
-        # get results from shopify inventory
         shopify_results = searchShopifyInventory(request.cardName, shopifyInventoryDb)
-        # append shopify results to results
-        print(f"Found {len(shopify_results)} shopify results")
-        print(f"Found {len(results)} crystal commerce results")
-
         results.extend(shopify_results)
-        # Filter the results
-        # Check if result name contains the card name
-        # Check if the result contains "Token" or "Emblem" and the request.cardName does not contain "Token" or "Emblem", remove result
-
+        
         filteredResults = filter_card_names(request.cardName, results)
-
         results = filteredResults
-
         numResults = len(results)
         background_tasks.add_task(
             post_search, request.cardName, request.websites, "single", "", numResults
@@ -500,7 +476,6 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
     cardNames = request.cardNames
     cardNames = cardNames[:5]  # Max 5 cards for bulk search
     websites = request.websites
-    worstCondition = request.worstCondition  # Not used at the moment,
 
     # List to store results from all threads
     totalResults = []
@@ -567,8 +542,6 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
         else:
             scrapers = [scraperMap[website] for website in websites if website in scraperMap]
 
-
-        # Run scrapers
         with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
             threadResults = executor.map(transform, scrapers)
 
@@ -577,14 +550,8 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
             "variants": results[re.sub(r"[^\w\s]", "", cardName).lower()],
         }
 
-        # now we need to find all cards that have the same name in the shpoify inventory in mongodb
-        # and join them with the variants
-
         shopify_results = searchShopifyInventoryBulk(cardName, shopifyInventoryDb, websites)
         shopify_results = filter_card_names(cardName, shopify_results)
-        print(f"Found {len(shopify_results)} shopify results")
-        print(f"Found {len(cardObject['variants'])} crystal commerce results")
-        # print the keys for the shopify results
         cardObject["variants"].extend(shopify_results)
         totalResults.append(cardObject)
 
@@ -594,18 +561,10 @@ async def search_bulk(request: BulkCardSearch, background_tasks: BackgroundTasks
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         threadResults = executor.map(executeScrapers, cardNames)
 
-
-
     numResults = 0
     for card in totalResults:
         numResults += len(card["variants"])
     
-    print(f"Found {numResults} results")
-
-    # background_tasks.add_task(
-    #     post_search, request.cardNames, request.websites, "multi", "", numResults
-    # )
-
     return totalResults
 
 
@@ -628,47 +587,25 @@ async def search_sealed(request: SealedSearch, background_tasks: BackgroundTasks
 
     # Arrange scrapers
     atlasScraper = AtlasSealedScraper(setName)
-    borderCityScaper = BorderCitySealedScraper(setName)
     connectionGamesScraper = ConnectionGamesSealedScraper(setName)
-    enterTheBattlefieldScraper = EnterTheBattlefieldSealedScraper(setName)
-    everythingGamesScraper = EverythingGamesSealedScraper(setName)
-    exorGamesScraper = ExorGamesSealedScraper(setName)
     faceToFaceScraper = FaceToFaceSealedScraper(setName)
-    # fantasyForgedScraper = FantasyForgedSealedScraper(setName)
     firstPlayerScraper = FirstPlayerSealedScraper(setName)
-    four01Scraper = Four01SealedScraper(setName)
     fusionScraper = FusionSealedScraper(setName)
-    gameKnightScraper = GameKnightSealedScraper(setName)
-    gamezillaScraper = GamezillaSealedScraper(setName)
     gauntletScraper = GauntletSealedScraper(setName)
-    houseOfCardsScraper = HouseOfCardsSealedScraper(setName)
     jeux3DragonsScraper = Jeux3DragonsSealedScraper(setName)
     magicStrongholdScraper = MagicStrongholdSealedScraper(setName)
     orchardCityScraper = OrchardCitySealedScraper(setName)
-    chimeraScraper = ChimeraSealedScraper(setName)
     comicHunterScraper = ComicHunterSealedScraper(setName)
     sequenceScraper = SequenceSealedScraper(setName)
     TopDeckHeroScraper = TopDeckHeroSealedScraper(setName)
-    hairyTScraper = HairyTSealedScraper(setName)
     # Map scrapers to an identifier keyword
     scraperMap = {
         "atlas": atlasScraper,
-        "bordercity": borderCityScaper,
-        "chimera": chimeraScraper,
         "connectiongames": connectionGamesScraper,
-        "enterthebattlefield": enterTheBattlefieldScraper,
-        "everythinggames": everythingGamesScraper,
-        "exorgames": exorGamesScraper,
         "facetoface": faceToFaceScraper,
-        # 'fantasyforged': fantasyForgedScraper,
         "firstplayer": firstPlayerScraper,
-        "four01": four01Scraper,
         "fusion": fusionScraper,
-        "gameknight": gameKnightScraper,
-        "gamezilla": gamezillaScraper,
         "gauntlet": gauntletScraper,
-        "hairyt": hairyTScraper,
-        "houseofcards": houseOfCardsScraper,
         "magicstronghold": magicStrongholdScraper,
         "orchardcity": orchardCityScraper,
         "jeux3dragons": jeux3DragonsScraper,
