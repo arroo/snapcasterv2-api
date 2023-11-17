@@ -345,8 +345,6 @@ def post_price_entry(query, price_list):
                 ),
             }
 
-        # Send the price entry to mongodb
-        # print(price_entry)
         db["price_entry"].insert_one(price_entry)
     except Exception as e:
         print("Error in post_price_entry while trying to insert price entry into mongo")
