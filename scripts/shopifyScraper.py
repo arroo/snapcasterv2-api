@@ -63,7 +63,6 @@ supportedWebsites = {
     "dragoncards":{"url":"https://tcg.dragoncardsandgames.com/"},
     "untouchables":{"url":"https://untouchables.ca/"},
     "darkfoxtcg":{"url":"https://www.darkfoxtcg.com/"},
-
 }
 
 def formatPrice(price):
